@@ -57,7 +57,7 @@ namespace rto_io_test{
            testRoDict_src.item << data_;                                 \
            uint16_t index =  testRoDict_src.item.index;                 \
            uint16_t len = testRoDict_src.item.data_size;                \
-           uint8_t* data = ((uint8_t*)((ODItem*)&testRoDict_src.item)) + sizeof(ODItem); \
+           uint8_t* data = testRoDict_src.item.getDataPtr(); \
            testRoDict_dest.singleWrite(index, data, len);               \
            ASSERT_EQ(testRoDict_dest.item.data, data_);                  \
            std::cout << "testRoDict_dest." << #item << " = " << testRoDict_dest.item.data << std::endl;\

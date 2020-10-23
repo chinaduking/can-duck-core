@@ -35,7 +35,7 @@ namespace libfcn_v2 {
 
         const uint16_t index         {0};
         const uint8_t  data_size     {0};
-        uint8_t status_code   {0};
+        uint8_t status_code          {0};
 
         /*
          * 取得子类数据对象。子类必须将数据放在第一个成员
