@@ -12,20 +12,17 @@ using namespace libfcn_v2;
  * ---------------------------------------------------------
  */
 
-RealtimeObjectDict::RealtimeObjectDict(uint16_t dict_size) :
+ObjectDict::ObjectDict(uint16_t dict_size) :
         dict_size(dict_size){
-    obj_dict = new RealtimeObjectBase*[dict_size];
+    obj_dict = new ODItem*[dict_size];
 }
 
-
-/*从参数表读取1个项目至缓冲区。限制最大长度。返回实际长度。超长返回0*/
-uint16_t RealtimeObjectDict::read(uint16_t index, uint8_t *data, uint16_t len){
-    //TODO
-    return 0;
+ObjectDict::~ObjectDict() {
+    delete [] obj_dict;
 }
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-uint16_t RealtimeObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
+uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
     while (len > 0){
 
         /* 不一次直接memcpy，有两个原因：
@@ -44,6 +41,8 @@ uint16_t RealtimeObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t
 
         utils::memcpy(p_obj->getDataPtr(), data, p_obj->data_size);
 
+        writePostAction(index);
+
         data += p_obj->data_size;
 
         len -= p_obj->data_size;
@@ -54,7 +53,7 @@ uint16_t RealtimeObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t
     return 0;
 }
 
-RealtimeObjectBase *RealtimeObjectDict::getObject(uint16_t index) {
+ODItem *ObjectDict::getObject(uint16_t index) {
 
     /* 仅做写保护，不使程序assert failed崩溃：
      * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
@@ -67,15 +66,13 @@ RealtimeObjectBase *RealtimeObjectDict::getObject(uint16_t index) {
     return obj_dict[index];
 }
 
-uint32_t RealtimeObjectDict::size() {
+uint16_t ObjectDict::getDictSize() {
     return dict_size;
 }
 
-
-
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
-        RealtimeObjectDict* dict,
+        ObjectDict* dict,
         uint16_t index){
 
     RtoFrameBuilder(result_frame, dict, index, index);
@@ -83,7 +80,7 @@ void libfcn_v2::RtoFrameBuilder(
 
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
-        RealtimeObjectDict* dict,
+        ObjectDict* dict,
         uint16_t index_start, uint16_t index_end){
 
     /* 保证起始地址不高于结束地址 */
@@ -127,7 +124,7 @@ RtoShmManager* RtoShmManager::getInstance(){
 }
 
 
-RealtimeObjectDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
+ObjectDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
     /* if we can find an exsiting shm, return it */
     for(auto & managed_item : managed_items){
         if(managed_item.address == address){

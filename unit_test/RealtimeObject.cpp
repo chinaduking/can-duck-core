@@ -9,13 +9,14 @@ using namespace libfcn_v2;
 
 namespace rto_io_test{
     TEST(RealtimeObject, setget){
-        RealtimeObject<uint32_t> Angle;
-        Angle.index = 10;
+        int angle_idx = 10;
+
+        RTODictItem<uint32_t> Angle(angle_idx);
 
         auto rto = Angle;
 
         ASSERT_EQ(rto.data_size, 4);
-        ASSERT_EQ(rto.index, 10);
+        ASSERT_EQ(rto.index, angle_idx);
 
         rto << 200;
 
@@ -56,13 +57,13 @@ namespace rto_io_test{
            testRoDict_src.item << data_;                                 \
            uint16_t index =  testRoDict_src.item.index;                 \
            uint16_t len = testRoDict_src.item.data_size;                \
-           uint8_t* data = ((uint8_t*)((RealtimeObjectBase*)&testRoDict_src.item)) + sizeof(RealtimeObjectBase); \
+           uint8_t* data = ((uint8_t*)((ODItem*)&testRoDict_src.item)) + sizeof(ODItem); \
            testRoDict_dest.singleWrite(index, data, len);               \
            ASSERT_EQ(testRoDict_dest.item.data, data_);                  \
            std::cout << "testRoDict_dest." << #item << " = " << testRoDict_dest.item.data << std::endl;\
     } while(0)
 
-    TEST(RealtimeObject, singleWrte){
+    TEST(RealtimeObject, singleWrite){
         libfcn_v2_test::TestRODict testRoDict_src;
         libfcn_v2_test::TestRODict testRoDict_dest;
 
