@@ -26,6 +26,7 @@ namespace libfcn_v2 {
     typedef uint8_t index_t;
     typedef uint8_t data_size_t;
 
+
 #pragma pack(2)
     /*非阻塞式任务的回调函数*/
     struct FcnCallbackInterface{
