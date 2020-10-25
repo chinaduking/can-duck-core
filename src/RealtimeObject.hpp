@@ -52,19 +52,57 @@ namespace libfcn_v2 {
     /*
      * 对象字典
      * */
-    class ObjectDict {
+    class ObjDictBase{
     public:
-        explicit ObjectDict(index_t dict_size);
-        virtual ~ObjectDict();
+
+        explicit ObjDictBase(index_t dict_size) :
+            dict_size(dict_size){
+            obj_dict = new ObjDictItemBase*[dict_size];
+        }
+
+        virtual ~ObjDictBase() {
+            delete [] obj_dict;
+        }
+
+    protected:
+        ObjDictItemBase **obj_dict  {nullptr };
+        const index_t dict_size { 0 };
+
+    public:
+
+        /* 获取字典大小 */
+        inline index_t getDictSize() {
+            return dict_size;
+        }
+
+        /*根据参数表索引获取元信息。未找到则返回空指针。 */
+        inline ObjDictItemBase *getObject(index_t index) {
+
+            /* 仅做写保护，不使程序assert failed崩溃：
+             * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
+             * 可记录错误log
+             * */
+            if(index >= dict_size){
+                return nullptr;
+            }
+
+            return obj_dict[index];
+        }
+    };
+
+
+    class RtoDict : public ObjDictBase{
+
+    public:
+        explicit RtoDict(index_t dict_size) : ObjDictBase(dict_size){
+        }
+
+        ~RtoDict() override = default;
+
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
         data_size_t singleWrite(index_t index, uint8_t *data, data_size_t len);
 
-        /* 获取字典大小 */
-        index_t getDictSize();
-
-        /*根据参数表索引获取元信息。未找到则返回空指针。 */
-        ObjDictItemBase *getObject(index_t index);
 
         /*默认字段
          * TODO: 版本校验？
@@ -72,9 +110,6 @@ namespace libfcn_v2 {
          * 2. 在网络配置阶段，使用专用协议读取*/
 //        RTODictItem<uint32_t> version;
 
-    protected:
-        ObjDictItemBase **obj_dict  {nullptr };
-        index_t dict_size { 0 };
 
         /* 自定义写入一个项目后的动作（回调/置标志位等） */
         virtual void writePostAction(index_t& index){};
@@ -184,12 +219,12 @@ namespace libfcn_v2 {
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
-            ObjectDict* dict,
+            RtoDict* dict,
             index_t index);
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
-            ObjectDict* dict,
+            RtoDict* dict,
             index_t index_start, index_t index_end);
 
 
@@ -231,14 +266,14 @@ namespace libfcn_v2 {
         }
 
 
-        ObjectDict* getSharedDictByAddr(uint16_t address);
+        RtoDict* getSharedDictByAddr(uint16_t address);
 
     private:
         RtoShmManager() : managed_items(MAX_LOCAL_NODE){}
 
         struct MaganedItem{
             uint32_t address {1000};
-            ObjectDict* p_dict {nullptr};
+            RtoDict* p_dict {nullptr};
         };
 
         utils::vector_s<MaganedItem> managed_items;
@@ -279,7 +314,7 @@ namespace libfcn_v2 {
              * end_idx != -1 : start_idx
              * end_idx == -1 : single_idx
              **/
-            ObjectDict* dict{nullptr};
+            RtoDict* dict{nullptr};
             index_t start_or_single_idx  {0};
             int end_idx    { -1 };
 

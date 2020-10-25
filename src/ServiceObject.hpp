@@ -78,7 +78,7 @@ namespace libfcn_v2 {
         uint16_t server_addr { 0 };
 
     private:
-        ObjectDict* svo_dict{nullptr};
+        RtoDict* svo_dict{nullptr};
     };
 
     class SvoServer{
