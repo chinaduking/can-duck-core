@@ -83,7 +83,7 @@ index_t ObjectDict::getDictSize() {
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
         ObjectDict* dict,
-        uint16_t index){
+        index_t index){
 
     RtoFrameBuilder(result_frame, dict, index, index);
 }
@@ -91,7 +91,7 @@ void libfcn_v2::RtoFrameBuilder(
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
         ObjectDict* dict,
-        uint16_t index_start, uint16_t index_end){
+        index_t index_start, index_t index_end){
 
     /* 保证起始地址不高于结束地址 */
     USER_ASSERT(index_start <= index_end);
@@ -169,7 +169,8 @@ void RtoNetworkHandler::update(){
         //TODO: ">=" ??
         if(pub_ctrl_rule.freq_divier_cnt > pub_ctrl_rule.freq_divier){
 
-            if(pub_ctrl_rule.end_idx == 0xFFFF){
+            //TODO..
+            if(pub_ctrl_rule.end_idx == -1){
                 /* Single Write */
                 RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
                                 pub_ctrl_rule.start_or_single_idx);

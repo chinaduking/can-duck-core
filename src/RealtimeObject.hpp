@@ -24,7 +24,7 @@ namespace libfcn_v2 {
      * */
     #define FCN_MAX_OBJ_SIZE 0xFF
     typedef uint8_t index_t;
-    typedef uint8_t  data_size_t;
+    typedef uint8_t data_size_t;
 
 #pragma pack(2)
     /*非阻塞式任务的回调函数*/
@@ -174,10 +174,6 @@ namespace libfcn_v2 {
 
 #pragma pack(0)
 
-
-
-
-
 }
 
 
@@ -191,12 +187,12 @@ namespace libfcn_v2 {
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
             ObjectDict* dict,
-            uint16_t index);
+            index_t index);
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
             ObjectDict* dict,
-            uint16_t index_start, uint16_t index_end);
+            index_t index_start, index_t index_end);
 
 
 
@@ -286,8 +282,8 @@ namespace libfcn_v2 {
              * end_idx == 0xFFFF : single_idx
              **/
             ObjectDict* dict{nullptr};
-            uint16_t start_or_single_idx  {0xFFFF};
-            uint16_t end_idx    {0xFFFF};
+            index_t start_or_single_idx  {0};
+            int end_idx    { -1 };
 
             /* TODO: Random write mode? Is it necessary? */
             //utils::StaticSet<uint16_t> rto;
