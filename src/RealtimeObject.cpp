@@ -9,7 +9,7 @@ using namespace libfcn_v2;
 
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t RtoDict::singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len){
+obj_size_t RealtimeObjectDict::singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len){
     while (len > 0){
 
         /* 不一次直接memcpy，有两个原因：
@@ -55,7 +55,7 @@ obj_size_t RtoDict::singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len){
 
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
-        RtoDict* dict,
+        RealtimeObjectDict* dict,
         obj_idx_t index){
 
     RtoFrameBuilder(result_frame, dict, index, index);
@@ -63,7 +63,7 @@ void libfcn_v2::RtoFrameBuilder(
 
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
-        RtoDict* dict,
+        RealtimeObjectDict* dict,
         obj_idx_t index_start, obj_idx_t index_end){
 
     /* 保证起始地址不高于结束地址 */
@@ -109,7 +109,7 @@ RtoShmManager* RtoShmManager::getInstance(){
 }
 
 
-RtoDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
+RealtimeObjectDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
     /* if we can find an exsiting shm, return it */
     for(auto & managed_item : managed_items){
         if(managed_item.address == address){

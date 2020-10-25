@@ -33,11 +33,11 @@ namespace libfcn_v2 {
      * 对象字典（Object Dictionary）成员.
      * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 2
      * */
-    class RtoDictItemBase{
+    class RealtimeObjectBase{
     public:
-        RtoDictItemBase(obj_idx_t index,
-                        obj_size_t data_size,
-                        bool derived_has_callback=false)
+        RealtimeObjectBase(obj_idx_t index,
+                           obj_size_t data_size,
+                           bool derived_has_callback=false)
                     :
                 index(index),
                 derived_has_callback(derived_has_callback),
@@ -45,7 +45,7 @@ namespace libfcn_v2 {
             USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
 
-        virtual ~RtoDictItemBase() = default;
+        virtual ~RealtimeObjectBase() = default;
 
 
         /* 消息索引 */
@@ -66,9 +66,9 @@ namespace libfcn_v2 {
          */
         inline uint8_t* getDataPtr(){
             if(!derived_has_callback){
-                return ((uint8_t*)this) + sizeof(RtoDictItemBase);
+                return ((uint8_t*)this) + sizeof(RealtimeObjectBase);
             } else{
-                return ((uint8_t*)this) + sizeof(RtoDictItemBase) +
+                return ((uint8_t*)this) + sizeof(RealtimeObjectBase) +
                        sizeof(FcnCallbackInterface);
             }
         }
@@ -86,7 +86,7 @@ namespace libfcn_v2 {
                  * 3. 根据回调地址构造指向回调的指针，并返回。
                  * */
                 return (FcnCallbackInterface*)(*(uint64_t*)(
-                        (uint8_t*)this + sizeof(RtoDictItemBase)));
+                        (uint8_t*)this + sizeof(RealtimeObjectBase)));
             }
         }
     };
@@ -100,9 +100,9 @@ namespace libfcn_v2 {
      * 不支持回调的字典项目
      * */
     template <typename T>
-    struct RtoDictItemNoCb : public RtoDictItemBase{
-        explicit RtoDictItemNoCb(obj_idx_t index):
-                RtoDictItemBase(index, sizeof(T), false){}
+    struct RealtimeObjectNoCb : public RealtimeObjectBase{
+        explicit RealtimeObjectNoCb(obj_idx_t index):
+                RealtimeObjectBase(index, sizeof(T), false){}
 
         void operator<<(T input) { data = input; }
         void operator>>(T &input) { input = data; }
@@ -115,9 +115,9 @@ namespace libfcn_v2 {
      * 支持回调的字典项目
      * */
     template <typename T>
-    struct RtoDictItemCb : public RtoDictItemBase{
-        explicit RtoDictItemCb(obj_idx_t index):
-                RtoDictItemBase(index, sizeof(T), true){}
+    struct RealtimeObjectCb : public RealtimeObjectBase{
+        explicit RealtimeObjectCb(obj_idx_t index):
+                RealtimeObjectBase(index, sizeof(T), true){}
 
         void operator<<(T input) { data = input; }
         void operator>>(T &input) { input = data; }
@@ -130,14 +130,14 @@ namespace libfcn_v2 {
 
 
 
-    class RtoDict{
+    class RealtimeObjectDict{
 
     public:
-        explicit RtoDict(obj_idx_t dict_size) : obj_dict(dict_size){
+        explicit RealtimeObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
             obj_dict.resize(dict_size);
         }
 
-        virtual ~RtoDict()  = default;
+        virtual ~RealtimeObjectDict()  = default;
 
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
@@ -155,7 +155,7 @@ namespace libfcn_v2 {
         void writePostAction(obj_idx_t& index){};
 
 
-        utils::vector_s<RtoDictItemBase*> obj_dict;
+        utils::vector_s<RealtimeObjectBase*> obj_dict;
     };
 
 
@@ -172,12 +172,12 @@ namespace libfcn_v2 {
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
-            RtoDict* dict,
+            RealtimeObjectDict* dict,
             obj_idx_t index);
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
-            RtoDict* dict,
+            RealtimeObjectDict* dict,
             obj_idx_t index_start, obj_idx_t index_end);
 
 
@@ -219,14 +219,14 @@ namespace libfcn_v2 {
         }
 
 
-        RtoDict* getSharedDictByAddr(uint16_t address);
+        RealtimeObjectDict* getSharedDictByAddr(uint16_t address);
 
     private:
         RtoShmManager() : managed_items(MAX_LOCAL_NODE){}
 
         struct MaganedItem{
             uint32_t address {1000};
-            RtoDict* p_dict {nullptr};
+            RealtimeObjectDict* p_dict {nullptr};
         };
 
         utils::vector_s<MaganedItem> managed_items;
@@ -267,7 +267,7 @@ namespace libfcn_v2 {
              * end_idx != -1 : start_idx
              * end_idx == -1 : single_idx
              **/
-            RtoDict* dict{nullptr};
+            RealtimeObjectDict* dict{nullptr};
             obj_idx_t start_or_single_idx  {0};
             int end_idx    { -1 };
 

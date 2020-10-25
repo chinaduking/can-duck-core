@@ -68,17 +68,17 @@ namespace libfcn_v2 {
         SvoClient();
         ~SvoClient();
 
-        void  readUnblocking(RtoDictItemBase& item, FcnCallbackInterface callback);
-        void writeUnblocking(RtoDictItemBase& item, FcnCallbackInterface callback);
+        void  readUnblocking(RealtimeObjectBase& item, FcnCallbackInterface callback);
+        void writeUnblocking(RealtimeObjectBase& item, FcnCallbackInterface callback);
 
 #ifdef SYSTYPE_FULL_OS
-        void  readBlocking(RtoDictItemBase& item);
-        void writeBlocking(RtoDictItemBase& item);
+        void  readBlocking(RealtimeObjectBase& item);
+        void writeBlocking(RealtimeObjectBase& item);
 #endif
         uint16_t server_addr { 0 };
 
     private:
-        RtoDict* svo_dict{nullptr};
+        RealtimeObjectDict* svo_dict{nullptr};
     };
 
     class SvoServer{
