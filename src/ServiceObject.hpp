@@ -15,16 +15,15 @@ namespace libfcn_v2 {
 
     #define USE_EVLOOP
 
+//    template<class T>
+//    using SvoDictItem = ObjDictItemCb<T>;
+
     template<class T>
-    struct SvoDictItem : public ObjDictItemBase{
+    struct SvoDictItem : public ObjDictItemCb<T>{
         /* 标志是服务器端还是客户端。
          * 如果是服务器端，只响应请求帧；如果是客户端，只响应应答帧。
          * 由Client/Server的构造函数进行置位。*/
         bool is_server {false};
-
-        FcnCallbackInterface<T>* callback{nullptr};
-
-        T data;
     };
 
     class SvoDict : public ObjectDict {

@@ -89,9 +89,12 @@ namespace libfcn_v2 {
         }
     };
 
+    /*
+     * 不支持回调的字典项目
+     * */
     template <typename T>
     struct ObjDictItemNoCb : public ObjDictItemBase{
-        ObjDictItemNoCb(uint16_t index):
+        explicit ObjDictItemNoCb(uint16_t index):
                 ObjDictItemBase(index, sizeof(T), false){}
 
         void operator<<(T input) { data = input; }
@@ -100,9 +103,13 @@ namespace libfcn_v2 {
         T data;
     };
 
+
+    /*
+     * 支持回调的字典项目
+     * */
     template <typename T>
     struct ObjDictItemCb : public ObjDictItemBase{
-        ObjDictItemCb(uint16_t index):
+        explicit ObjDictItemCb(uint16_t index):
                 ObjDictItemBase(index, sizeof(T), true){}
 
         void operator<<(T input) { data = input; }
@@ -117,10 +124,13 @@ namespace libfcn_v2 {
 
 
     /*
-     *
+     * 最多支持的本地节点数目
      * */
     #define MAX_LOCAL_NODE 6
 
+    /*
+     * 对象字典
+     * */
     class ObjectDict {
     public:
         explicit ObjectDict(uint16_t dict_size);
@@ -149,6 +159,16 @@ namespace libfcn_v2 {
         virtual void writePostAction(uint16_t& index){};
     };
 
+}
+
+
+
+/* ---------------------------------------------------------
+ *            Realtime Object Transfer Controller
+ * ---------------------------------------------------------
+ */
+namespace libfcn_v2 {
+
     /*
      * 实时数据对象（Real-Time Object）字典成员
      * 实现了类型安全的数据存储。
@@ -157,21 +177,7 @@ namespace libfcn_v2 {
     using RtoDictItemNoCb = ObjDictItemNoCb<T>;
 
     template<class T>
-    using RtoDictItemCb = ObjDictItemNoCb<T>;
-
-//    template<class T>
-//    struct RTODictItem : public ObjDictItemBase {
-//
-//        RTODictItem(uint16_t index)
-//            : ObjDictItemBase(index, sizeof(T)) {}
-//
-//        void operator<<(T input) { data = input; }
-//        void operator>>(T &input) { input = data; }
-//
-//        /*子类必须将数据放在第一个成员*/
-//        T data;
-//    };
-
+    using RtoDictItemCb = ObjDictItemCb<T>;
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
@@ -182,15 +188,8 @@ namespace libfcn_v2 {
             DataLinkFrame* result_frame,
             ObjectDict* dict,
             uint16_t index_start, uint16_t index_end);
-}
 
 
-
-/* ---------------------------------------------------------
- *            Realtime Object Transfer Controller
- * ---------------------------------------------------------
- */
-namespace libfcn_v2 {
 
     #define MAX_LOCAL_NODE 6
 
@@ -277,7 +276,7 @@ namespace libfcn_v2 {
              * end_idx != 0xFFFF : start_idx
              * end_idx == 0xFFFF : single_idx
              **/
-            ObjectDict* dict;
+            ObjectDict* dict{nullptr};
             uint16_t start_or_single_idx  {0xFFFF};
             uint16_t end_idx    {0xFFFF};
 
