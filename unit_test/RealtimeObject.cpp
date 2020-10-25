@@ -85,23 +85,23 @@ namespace rto_io_test{
 
     TEST(RealtimeObject, callback) {
         int angle_idx = 10;
-        ObjDictItemCb<uint32_t> angle(angle_idx);
+        RtoDictItemCb<uint32_t> angle(angle_idx);
 
         angle << 230;
 
         auto cb_handle = new testCallbackObj();
         angle.callback = cb_handle;
 
-        printf("sizeof(ObjDictItemBase) = %d\n", sizeof(ObjDictItemBase));
+        printf("sizeof(ObjDictItemBase) = %d\n", sizeof(RtoDictItemBase));
 
-        printf("sizeof(ObjDictItemCb<uint32_t>) = %d\n", sizeof(ObjDictItemCb<uint32_t>));
+        printf("sizeof(ObjDictItemCb<uint32_t>) = %d\n", sizeof(RtoDictItemCb<uint32_t>));
 
-        printf("sizeof(ObjDictItemCb<uint8_t>) = %d\n", sizeof(ObjDictItemCb<uint8_t>));
+        printf("sizeof(ObjDictItemCb<uint8_t>) = %d\n", sizeof(RtoDictItemCb<uint8_t>));
 
         printf("sizeof(ObjDictItemNoCb<uint8_t>) = %d\n", sizeof
-        (ObjDictItemNoCb<uint8_t>));
+        (RtoDictItemNoCb<uint8_t>));
 
-        printf("sizeof(ObjDictItemNoCb<uint32_t>) = %d\n", sizeof(ObjDictItemNoCb<uint32_t>));
+        printf("sizeof(ObjDictItemNoCb<uint32_t>) = %d\n", sizeof(RtoDictItemNoCb<uint32_t>));
 
         printf("sizeof(testCallbackObj*) = %d\n", sizeof(testCallbackObj*));
 

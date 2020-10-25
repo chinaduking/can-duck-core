@@ -23,6 +23,8 @@ namespace libfcn_v2 {
     /* 数据长度标志位为无符号8位整形，最大255
      * */
     #define FCN_MAX_OBJ_SIZE 0xFF
+    typedef uint8_t fcn_index_t;
+    typedef uint8_t fcn_data_size_t;
 
 #pragma pack(2)
     /*非阻塞式任务的回调函数*/
@@ -35,98 +37,21 @@ namespace libfcn_v2 {
      * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
      * */
     struct ObjDictItemBase {
-        ObjDictItemBase(uint16_t index,
-                        uint8_t data_size,
-                        bool derived_has_callback=false)
-                    :
-            index(index),
-            data_size(data_size),
-            derived_has_callback(derived_has_callback)
-        {
-            status_code = 0;
-        }
+        ObjDictItemBase(fcn_index_t index,
+                        fcn_data_size_t data_size)
+                :
+                index(index),
+                data_size(data_size){ }
 
         /* 消息索引 */
-        const uint16_t index         {0};
+        const fcn_index_t index{0};
 
         /* 消息数据大小，最长255字节。不支持变长 */
-        const uint8_t  data_size     {0};
-
-        /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
-         * （为了节省函数指针的内存） */
-        const uint8_t derived_has_callback : 1;
-
-        /* 子类字典成员的状态码，根据不同类别有区别 */
-        uint8_t status_code          : 7;
-
-        /*
-         * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
-         */
-        inline uint8_t* getDataPtr(){
-            if(!derived_has_callback){
-                return ((uint8_t*)this) + sizeof(ObjDictItemBase);
-            } else{
-                return ((uint8_t*)this) + sizeof(ObjDictItemBase) +
-                    sizeof(FcnCallbackInterface);
-            }
-        }
-
-        /*
-         * 取得子类回调对象（如果不支持回调则返回空指针）
-         */
-        inline FcnCallbackInterface* getCallbackPtr(){
-            if(!derived_has_callback){
-                return nullptr;
-            } else{
-                /* 由括号内向括号外：
-                 * 1. 取得存储回调地址的指针的地址。
-                 * 2. 按指针的数据类型解引用，取得指针所指的回调的地址。
-                 * 3. 根据回调地址构造指向回调的指针，并返回。
-                 * */
-                return (FcnCallbackInterface*)(*(uint64_t*)(
-                        (uint8_t*)this + sizeof(ObjDictItemBase)));
-            }
-        }
-    };
-
-    /*
-     * 不支持回调的字典项目
-     * */
-    template <typename T>
-    struct ObjDictItemNoCb : public ObjDictItemBase{
-        explicit ObjDictItemNoCb(uint16_t index):
-                ObjDictItemBase(index, sizeof(T), false){}
-
-        void operator<<(T input) { data = input; }
-        void operator>>(T &input) { input = data; }
-
-        T data;
+        const fcn_data_size_t data_size{0};
     };
 
 
-    /*
-     * 支持回调的字典项目
-     * */
-    template <typename T>
-    struct ObjDictItemCb : public ObjDictItemBase{
-        explicit ObjDictItemCb(uint16_t index):
-                ObjDictItemBase(index, sizeof(T), true){}
 
-        void operator<<(T input) { data = input; }
-        void operator>>(T &input) { input = data; }
-
-        FcnCallbackInterface* callback{nullptr};
-        T data;
-    };
-
-#pragma pack(0)
-
-
-
-    /*
-     * 最多支持的本地节点数目
-     * */
-    #define MAX_LOCAL_NODE 6
 
     /*
      * 对象字典
@@ -159,6 +84,102 @@ namespace libfcn_v2 {
         virtual void writePostAction(uint16_t& index){};
     };
 
+
+
+    /*
+     * 对象字典（Object Dictionary）成员.
+     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
+     * */
+    struct RtoDictItemBase : public ObjDictItemBase{
+        RtoDictItemBase(fcn_index_t index,
+                        fcn_data_size_t data_size,
+                        bool derived_has_callback=false)
+                    :
+            ObjDictItemBase(index, data_size),
+            derived_has_callback(derived_has_callback)
+        {
+            status_code = 0;
+        }
+
+
+        /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
+         * （为了节省函数指针的内存） */
+        const uint16_t derived_has_callback : 1;
+
+        /* 子类字典成员的状态码 */
+        uint16_t status_code          : 15;
+
+        /*
+         * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
+         */
+        inline uint8_t* getDataPtr(){
+            if(!derived_has_callback){
+                return ((uint8_t*)this) + sizeof(RtoDictItemBase);
+            } else{
+                return ((uint8_t*)this) + sizeof(RtoDictItemBase) +
+                       sizeof(FcnCallbackInterface);
+            }
+        }
+
+        /*
+         * 取得子类回调对象（如果不支持回调则返回空指针）
+         */
+        inline FcnCallbackInterface* getCallbackPtr(){
+            if(!derived_has_callback){
+                return nullptr;
+            } else{
+                /* 由括号内向括号外：
+                 * 1. 取得存储回调地址的指针的地址。
+                 * 2. 按指针的数据类型解引用，取得指针所指的回调的地址。
+                 * 3. 根据回调地址构造指向回调的指针，并返回。
+                 * */
+                return (FcnCallbackInterface*)(*(uint64_t*)(
+                        (uint8_t*)this + sizeof(RtoDictItemBase)));
+            }
+        }
+    };
+
+    /*
+     * 实时数据对象（Real-Time Object）字典成员
+     * 实现了类型安全的数据存储。
+     * */
+
+    /*
+     * 不支持回调的字典项目
+     * */
+    template <typename T>
+    struct RtoDictItemNoCb : public RtoDictItemBase{
+        explicit RtoDictItemNoCb(uint16_t index):
+                RtoDictItemBase(index, sizeof(T), false){}
+
+        void operator<<(T input) { data = input; }
+        void operator>>(T &input) { input = data; }
+
+        T data;
+    };
+
+
+    /*
+     * 支持回调的字典项目
+     * */
+    template <typename T>
+    struct RtoDictItemCb : public RtoDictItemBase{
+        explicit RtoDictItemCb(uint16_t index):
+                RtoDictItemBase(index, sizeof(T), true){}
+
+        void operator<<(T input) { data = input; }
+        void operator>>(T &input) { input = data; }
+
+        FcnCallbackInterface* callback{nullptr};
+        T data;
+    };
+
+#pragma pack(0)
+
+
+
+
+
 }
 
 
@@ -168,16 +189,6 @@ namespace libfcn_v2 {
  * ---------------------------------------------------------
  */
 namespace libfcn_v2 {
-
-    /*
-     * 实时数据对象（Real-Time Object）字典成员
-     * 实现了类型安全的数据存储。
-     * */
-    template<class T>
-    using RtoDictItemNoCb = ObjDictItemNoCb<T>;
-
-    template<class T>
-    using RtoDictItemCb = ObjDictItemCb<T>;
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,

@@ -19,7 +19,7 @@ namespace libfcn_v2 {
 //    using SvoDictItem = ObjDictItemCb<T>;
 
     template<class T>
-    struct SvoDictItem : public ObjDictItemCb<T>{
+    struct SvoDictItem : public RtoDictItemCb<T>{
         /* 标志是服务器端还是客户端。
          * 如果是服务器端，只响应请求帧；如果是客户端，只响应应答帧。
          * 由Client/Server的构造函数进行置位。*/
@@ -40,12 +40,12 @@ namespace libfcn_v2 {
         SvoClient();
         ~SvoClient();
 
-        void  readUnblocking(ObjDictItemBase& item, FcnCallbackInterface callback);
-        void writeUnblocking(ObjDictItemBase& item, FcnCallbackInterface callback);
+        void  readUnblocking(RtoDictItemBase& item, FcnCallbackInterface callback);
+        void writeUnblocking(RtoDictItemBase& item, FcnCallbackInterface callback);
 
 #ifdef SYSTYPE_FULL_OS
-        void  readBlocking(ObjDictItemBase& item);
-        void writeBlocking(ObjDictItemBase& item);
+        void  readBlocking(RtoDictItemBase& item);
+        void writeBlocking(RtoDictItemBase& item);
 #endif
         uint16_t server_addr { 0 };
 

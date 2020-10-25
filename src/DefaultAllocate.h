@@ -15,6 +15,11 @@ namespace libfcn_v2{
 #ifndef MAX_COM_PORT_NUM
 #define MAX_COM_PORT_NUM 4
 #endif
+
+/*
+ * 最多支持的本地节点数目
+ * */
+#define MAX_LOCAL_NODE 6
 }
 
 #endif //LIBFCN_V2_DEFAULTALLOCATE_H

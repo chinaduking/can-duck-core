@@ -29,7 +29,7 @@ uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
          * 1. 每次均检查index是否已溢出
          * 2. 支持未来的回调
          * */
-        auto p_obj = getObject(index);
+        auto p_obj = (RtoDictItemBase*)getObject(index);
 
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
@@ -39,7 +39,8 @@ uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
             return 0xFFFF;
         }
 
-        utils::memcpy(p_obj->getDataPtr(), data, p_obj->data_size);
+        utils::memcpy(p_obj->getDataPtr(), data,
+                p_obj->data_size);
 
         auto callback = p_obj->getCallbackPtr();
 
@@ -103,7 +104,7 @@ void libfcn_v2::RtoFrameBuilder(
 
     /* 填充数据 */
     for(int index = index_start; index <= index_end; index++){
-        auto obj = dict->getObject(index);
+        auto obj = (RtoDictItemBase*)dict->getObject(index);
 
         USER_ASSERT(obj != nullptr);
         if(obj == nullptr){ return; }
