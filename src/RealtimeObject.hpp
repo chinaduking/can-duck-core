@@ -42,7 +42,9 @@ namespace libfcn_v2 {
             index(index),
             data_size(data_size),
             derived_has_callback(derived_has_callback)
-        { }
+        {
+            status_code = 0;
+        }
 
         /* 消息索引 */
         const uint16_t index         {0};
@@ -52,10 +54,10 @@ namespace libfcn_v2 {
 
         /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
          * （为了节省函数指针的内存） */
-        uint8_t derived_has_callback : 1;
+        const uint8_t derived_has_callback : 1;
 
         /* 子类字典成员的状态码，根据不同类别有区别 */
-        uint8_t status_code          : 7{0};
+        uint8_t status_code          : 7;
 
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
