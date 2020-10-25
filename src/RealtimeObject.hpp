@@ -9,9 +9,6 @@
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 
-#ifdef SYSTYPE_FULL_OS
-#include <functional>
-#endif
 
 /* ---------------------------------------------------------
  *               Realtime Object Definition
@@ -22,9 +19,9 @@ namespace libfcn_v2 {
 
     /* 数据长度标志位为无符号8位整形，最大255
      * */
-    #define FCN_MAX_OBJ_SIZE 0xFF
     typedef uint8_t index_t;
     typedef uint8_t data_size_t;
+    typedef uint16_t rto_ts_t;
 
 
 #pragma pack(2)
@@ -103,10 +100,10 @@ namespace libfcn_v2 {
 
         /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
          * （为了节省函数指针的内存） */
-        const uint16_t derived_has_callback : 1;
+        const rto_ts_t derived_has_callback : 1;
 
         /* 时间戳 */
-        uint16_t timestamp          : 15;
+        rto_ts_t timestamp          : 15;
 
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
@@ -279,8 +276,8 @@ namespace libfcn_v2 {
             uint16_t dest_address{  0  };
 
             /*
-             * end_idx != 0xFFFF : start_idx
-             * end_idx == 0xFFFF : single_idx
+             * end_idx != -1 : start_idx
+             * end_idx == -1 : single_idx
              **/
             ObjectDict* dict{nullptr};
             index_t start_or_single_idx  {0};
