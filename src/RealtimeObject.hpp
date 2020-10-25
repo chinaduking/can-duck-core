@@ -154,17 +154,23 @@ namespace libfcn_v2 {
      * 实现了类型安全的数据存储。
      * */
     template<class T>
-    struct RTODictItem : public ObjDictItemBase {
+    using RtoDictItemNoCb = ObjDictItemNoCb<T>;
 
-        RTODictItem(uint16_t index)
-            : ObjDictItemBase(index, sizeof(T)) {}
+    template<class T>
+    using RtoDictItemCb = ObjDictItemNoCb<T>;
 
-        void operator<<(T input) { data = input; }
-        void operator>>(T &input) { input = data; }
-
-        /*子类必须将数据放在第一个成员*/
-        T data;
-    };
+//    template<class T>
+//    struct RTODictItem : public ObjDictItemBase {
+//
+//        RTODictItem(uint16_t index)
+//            : ObjDictItemBase(index, sizeof(T)) {}
+//
+//        void operator<<(T input) { data = input; }
+//        void operator>>(T &input) { input = data; }
+//
+//        /*子类必须将数据放在第一个成员*/
+//        T data;
+//    };
 
 
     void RtoFrameBuilder(

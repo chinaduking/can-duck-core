@@ -11,7 +11,7 @@ namespace rto_io_test{
     TEST(RealtimeObject, setget){
         int angle_idx = 10;
 
-        RTODictItem<uint32_t> Angle(angle_idx);
+        RtoDictItemNoCb<uint32_t> Angle(angle_idx);
 
         auto rto = Angle;
 

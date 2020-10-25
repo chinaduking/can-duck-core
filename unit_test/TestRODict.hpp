@@ -16,10 +16,10 @@ namespace libfcn_v2_test{
     class TestRODict : public libfcn_v2::ObjectDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::RTODictItem<int16_t> speed;
-        libfcn_v2::RTODictItem<int32_t> angle;
-        libfcn_v2::RTODictItem<int8_t> current;
-        libfcn_v2::RTODictItem<int32_t> target_angle;
+        libfcn_v2::RtoDictItemNoCb<int16_t> speed;
+        libfcn_v2::RtoDictItemNoCb<int32_t> angle;
+        libfcn_v2::RtoDictItemNoCb<int8_t> current;
+        libfcn_v2::RtoDictItemNoCb<int32_t> target_angle;
 
         TestRODict() : ObjectDict(4),
 
