@@ -63,7 +63,7 @@ namespace libfcn_v2{
         SVO_MULTI_WRITE_VERIFY_REQ = 0x0B,
 
         /* 服务对象多帧写，校验应答 */
-        SVO_MULTI_WRITE_VERIFY_ACK  = 0x0C,
+        SVO_MULTI_WRITE_VERIFY_ACK = 0x0C,
 
 
 

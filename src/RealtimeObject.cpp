@@ -14,7 +14,7 @@ using namespace libfcn_v2;
 
 ObjectDict::ObjectDict(uint16_t dict_size) :
         dict_size(dict_size){
-    obj_dict = new ODItem*[dict_size];
+    obj_dict = new ObjDictItemBase*[dict_size];
 }
 
 ObjectDict::~ObjectDict() {
@@ -41,6 +41,15 @@ uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
 
         utils::memcpy(p_obj->getDataPtr(), data, p_obj->data_size);
 
+        auto callback = p_obj->getCallbackPtr();
+
+        if(callback != nullptr){
+            callback->callback(p_obj->getDataPtr(), 0);
+        }
+
+        /* 接收计数自增 */
+//        p_obj->status_code ++;
+
         writePostAction(index);
 
         data += p_obj->data_size;
@@ -53,7 +62,7 @@ uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
     return 0;
 }
 
-ODItem *ObjectDict::getObject(uint16_t index) {
+ObjDictItemBase *ObjectDict::getObject(uint16_t index) {
 
     /* 仅做写保护，不使程序assert failed崩溃：
      * 外界输入（index为通信接收的数据）的异常不应使程序崩溃

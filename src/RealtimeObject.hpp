@@ -8,6 +8,7 @@
 #include <cstdint>
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
+
 #ifdef SYSTYPE_FULL_OS
 #include <functional>
 #endif
@@ -18,38 +19,99 @@
  */
 namespace libfcn_v2 {
 
+
     /* 数据长度标志位为无符号8位整形，最大255
      * */
     #define FCN_MAX_OBJ_SIZE 0xFF
 
+#pragma pack(2)
+    /*非阻塞式任务的回调函数*/
+    struct FcnCallbackInterface{
+        virtual void callback(void* data, uint8_t ev_code) = 0;
+    };
 
-#pragma pack(4)
     /*
-     * 对象字典（Object Dictionary）成员
-     * 内存按4Byte对齐，更改时要注意
+     * 对象字典（Object Dictionary）成员.
+     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
      * */
-    struct ODItem {
-        ODItem(uint16_t index, uint8_t data_size) :
+    struct ObjDictItemBase {
+        ObjDictItemBase(uint16_t index,
+                        uint8_t data_size,
+                        bool derived_has_callback=false)
+                    :
             index(index),
-            data_size(data_size) { }
+            data_size(data_size),
+            derived_has_callback(derived_has_callback)
+        { }
 
+        /* 消息索引 */
         const uint16_t index         {0};
+
+        /* 消息数据大小，最长255字节。不支持变长 */
         const uint8_t  data_size     {0};
-        uint8_t status_code          {0};
+
+        /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
+         * （为了节省函数指针的内存） */
+        uint8_t derived_has_callback : 1;
+
+        /* 子类字典成员的状态码，根据不同类别有区别 */
+        uint8_t status_code          : 7{0};
 
         /*
-         * 取得子类数据对象。子类必须将数据放在第一个成员
+         * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
          */
         inline uint8_t* getDataPtr(){
-            return ((uint8_t*)this) + sizeof(ODItem);
+            if(!derived_has_callback){
+                return ((uint8_t*)this) + sizeof(ObjDictItemBase);
+            } else{
+                return ((uint8_t*)this) + sizeof(ObjDictItemBase) +
+                    sizeof(FcnCallbackInterface);
+            }
         }
 
-#ifdef SYSTYPE_FULL_OS
-        std::function<void(void *)> *callback;
-#endif
+        /*
+         * 取得子类回调对象（如果不支持回调则返回空指针）
+         */
+        inline FcnCallbackInterface* getCallbackPtr(){
+            if(!derived_has_callback){
+                return nullptr;
+            } else{
+                /* 由括号内向括号外：
+                 * 1. 取得存储回调地址的指针的地址。
+                 * 2. 按指针的数据类型解引用，取得指针所指的回调的地址。
+                 * 3. 根据回调地址构造指向回调的指针，并返回。
+                 * */
+                return (FcnCallbackInterface*)(*(uint64_t*)(
+                        (uint8_t*)this + sizeof(ObjDictItemBase)));
+            }
+        }
+    };
+
+    template <typename T>
+    struct ObjDictItemNoCb : public ObjDictItemBase{
+        ObjDictItemNoCb(uint16_t index):
+                ObjDictItemBase(index, sizeof(T), false){}
+
+        void operator<<(T input) { data = input; }
+        void operator>>(T &input) { input = data; }
+
+        T data;
+    };
+
+    template <typename T>
+    struct ObjDictItemCb : public ObjDictItemBase{
+        ObjDictItemCb(uint16_t index):
+                ObjDictItemBase(index, sizeof(T), true){}
+
+        void operator<<(T input) { data = input; }
+        void operator>>(T &input) { input = data; }
+
+        FcnCallbackInterface* callback{nullptr};
+        T data;
     };
 
 #pragma pack(0)
+
 
 
     /*
@@ -69,7 +131,7 @@ namespace libfcn_v2 {
         uint16_t getDictSize();
 
         /*根据参数表索引获取元信息。未找到则返回空指针。 */
-        ODItem *getObject(uint16_t index);
+        ObjDictItemBase *getObject(uint16_t index);
 
         /*默认字段
          * TODO: 版本校验？
@@ -78,7 +140,7 @@ namespace libfcn_v2 {
 //        RTODictItem<uint32_t> version;
 
     protected:
-        ODItem **obj_dict  { nullptr };
+        ObjDictItemBase **obj_dict  {nullptr };
         uint16_t dict_size { 0 };
 
         /* 自定义写入一个项目后的动作（回调/置标志位等） */
@@ -90,10 +152,10 @@ namespace libfcn_v2 {
      * 实现了类型安全的数据存储。
      * */
     template<class T>
-    struct RTODictItem : public ODItem {
+    struct RTODictItem : public ObjDictItemBase {
 
         RTODictItem(uint16_t index)
-            : ODItem(index, sizeof(T)) {}
+            : ObjDictItemBase(index, sizeof(T)) {}
 
         void operator<<(T input) { data = input; }
         void operator>>(T &input) { input = data; }
@@ -101,6 +163,7 @@ namespace libfcn_v2 {
         /*子类必须将数据放在第一个成员*/
         T data;
     };
+
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,

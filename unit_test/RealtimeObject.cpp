@@ -29,7 +29,7 @@ namespace rto_io_test{
 
 
 
-#include "TestRODict.hpp"
+    #include "TestRODict.hpp"
 
     TEST(RealtimeObject, Dict){
         libfcn_v2_test::TestRODict testRoDict;
@@ -60,7 +60,8 @@ namespace rto_io_test{
            uint8_t* data = testRoDict_src.item.getDataPtr(); \
            testRoDict_dest.singleWrite(index, data, len);               \
            ASSERT_EQ(testRoDict_dest.item.data, data_);                  \
-           std::cout << "testRoDict_dest." << #item << " = " << testRoDict_dest.item.data << std::endl;\
+           std::cout << "testRoDict_dest." << #item << " = "             \
+            << testRoDict_dest.item.data << std::endl;\
     } while(0)
 
     TEST(RealtimeObject, singleWrite){
@@ -74,8 +75,63 @@ namespace rto_io_test{
 
         cout << "pass!" << endl;
     }
-}
 
+
+    struct testCallbackObj : public FcnCallbackInterface {
+        void callback(void *data, uint8_t ev_code) override {
+            cout << "testCallbackObj! data = " << *(uint32_t*)data << endl;
+        }
+    };
+
+    TEST(RealtimeObject, callback) {
+        int angle_idx = 10;
+        ObjDictItemCb<uint32_t> angle(angle_idx);
+
+        angle << 230;
+
+        auto cb_handle = new testCallbackObj();
+        angle.callback = cb_handle;
+
+        printf("sizeof(ObjDictItemBase) = %d\n", sizeof(ObjDictItemBase));
+
+        printf("sizeof(ObjDictItemCb<uint32_t>) = %d\n", sizeof(ObjDictItemCb<uint32_t>));
+
+        printf("sizeof(ObjDictItemCb<uint8_t>) = %d\n", sizeof(ObjDictItemCb<uint8_t>));
+
+        printf("sizeof(ObjDictItemNoCb<uint8_t>) = %d\n", sizeof
+        (ObjDictItemNoCb<uint8_t>));
+
+        printf("sizeof(ObjDictItemNoCb<uint32_t>) = %d\n", sizeof(ObjDictItemNoCb<uint32_t>));
+
+        printf("sizeof(testCallbackObj*) = %d\n", sizeof(testCallbackObj*));
+
+
+        printf("addr of class testCallbackObj instance = %p\n", angle.callback);
+        printf("addr of Angle instance = %p\n", &angle);
+        printf("addr of Angle.callback instance = %p\n", &angle.callback);
+
+        printf("value of Angle.callback instance = %lx\n", angle.callback);
+        printf("addr of (FcnCallbackInterface*)(*(&angle.callback) = %p\n",
+               (FcnCallbackInterface*)(*(&angle.callback)));
+
+
+        printf("value of Angle.callback instance = %p\n", angle.getCallbackPtr());
+
+        ASSERT_EQ(angle.getCallbackPtr(), cb_handle);
+
+        uint32_t test_data = 200;
+
+        printf("call from ObjDictItemCb:\n");
+        angle.callback->callback(&test_data, 1);
+
+        printf("call from ObjDictItemBase:\n");
+        FcnCallbackInterface* cb = angle.getCallbackPtr();
+
+        cb->callback(&test_data, 1);
+
+
+    }
+}
 
 
 namespace rto_shm_test{

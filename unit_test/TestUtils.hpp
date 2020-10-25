@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <thread>
 #include <chrono>
 #include <mutex>
