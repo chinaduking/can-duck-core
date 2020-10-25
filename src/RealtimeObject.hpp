@@ -19,126 +19,47 @@ namespace libfcn_v2 {
 
     /* 数据长度标志位为无符号8位整形，最大255
      * */
-    typedef uint8_t index_t;
-    typedef uint8_t data_size_t;
-    typedef uint16_t rto_ts_t;
+    typedef uint8_t  obj_idx_t;
+    typedef uint8_t  obj_size_t;
 
-
-#pragma pack(2)
     /*非阻塞式任务的回调函数*/
     struct FcnCallbackInterface{
         virtual void callback(void* data, uint8_t ev_code) = 0;
     };
 
+
+#pragma pack(2)
     /*
      * 对象字典（Object Dictionary）成员.
      * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 2
      * */
-    struct ObjDictItemBase {
-        ObjDictItemBase(index_t index,
-                        data_size_t data_size)
-                :
-                index(index),
-                data_size(data_size){ }
-
-        /* 消息索引 */
-        const index_t index{0};
-
-        /* 消息数据大小，最长255字节。不支持变长 */
-        const data_size_t data_size{0};
-    };
-
-
-    /*
-     * 对象字典
-     * */
-    class ObjDictBase{
+    class RtoDictItemBase{
     public:
-
-        explicit ObjDictBase(index_t dict_size) :
-            dict_size(dict_size){
-            obj_dict = new ObjDictItemBase*[dict_size];
-        }
-
-        virtual ~ObjDictBase() {
-            delete [] obj_dict;
-        }
-
-    protected:
-        ObjDictItemBase **obj_dict  {nullptr };
-        const index_t dict_size { 0 };
-
-    public:
-
-        /* 获取字典大小 */
-        inline index_t getDictSize() {
-            return dict_size;
-        }
-
-        /*根据参数表索引获取元信息。未找到则返回空指针。 */
-        inline ObjDictItemBase *getObject(index_t index) {
-
-            /* 仅做写保护，不使程序assert failed崩溃：
-             * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
-             * 可记录错误log
-             * */
-            if(index >= dict_size){
-                return nullptr;
-            }
-
-            return obj_dict[index];
-        }
-    };
-
-
-    class RtoDict : public ObjDictBase{
-
-    public:
-        explicit RtoDict(index_t dict_size) : ObjDictBase(dict_size){
-        }
-
-        ~RtoDict() override = default;
-
-
-        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        data_size_t singleWrite(index_t index, uint8_t *data, data_size_t len);
-
-
-        /*默认字段
-         * TODO: 版本校验？
-         * 1. 可手动校验：使用快照指令
-         * 2. 在网络配置阶段，使用专用协议读取*/
-//        RTODictItem<uint32_t> version;
-
-
-        /* 自定义写入一个项目后的动作（回调/置标志位等） */
-        virtual void writePostAction(index_t& index){};
-    };
-
-
-
-    /*
-     * 对象字典（Object Dictionary）成员.
-     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
-     * */
-    struct RtoDictItemBase : public ObjDictItemBase{
-        RtoDictItemBase(index_t index,
-                        data_size_t data_size,
+        RtoDictItemBase(obj_idx_t index,
+                        obj_size_t data_size,
                         bool derived_has_callback=false)
                     :
-            ObjDictItemBase(index, data_size),
-            derived_has_callback(derived_has_callback)
-        {
-            timestamp = 0;
+                index(index),
+                derived_has_callback(derived_has_callback),
+                data_size(data_size){
+            USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
 
+        virtual ~RtoDictItemBase() = default;
+
+
+        /* 消息索引 */
+        const obj_idx_t index{0};
 
         /* 子类字典成员是否含有回调对象（TransferCallbackPtr）的标志位
          * （为了节省函数指针的内存） */
-        const rto_ts_t derived_has_callback : 1;
+        const obj_size_t derived_has_callback : 1;
 
-        /* 时间戳 */
-        rto_ts_t timestamp          : 15;
+
+        /* 消息数据大小，最长128字节。不支持变长 */
+        const obj_size_t data_size : 7;
+
+        static const int MAX_OBJ_SZIE = 0x7F;
 
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
@@ -180,7 +101,7 @@ namespace libfcn_v2 {
      * */
     template <typename T>
     struct RtoDictItemNoCb : public RtoDictItemBase{
-        explicit RtoDictItemNoCb(index_t index):
+        explicit RtoDictItemNoCb(obj_idx_t index):
                 RtoDictItemBase(index, sizeof(T), false){}
 
         void operator<<(T input) { data = input; }
@@ -195,7 +116,7 @@ namespace libfcn_v2 {
      * */
     template <typename T>
     struct RtoDictItemCb : public RtoDictItemBase{
-        explicit RtoDictItemCb(index_t index):
+        explicit RtoDictItemCb(obj_idx_t index):
                 RtoDictItemBase(index, sizeof(T), true){}
 
         void operator<<(T input) { data = input; }
@@ -206,6 +127,38 @@ namespace libfcn_v2 {
     };
 
 #pragma pack(0)
+
+
+
+    class RtoDict{
+
+    public:
+        explicit RtoDict(obj_idx_t dict_size) : obj_dict(dict_size){
+            obj_dict.resize(dict_size);
+        }
+
+        virtual ~RtoDict()  = default;
+
+
+        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+        obj_size_t singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len);
+
+
+        /*默认字段
+         * TODO: 版本校验？
+         * 1. 可手动校验：使用快照指令
+         * 2. 在网络配置阶段，使用专用协议读取*/
+//        RtoDictItemNoCb<uint32_t> version;
+
+
+        /* 自定义写入一个项目后的动作（回调/置标志位等） */
+        void writePostAction(obj_idx_t& index){};
+
+
+        utils::vector_s<RtoDictItemBase*> obj_dict;
+    };
+
+
 
 }
 
@@ -220,12 +173,12 @@ namespace libfcn_v2 {
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
             RtoDict* dict,
-            index_t index);
+            obj_idx_t index);
 
     void RtoFrameBuilder(
             DataLinkFrame* result_frame,
             RtoDict* dict,
-            index_t index_start, index_t index_end);
+            obj_idx_t index_start, obj_idx_t index_end);
 
 
 
@@ -315,7 +268,7 @@ namespace libfcn_v2 {
              * end_idx == -1 : single_idx
              **/
             RtoDict* dict{nullptr};
-            index_t start_or_single_idx  {0};
+            obj_idx_t start_or_single_idx  {0};
             int end_idx    { -1 };
 
             /* TODO: Random write mode? Is it necessary? */

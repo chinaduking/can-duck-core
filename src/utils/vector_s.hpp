@@ -58,6 +58,12 @@ namespace utils{
             return array[x];
         }
 
+        void resize(uint32_t size){
+            if(size > capicity_){
+                size = capicity_;
+            }
+            member_cnt = size;
+        }
 
         /* 迭代器方法，支持range-based for loop */
         class iterator{

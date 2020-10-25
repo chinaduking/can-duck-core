@@ -7,30 +7,26 @@
 #include "utils/CppUtils.hpp"
 using namespace libfcn_v2;
 
-/* ---------------------------------------------------------
- *               Realtime Object Definition
- * ---------------------------------------------------------
- */
-
-
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-data_size_t RtoDict::singleWrite(index_t index, uint8_t *data, data_size_t len){
+obj_size_t RtoDict::singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len){
     while (len > 0){
 
         /* 不一次直接memcpy，有两个原因：
          * 1. 每次均检查index是否已溢出
          * 2. 支持未来的回调
          * */
-        auto p_obj = (RtoDictItemBase*)getObject(index);
+        if(index > obj_dict.size()){
+            return 1;
+        }
+
+        auto p_obj = obj_dict[index];
 
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
          * 可记录错误log
          * */
-        if(p_obj == nullptr){
-            return 0xFFFF;
-        }
+        USER_ASSERT(p_obj != nullptr);
 
         utils::memcpy(p_obj->getDataPtr(), data,
                 p_obj->data_size);
@@ -60,7 +56,7 @@ data_size_t RtoDict::singleWrite(index_t index, uint8_t *data, data_size_t len){
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
         RtoDict* dict,
-        index_t index){
+        obj_idx_t index){
 
     RtoFrameBuilder(result_frame, dict, index, index);
 }
@@ -68,7 +64,7 @@ void libfcn_v2::RtoFrameBuilder(
 void libfcn_v2::RtoFrameBuilder(
         DataLinkFrame* result_frame,
         RtoDict* dict,
-        index_t index_start, index_t index_end){
+        obj_idx_t index_start, obj_idx_t index_end){
 
     /* 保证起始地址不高于结束地址 */
     USER_ASSERT(index_start <= index_end);
@@ -81,10 +77,12 @@ void libfcn_v2::RtoFrameBuilder(
 
     /* 填充数据 */
     for(int index = index_start; index <= index_end; index++){
-        auto obj = (RtoDictItemBase*)dict->getObject(index);
+        if(index > dict->obj_dict.size()){
+            break;
+        }
 
+        auto obj = dict->obj_dict[index];
         USER_ASSERT(obj != nullptr);
-        if(obj == nullptr){ return; }
 
         utils::memcpy(payload_ptr, obj->getDataPtr(), obj->data_size);
 

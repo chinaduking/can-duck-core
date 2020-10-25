@@ -27,8 +27,8 @@ namespace libfcn_v2 {
     template<class T>
 
     struct SvoDictItem : public ObjDictItemBase{
-        SvoDictItem(index_t index,
-                    data_size_t data_size)
+        SvoDictItem(obj_idx_t index,
+                    obj_size_t data_size)
                 :
                 ObjDictItemBase(index, data_size)
         {
