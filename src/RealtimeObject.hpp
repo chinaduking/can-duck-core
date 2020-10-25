@@ -23,8 +23,8 @@ namespace libfcn_v2 {
     /* 数据长度标志位为无符号8位整形，最大255
      * */
     #define FCN_MAX_OBJ_SIZE 0xFF
-    typedef uint8_t fcn_index_t;
-    typedef uint8_t fcn_data_size_t;
+    typedef uint8_t index_t;
+    typedef uint8_t  data_size_t;
 
 #pragma pack(2)
     /*非阻塞式任务的回调函数*/
@@ -34,23 +34,21 @@ namespace libfcn_v2 {
 
     /*
      * 对象字典（Object Dictionary）成员.
-     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
+     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 2
      * */
     struct ObjDictItemBase {
-        ObjDictItemBase(fcn_index_t index,
-                        fcn_data_size_t data_size)
+        ObjDictItemBase(index_t index,
+                        data_size_t data_size)
                 :
                 index(index),
                 data_size(data_size){ }
 
         /* 消息索引 */
-        const fcn_index_t index{0};
+        const index_t index{0};
 
         /* 消息数据大小，最长255字节。不支持变长 */
-        const fcn_data_size_t data_size{0};
+        const data_size_t data_size{0};
     };
-
-
 
 
     /*
@@ -58,17 +56,17 @@ namespace libfcn_v2 {
      * */
     class ObjectDict {
     public:
-        explicit ObjectDict(uint16_t dict_size);
+        explicit ObjectDict(index_t dict_size);
         virtual ~ObjectDict();
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        uint16_t singleWrite(uint16_t index, uint8_t *data, uint16_t len);
+        data_size_t singleWrite(index_t index, uint8_t *data, data_size_t len);
 
         /* 获取字典大小 */
-        uint16_t getDictSize();
+        index_t getDictSize();
 
         /*根据参数表索引获取元信息。未找到则返回空指针。 */
-        ObjDictItemBase *getObject(uint16_t index);
+        ObjDictItemBase *getObject(index_t index);
 
         /*默认字段
          * TODO: 版本校验？
@@ -78,10 +76,10 @@ namespace libfcn_v2 {
 
     protected:
         ObjDictItemBase **obj_dict  {nullptr };
-        uint16_t dict_size { 0 };
+        index_t dict_size { 0 };
 
         /* 自定义写入一个项目后的动作（回调/置标志位等） */
-        virtual void writePostAction(uint16_t& index){};
+        virtual void writePostAction(index_t& index){};
     };
 
 
@@ -91,14 +89,14 @@ namespace libfcn_v2 {
      * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 4
      * */
     struct RtoDictItemBase : public ObjDictItemBase{
-        RtoDictItemBase(fcn_index_t index,
-                        fcn_data_size_t data_size,
+        RtoDictItemBase(index_t index,
+                        data_size_t data_size,
                         bool derived_has_callback=false)
                     :
             ObjDictItemBase(index, data_size),
             derived_has_callback(derived_has_callback)
         {
-            status_code = 0;
+            timestamp = 0;
         }
 
 
@@ -106,8 +104,8 @@ namespace libfcn_v2 {
          * （为了节省函数指针的内存） */
         const uint16_t derived_has_callback : 1;
 
-        /* 子类字典成员的状态码 */
-        uint16_t status_code          : 15;
+        /* 时间戳 */
+        uint16_t timestamp          : 15;
 
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
@@ -149,7 +147,7 @@ namespace libfcn_v2 {
      * */
     template <typename T>
     struct RtoDictItemNoCb : public RtoDictItemBase{
-        explicit RtoDictItemNoCb(uint16_t index):
+        explicit RtoDictItemNoCb(index_t index):
                 RtoDictItemBase(index, sizeof(T), false){}
 
         void operator<<(T input) { data = input; }
@@ -164,7 +162,7 @@ namespace libfcn_v2 {
      * */
     template <typename T>
     struct RtoDictItemCb : public RtoDictItemBase{
-        explicit RtoDictItemCb(uint16_t index):
+        explicit RtoDictItemCb(index_t index):
                 RtoDictItemBase(index, sizeof(T), true){}
 
         void operator<<(T input) { data = input; }

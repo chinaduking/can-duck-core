@@ -12,7 +12,7 @@ using namespace libfcn_v2;
  * ---------------------------------------------------------
  */
 
-ObjectDict::ObjectDict(uint16_t dict_size) :
+ObjectDict::ObjectDict(index_t dict_size) :
         dict_size(dict_size){
     obj_dict = new ObjDictItemBase*[dict_size];
 }
@@ -22,7 +22,7 @@ ObjectDict::~ObjectDict() {
 }
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
+data_size_t ObjectDict::singleWrite(index_t index, uint8_t *data, data_size_t len){
     while (len > 0){
 
         /* 不一次直接memcpy，有两个原因：
@@ -63,7 +63,7 @@ uint16_t ObjectDict::singleWrite(uint16_t index, uint8_t *data, uint16_t len){
     return 0;
 }
 
-ObjDictItemBase *ObjectDict::getObject(uint16_t index) {
+ObjDictItemBase *ObjectDict::getObject(index_t index) {
 
     /* 仅做写保护，不使程序assert failed崩溃：
      * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
@@ -76,7 +76,7 @@ ObjDictItemBase *ObjectDict::getObject(uint16_t index) {
     return obj_dict[index];
 }
 
-uint16_t ObjectDict::getDictSize() {
+index_t ObjectDict::getDictSize() {
     return dict_size;
 }
 
