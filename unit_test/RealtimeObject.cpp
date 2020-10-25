@@ -129,6 +129,8 @@ namespace rto_io_test{
 
         cb->callback(&test_data, 1);
 
+        printf("data value: %d\n", *(uint32_t*)(angle.getDataPtr()));
+
 
     }
 }
