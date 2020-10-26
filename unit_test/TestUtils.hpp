@@ -20,9 +20,4 @@
 using namespace std;
 
 
-#include "utils/CppUtils.hpp"
-#include "utils/Tracer.hpp"
-
-using namespace utils;
-
 #endif //LIBFCN_V2_TESTUTILS_HPP

@@ -5,10 +5,13 @@
 #include "NetworkLayer.hpp"
 
 #include "utils/PosixSerial.hpp"
+#include "utils/Tracer.hpp"
+
 #include "TestRODict.hpp"
 #include "FrameUtils.hpp"
 
 using namespace libfcn_v2;
+using namespace utils;
 
 namespace network_test {
     class Node {

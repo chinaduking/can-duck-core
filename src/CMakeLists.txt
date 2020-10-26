@@ -5,6 +5,6 @@ add_library(fcn_v2
         ServiceObject.cpp
 
         utils/DataVerify.cpp
-        utils/EHeap.cpp
+        utils/ObjPool.cpp
         utils/Tracer.cpp
         utils/HostIODeviceWrapper.cpp)

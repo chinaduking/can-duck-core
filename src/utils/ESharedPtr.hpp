@@ -6,14 +6,14 @@
 #define LIBFCN_ESHAREDPTR_HPP
 
 #include <cstdint>
-#include "EHeap.hpp"
+#include "ObjPool.hpp"
 
 #ifdef SYSTYPE_FULL_OS
 #include <mutex>
 #endif
 
 namespace utils{
-    extern EHeap g_RefCntHeap;
+    extern ObjPool g_RefCntHeap;
 
     template <typename T>
     class ESharedPtr
@@ -67,11 +67,11 @@ namespace utils{
             }
 
             void * operator new(size_t size) noexcept {
-                return g_RefCntHeap.getMemBlock(size);
+                return g_RefCntHeap.allocate(size);
             }
 
             void operator delete(void * p) {
-                g_RefCntHeap.returnMemBlock((uint8_t*)p);
+                g_RefCntHeap.deallocate((uint8_t *) p);
             }
         };
 

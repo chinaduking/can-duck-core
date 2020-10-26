@@ -2,10 +2,11 @@
 // Created by sdong on 2019/12/1.
 //
 
-#include "EHeap.hpp"
+#include "ObjPool.hpp"
 #include <iostream>
 using namespace utils;
 
+#if 0
 EHeap::EHeap( uint8_t* p_mem_block, uint8_t** p_free_stack,
         uint32_t bloack_size, uint32_t block_num):
 
@@ -91,3 +92,4 @@ uint32_t EHeap::getUsedBlock(){
     return free_stack_top;
 }
 
+#endif

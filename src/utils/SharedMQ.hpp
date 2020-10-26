@@ -4,7 +4,7 @@
 
 #include "ESharedPtr.hpp"
 
-#include "EHeap.hpp"
+#include "ObjPool.hpp"
 
 #ifndef LIBFCN_SHAREDMQ_HPP
 #define LIBFCN_SHAREDMQ_HPP

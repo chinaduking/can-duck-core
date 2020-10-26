@@ -8,7 +8,7 @@ add_executable(testDataLinkLayer DataLinkLayer.cpp
         ${PROJECT_SOURCE_DIR}/src/DataLinkLayer.cpp
         ${PROJECT_SOURCE_DIR}/src/utils/DataVerify.cpp
         ${PROJECT_SOURCE_DIR}/src/utils/PosixSerial.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/EHeap.cpp)
+        ${PROJECT_SOURCE_DIR}/src/utils/ObjPool.cpp)
 
 target_link_libraries(testDataLinkLayer  GTest::GTest GTest::Main)
 

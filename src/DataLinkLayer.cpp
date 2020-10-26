@@ -5,7 +5,7 @@
 #include "DataLinkLayer.hpp"
 #include "DefaultAllocate.h"
 
-#include "utils/EHeap.hpp"
+#include "utils/ObjPool.hpp"
 #include "utils/CppUtils.hpp"
 #include "utils/DataVerify.hpp"
 
@@ -18,11 +18,11 @@ EHEAP_STATIC_INIT(
 
 /* 重载New 和 Delete，以无碎片的方式进行内存分配 */
 void * DataLinkFrame::operator new(size_t size) noexcept{
-    return m_FrameHeap.getMemBlock(size);
+    return m_FrameHeap.allocate(size);
 }
 
 void DataLinkFrame::operator delete(void * p){
-    m_FrameHeap.returnMemBlock((uint8_t*)p);
+    m_FrameHeap.deallocate((uint8_t *) p);
 }
 
 void libfcn_v2::buffer2Frame(DataLinkFrame* frame, uint8_t *buf, uint16_t len) {

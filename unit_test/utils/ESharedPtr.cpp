@@ -3,7 +3,7 @@
 //
 
 #include "utils/ESharedPtr.hpp"
-#include "utils/EHeap.hpp"
+#include "utils/ObjPool.hpp"
 #include "utils/LinkedList.hpp"
 
 #include <gtest/gtest.h>
@@ -17,7 +17,7 @@ using namespace utils;
 using namespace libfcn_v2;
 using namespace std;
 
-extern EHeap m_FrameHeap;
+extern ObjPool m_FrameHeap;
 
 namespace emros_test{
     void AquirePtrRefrence(ESharedPtr<DataLinkFrame>& p_frame){
@@ -74,7 +74,7 @@ namespace emros_test{
 
 
         cout << "\n\n" << DataLinkFrameToString(*p_frame);
-        ASSERT_EQ(m_FrameHeap.getUsedBlock(), 1);
+        ASSERT_EQ(m_FrameHeap.usage(), 1);
 
     }
 
@@ -86,7 +86,7 @@ namespace emros_test{
                 frame_queue.emplace_back(new DataLinkFrame());
                 frame_queue[i]->msg_id = i;
             }
-            ASSERT_EQ(m_FrameHeap.getUsedBlock(), 3);
+            ASSERT_EQ(m_FrameHeap.usage(), 3);
 
             auto frame_0 = frame_queue[0];
             ASSERT_EQ(frame_queue[0].refCount(), 2);
@@ -95,13 +95,13 @@ namespace emros_test{
 
             for(int i = 0; i < 3; i++){
                 frame_queue.erase(frame_queue.begin());
-                ASSERT_EQ(m_FrameHeap.getUsedBlock(), 2-i+1);
+                ASSERT_EQ(m_FrameHeap.usage(), 2 - i + 1);
             }
 
             frame_0->dest_id = 1;
             cout << DataLinkFrameToString(*frame_0) << endl;
         }
-        ASSERT_EQ(m_FrameHeap.getUsedBlock(), 0);
+        ASSERT_EQ(m_FrameHeap.usage(), 0);
     }
 
 
