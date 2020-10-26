@@ -9,19 +9,16 @@
 
 namespace libfcn_v2 {
 
-    #define SVO_RW_PREV_MASK (0x01 << 0)
-    #define SVO_RD_STAT_MASK (0x06 << 1)
-    #define SVO_WR_STAT_MASK (0x06 << 4)
 
     #define USE_EVLOOP
     /*参数表任务状态：包括读、写*/
-    enum ParamOperateStatus : uint8_t {
-        PARAM_STATUS_IDLE = 0, /*初始状态/无任务状态*/
-        PARAM_STATUS_PENDDING, /*正在进行读写*/
-        PARAM_STATUS_SUCCESS,  /*读写成功*/
-        PARAM_STATUS_REJECTED, /*访问被拒绝（可能原因：服务器上的元信息和数据包不匹配、没有权限）*/
-        PARAM_STATUS_TIMEOUT,  /*访问超时（可能原因：服务器上的元信息和数据包不匹配、网络层通信失败）*/
-        PARAM_STATUS_UNKNOWN   /*未知错误*/
+    enum class SvoClientStat : uint8_t {
+        Idle = 0,   /*初始状态/无任务状态*/
+        Pendding,   /*正在进行读写*/
+        Ok,         /*读写成功*/
+        Rejected,   /*访问被拒绝（可能原因：服务器上的元信息和数据包不匹配、没有权限）*/
+        Timeout,    /*访问超时（可能原因：服务器上的元信息和数据包不匹配、网络层通信失败）*/
+        Unknown     /*未知错误*/
     };
 
 
@@ -42,8 +39,10 @@ namespace libfcn_v2 {
 
                 is_server(0),
                 wr_access(wr_access),
-                read_status(PARAM_STATUS_IDLE),
-                write_status(PARAM_STATUS_IDLE){
+                read_status(static_cast<uint8_t>
+                (SvoClientStat::Idle)),
+                write_status(static_cast<uint8_t>
+                             (SvoClientStat::Idle)){
             USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
 
@@ -78,12 +77,8 @@ namespace libfcn_v2 {
     };
 
     /*
-     * 实时数据对象（Real-Time Object）字典成员
+     * 服务数据对象（Service Object）字典成员
      * 实现了类型安全的数据存储。
-     * */
-
-    /*
-     * 不支持回调的字典项目
      * */
     template <typename T>
     struct ServiceObject : public ServiceObjectBase{
@@ -100,14 +95,14 @@ namespace libfcn_v2 {
 
 
 
-    class RealtimeObjectDict{
+    class ServiceObjectDict{
 
     public:
-        explicit RealtimeObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
+        explicit ServiceObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
             obj_dict.resize(dict_size);
         }
 
-        virtual ~RealtimeObjectDict()  = default;
+        virtual ~ServiceObjectDict()  = default;
 
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
@@ -120,12 +115,7 @@ namespace libfcn_v2 {
          * 2. 在网络配置阶段，使用专用协议读取*/
 //        RtoDictItemNoCb<uint32_t> version;
 
-
-        /* 自定义写入一个项目后的动作（回调/置标志位等） */
-        void writePostAction(obj_idx_t& index){};
-
-
-        utils::vector_s<RealtimeObjectBase*> obj_dict;
+        utils::vector_s<ServiceObjectBase*> obj_dict;
     };
 
 

@@ -141,7 +141,7 @@ namespace libfcn_v2 {
 
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        obj_size_t singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len);
+        obj_size_t continuousWrite(obj_idx_t index, uint8_t *data, obj_size_t len);
 
 
         /*默认字段
@@ -149,11 +149,6 @@ namespace libfcn_v2 {
          * 1. 可手动校验：使用快照指令
          * 2. 在网络配置阶段，使用专用协议读取*/
 //        RtoDictItemNoCb<uint32_t> version;
-
-
-        /* 自定义写入一个项目后的动作（回调/置标志位等） */
-        void writePostAction(obj_idx_t& index){};
-
 
         utils::vector_s<RealtimeObjectBase*> obj_dict;
     };

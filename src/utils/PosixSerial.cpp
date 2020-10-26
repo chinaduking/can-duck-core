@@ -19,7 +19,8 @@ using namespace utils;
 using namespace std;
 
 PosixSerial::PosixSerial(int id, uint32_t baud,
-                         uint16_t read_timeout_ms ): LLByteDevice(1024){
+                         uint16_t read_timeout_ms ): LLByteDevice(1024),
+                                                     baud(baud){
     /*TODO: use FTDI device ID to open serial (FTDI-D2XX Driver)
      * AR: @jin.wang*/
     is_open = false;
@@ -134,9 +135,9 @@ std::vector<std::string> PosixSerial::listUSBDevice(){
     vector<string> usb_serial;
 
     char* pattern_unix[] = {
-        "ttyUSB",   /*Ubuntu下的串口设备*/
-        "cu.usbserial-", /*Mac下的串口设备*/
-        "ttyS"  /*Android下的串口设备*/
+            (char*)"ttyUSB",   /*Ubuntu下的串口设备*/
+            (char*)"cu.usbserial-", /*Mac下的串口设备*/
+            (char*)"ttyS"  /*Android下的串口设备*/
     };
 
 

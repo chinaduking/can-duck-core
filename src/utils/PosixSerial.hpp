@@ -27,6 +27,10 @@ namespace utils{
 
         bool isOpen();
 
+        inline uint32_t getBaud(){
+            return baud;
+        }
+
         static std::vector<std::string> listUSBDevice();
 
     private:

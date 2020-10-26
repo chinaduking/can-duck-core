@@ -9,23 +9,26 @@ using namespace libfcn_v2;
 
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t RealtimeObjectDict::singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len){
+obj_size_t RealtimeObjectDict::continuousWrite(obj_idx_t index, uint8_t *data,
+                                     obj_size_t len){
+
+    /* 不一次直接memcpy，有两个原因：
+     * 1. 每次均检查index是否已溢出
+     * 2. 支持未来的回调
+     * */
     while (len > 0){
 
-        /* 不一次直接memcpy，有两个原因：
-         * 1. 每次均检查index是否已溢出
-         * 2. 支持未来的回调
-         * */
         if(index > obj_dict.size()){
+            /* 仅做写保护，不使程序assert failed崩溃：
+             * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
+             * 可记录错误log
+             * */
             return 1;
         }
 
         auto p_obj = obj_dict[index];
 
-        /* 仅做写保护，不使程序assert failed崩溃：
-         * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
-         * 可记录错误log
-         * */
+
         USER_ASSERT(p_obj != nullptr);
 
         utils::memcpy(p_obj->getDataPtr(), data,
@@ -36,11 +39,6 @@ obj_size_t RealtimeObjectDict::singleWrite(obj_idx_t index, uint8_t *data, obj_s
         if(callback != nullptr){
             callback->callback(p_obj->getDataPtr(), 0);
         }
-
-        /* 接收计数自增 */
-//        p_obj->status_code ++;
-
-        writePostAction(index);
 
         data += p_obj->data_size;
 
@@ -128,7 +126,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame) {
         return;
     }
 
-    dict->singleWrite(frame->msg_id,  frame->payload, frame->payload_len);
+    dict->continuousWrite(frame->msg_id, frame->payload, frame->payload_len);
 }
 
 void RtoNetworkHandler::addPubCtrlRule(PubCtrlRule& rule){
