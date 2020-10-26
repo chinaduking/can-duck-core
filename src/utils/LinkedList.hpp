@@ -1,25 +1,42 @@
 //
-// Created by sdong on 2019/11/18.
+// Created by sdong on 2019/12/2.
 //
 
-#ifndef LIBFCN_LINKEDLIST_HPP
-#define LIBFCN_LINKEDLIST_HPP
+#ifndef LIBFCN_SHAREDMQ_HPP
+#define LIBFCN_SHAREDMQ_HPP
 
 #include <cstdint>
+#include <cstddef>
+
+#include "ObjPool.hpp"
 
 namespace utils{
 
-    template <typename val_T>
+#ifdef SYSTYPE_FULL_OS
+    #include <mutex>
+    #define LINKED_LIST_LOCKGUARD std::lock_guard<std::mutex> updating_lk(update_mutex)
+#else
+    #define LINKED_LIST_LOCKGUARD
+#endif //SYSTYPE_FULL_OS
+
+    template <typename val_T=void*, typename Allocator=DefaultAllocator>
     class LinkedList{
     public:
 
         /* 节点 */
+        //TODO: use EHeap at new / delete
         struct Node{
             val_T val;
-            Node* p_next;
-            Node* p_prev;
-        };
+            Node* p_next{nullptr};
 
+            void * operator new(size_t size) noexcept {
+                return Allocator::allocate(size);
+            }
+
+            void operator delete(void * p) {
+                Allocator::deallocate((uint8_t*)p);
+            }
+        };
 
         /* 迭代器方法，支持range-based for loop */
         class iterator{
@@ -29,7 +46,7 @@ namespace utils{
 
             iterator operator++() { ptr = ptr->p_next; return *this; }
             bool operator!=(const iterator & other) const { return ptr != other.ptr; }
-            const val_T& operator*() const { return ptr->val; }
+            val_T& operator*() const { return ptr->val; }
         private:
             Node* ptr;
         };
@@ -38,14 +55,10 @@ namespace utils{
         iterator end() const { return iterator(nullptr); }
 
         /* 构造方法 */
-        LinkedList(){
-            head_node = nullptr;
-            tail_node = nullptr;
-            size_ = 0;
-        }
+        LinkedList() = default;
 
         ~LinkedList(){
-            Node* i_node = head();
+            Node* i_node = head_node;
             if(i_node == nullptr){
                 return;
             }
@@ -56,9 +69,14 @@ namespace utils{
                 delete p_node;
             }
         }
-        
-        Node* head(){ return head_node; }
-        Node* tail(){ return tail_node; }
+
+        val_T head(){
+            return head_node->val;
+        }
+
+        val_T tail(){
+            return tail_node->val;
+        }
 
         uint64_t size(){
             return size_;
@@ -68,8 +86,26 @@ namespace utils{
             return size_ == 0;
         }
 
+#ifdef SYSTYPE_FULL_OS
 
-        void append(val_T& val){
+        /* 等待推入数据 */
+        void wait(int32_t timeout = -1){
+            if(timeout > 0){
+                std::unique_lock<std::mutex> updating_lk(update_mutex);
+                sched_ctrl_cv.wait_for(
+                        updating_lk, std::chrono::microseconds(timeout));
+            } else if(timeout < 0){
+                std::unique_lock<std::mutex> updating_lk(update_mutex);
+                sched_ctrl_cv.wait(updating_lk);
+            }
+        }
+
+        void notify(){
+            sched_ctrl_cv.notify_all();
+        }
+#endif //SYSTYPE_FULL_OS
+
+        void push(val_T&& val){
             Node* p_node;
             size_ ++;
 
@@ -78,9 +114,8 @@ namespace utils{
                 p_node = head_node;
                 p_node->val = val;
                 p_node->p_next = nullptr;
-                p_node->p_prev = nullptr;
 
-                tail_node = p_node;
+                tail_node = head_node;
                 return;
             }
 
@@ -88,84 +123,19 @@ namespace utils{
             tail_node->p_next = p_node;
             p_node->val = val;
             p_node->p_next = nullptr;
-            p_node->p_prev = tail_node;
             tail_node = p_node;
+
+            //TODO: remove if no OS support!
+#ifdef SYSTYPE_FULL_OS
+            sched_ctrl_cv.notify_all();
+#endif
         }
 
-        Node* find(val_T& val){
-            Node* i_node = head_node;
-            if(i_node == nullptr){
-                return nullptr;
-            }
-
-            while(i_node->p_next != nullptr){
-                if(i_node->val == val){
-                    return i_node;
-                }
-
-                i_node = i_node->p_next;
-            }
-
-            return nullptr;
+        void push(val_T& val){
+            push(std::move(val));
         }
 
-        void remove(val_T val){
-            Node* i_node = head_node;
-            if(i_node == nullptr){
-                return;
-            }
-
-            while(i_node != nullptr){
-                if(i_node->val == val){
-                    if(i_node == head_node){
-                        head_node = head_node->p_next;
-                        head_node->p_prev = nullptr;
-                    } else if (i_node == tail_node){
-                        tail_node = tail_node->p_prev;
-                        tail_node->p_next = nullptr;
-                    } else{
-                        i_node->p_next->p_prev = i_node->p_prev;
-                        i_node->p_prev->p_next = i_node->p_next;
-                    }
-
-                    delete i_node;
-                    size_ --;
-                    break;
-                }
-
-                i_node = i_node->p_next;
-            }
-        }
-
-        void removeIf(bool (*matched)(val_T& val)){
-            Node* i_node = head_node;
-            if(i_node == nullptr){
-                return;
-            }
-
-            while(i_node != nullptr){
-                if(*matched(i_node->val)){
-                    if(i_node == head_node){
-                        head_node = head_node->p_next;
-                        head_node->p_prev = nullptr;
-                    } else if (i_node == tail_node){
-                        tail_node = tail_node->p_prev;
-                        tail_node->p_next = nullptr;
-                    } else{
-                        i_node->p_next->p_prev = i_node->p_prev;
-                        i_node->p_prev->p_next = i_node->p_next;
-                    }
-
-                    delete i_node;
-                    size_ --;
-                    break;
-                }
-
-                i_node = i_node->p_next;
-            }
-        }
-
-        void popHead(){
+        void pop(){
             if(head_node == nullptr){
                 return;
             }
@@ -174,22 +144,74 @@ namespace utils{
                 delete head_node;
                 head_node = nullptr;
                 tail_node = nullptr;
+
+                size_ --;
                 return;
             }
 
             Node* i_node = head_node;
             head_node = head_node->p_next;
-            head_node->p_prev = nullptr;
             delete i_node;
             size_ --;
         }
 
+        void removeIf(bool (*matched)(val_T& val)){
+            if(head_node == nullptr){
+                return;
+            }
+
+            Node* node_iter_prev = nullptr;
+            Node* node_iter = head_node;
+
+            while (node_iter != nullptr){
+                if(matched((val_T&)*(node_iter->val))){
+                    size_ --;
+
+                    if(node_iter_prev != nullptr){
+                        /* 如果不是头部，上个节点链接下一个节点 */
+                        node_iter_prev->p_next = node_iter->p_next;
+
+                        Node* deleting_node = node_iter;
+
+                        /* 旧指针不动，新指针从下一个节点开始 */
+                        node_iter = node_iter_prev->p_next;
+
+                        /* 删除当前节点 */
+                        delete deleting_node;
+                    }else{
+                        /* 如果是头部，头节点后移 */
+                        head_node = node_iter->p_next;
+
+                        /* 头节点后移之后为空，说明链表已空 */
+                        if(head_node == nullptr){
+                            tail_node = nullptr;
+                        }
+
+                        delete node_iter;
+                        node_iter = head_node;
+                    }
+                }else{
+                    node_iter_prev = node_iter;
+                    node_iter = node_iter->p_next;
+                }
+            }
+        }
+
     private:
-        Node* head_node;
-        Node* tail_node;
-        uint64_t size_;
+        Node* head_node{nullptr};
+        Node* tail_node{nullptr};
+        uint64_t size_{0};
+
+#ifdef SYSTYPE_FULL_OS
+
+        std::condition_variable sched_ctrl_cv;
+        std::mutex update_mutex;
+
+#endif //SYSTYPE_FULL_OS
+
     };
 
-}
 
-#endif //LIBFCN_LINKEDLIST_HPP
+
+}
+#endif

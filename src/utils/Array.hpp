@@ -20,6 +20,10 @@ namespace utils{
             assert(x < N);
             return array[x];
         }
+
+        uint32_t size(){
+            return N;
+        }
     };
 }
 

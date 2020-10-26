@@ -10,7 +10,7 @@
 #define EVENTLOOP_ALLOCATE_DYNAMIC
 #define EVENTLOOP_ALLOCATE_STATIC
 
-#include "SharedMQ.hpp"
+#include "LinkedList.hpp"
 
 #ifdef EVENTLOOP_THREADING
 #include <cstdint>

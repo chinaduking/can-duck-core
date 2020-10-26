@@ -30,3 +30,8 @@ add_executable(testEHeap EHeap.cpp)
 
 target_link_libraries(testEHeap  GTest::GTest GTest::Main)
 
+
+add_executable(testLinkedList LinkedList.cpp)
+
+target_link_libraries(testLinkedList  GTest::GTest GTest::Main)
+
