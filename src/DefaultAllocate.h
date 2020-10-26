@@ -22,7 +22,7 @@ namespace libfcn_v2{
 #define MAX_LOCAL_NODE 6
 
 
-#define USE_EVLOOP
+//#define USE_EVLOOP
 
 }
 

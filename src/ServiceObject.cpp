@@ -138,9 +138,12 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             utils::memcpy(server_frame.payload, obj->getDataPtr(),
                           obj->data_size);
             server_frame.payload_len = obj->data_size;
-            server_frame.op_code = (uint8_t)OpCode::SVO_SINGLE_READ_ACK;
 
-            //TODO: rd ack
+            server_frame.msg_id = frame->msg_id;
+            server_frame.op_code = (uint8_t)OpCode::SVO_SINGLE_READ_ACK;
+            server_frame.src_id = address;
+            server_frame.dest_id = frame->src_id;
+
             network->data_link_dev[recv_port_id]->write(&server_frame);
         }
             break;
@@ -172,10 +175,13 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             if(is_server){
                 break;
             }
-
+#ifndef USE_EVLOOP
             dict->readAckHandle(frame->msg_id,
                                 frame->payload,
                                 frame->payload_len);
+#else  //USE_EVLOOP
+            //TODO: notify event loop
+#endif //USE_EVLOOP
         }
             break;
 
@@ -184,9 +190,14 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             if(is_server){
                 break;
             }
-
+#ifndef USE_EVLOOP
             dict->writeAckHandle(frame->msg_id,
                                 frame->payload[0]);
+
+#else  //USE_EVLOOP
+            //TODO: notify event loop
+#endif //USE_EVLOOP
+
         }
             break;
         default:
