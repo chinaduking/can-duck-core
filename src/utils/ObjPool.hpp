@@ -6,7 +6,7 @@
 #define LIBFCN_EHEAP_HPP
 
 #include <cstdint>
-
+#include <cstdlib>
 #ifdef SYSTYPE_FULL_OS
 #include <mutex>
 #endif  //SYSTYPE_FULL_OS
@@ -47,7 +47,7 @@ namespace utils{
 
         void init(){
             for(int i = 0; i < N; i ++){
-                obj_pool[i] = T();
+//                obj_pool[i] = T();
                 free_block_stack[i] = &obj_pool[i];
             }
         }
@@ -101,6 +101,17 @@ namespace utils{
         std::mutex io_mutex;
 #endif  //SYSTYPE_FULL_OS
 
+    };
+
+
+    struct DefaultAllocator{
+        static void* allocate(size_t size){
+            return malloc(size);
+        }
+
+        static void deallocate(void* p){
+            free(p);
+        }
     };
 
 }

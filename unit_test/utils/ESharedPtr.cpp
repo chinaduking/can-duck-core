@@ -10,21 +10,36 @@
 #include <iostream>
 #include <thread>
 
-#include "DataLinkLayer.hpp"
 #include "FrameUtils.hpp"
 
 using namespace utils;
-using namespace libfcn_v2;
 using namespace std;
+using namespace libfcn_v2;
 
-extern ObjPool m_FrameHeap;
+extern ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
 
-namespace emros_test{
-    void AquirePtrRefrence(ESharedPtr<DataLinkFrame>& p_frame){
+
+namespace esharedptr_test{
+
+    ObjPool<ESharedPtr<>::RefCount, 100> refCntPool;
+
+    struct RefCntAllocator{
+        static void* allocate(size_t size){
+            return refCntPool.allocate();
+        }
+
+        static void deallocate(void* p){
+            refCntPool.deallocate(p);
+        }
+    };
+
+    typedef ESharedPtr<DataLinkFrame, RefCntAllocator> FrameShrPtr;
+
+    void AquirePtrRefrence(FrameShrPtr& p_frame){
 
         cout << "AquirePtrRefrence:: refcnt before local ptr assign: "
             << p_frame.refCount() << endl;
-        ESharedPtr<DataLinkFrame> p_;
+        FrameShrPtr p_;
         p_ = p_frame;
         cout << "AquirePtrRefrence:: refcnt after local ptr assign: "
             << p_.refCount() << endl;
@@ -35,11 +50,11 @@ namespace emros_test{
     }
 
 
-    void AquirePtrCopy(ESharedPtr<DataLinkFrame> p_frame){
+    void AquirePtrCopy(FrameShrPtr p_frame){
 
         cout << "AquirePtrCopy:: refcnt before local ptr assign: "
             << p_frame.refCount() << endl;
-        ESharedPtr<DataLinkFrame> p_;
+        FrameShrPtr p_;
         p_ = p_frame;
         cout << "AquirePtrCopy:: refcnt after local ptr assign: "
             << p_.refCount() << endl;
@@ -51,7 +66,7 @@ namespace emros_test{
 
 
     TEST(AutoPtr, test) {
-        ESharedPtr<DataLinkFrame> p_frame(new DataLinkFrame());
+        FrameShrPtr p_frame(new DataLinkFrame());
         cout << "refcnt after created: " << p_frame.refCount() << endl;
 
         cout << "\n\nrefcnt before AquirePtrRefrence: "
@@ -74,7 +89,9 @@ namespace emros_test{
 
 
         cout << "\n\n" << DataLinkFrameToString(*p_frame);
-        ASSERT_EQ(m_FrameHeap.usage(), 1);
+        ASSERT_EQ(framObjPool.usage(), 1);
+
+        cout << "pass !" << endl;
 
     }
 
@@ -86,7 +103,7 @@ namespace emros_test{
                 frame_queue.emplace_back(new DataLinkFrame());
                 frame_queue[i]->msg_id = i;
             }
-            ASSERT_EQ(m_FrameHeap.usage(), 3);
+            ASSERT_EQ(framObjPool.usage(), 3);
 
             auto frame_0 = frame_queue[0];
             ASSERT_EQ(frame_queue[0].refCount(), 2);
@@ -95,13 +112,13 @@ namespace emros_test{
 
             for(int i = 0; i < 3; i++){
                 frame_queue.erase(frame_queue.begin());
-                ASSERT_EQ(m_FrameHeap.usage(), 2 - i + 1);
+                ASSERT_EQ(framObjPool.usage(), 2 - i + 1);
             }
 
             frame_0->dest_id = 1;
             cout << DataLinkFrameToString(*frame_0) << endl;
         }
-        ASSERT_EQ(m_FrameHeap.usage(), 0);
+        ASSERT_EQ(framObjPool.usage(), 0);
     }
 
 

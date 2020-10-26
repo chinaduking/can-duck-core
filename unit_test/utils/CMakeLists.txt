@@ -23,7 +23,7 @@ target_link_libraries(testPosixSerial  GTest::GTest GTest::Main)
 
 add_executable(testESharedPtr ESharedPtr.cpp)
 
-target_link_libraries(testESharedPtr  GTest::GTest GTest::Main)
+target_link_libraries(testESharedPtr fcn_v2 GTest::GTest GTest::Main)
 
 
 add_executable(testEHeap EHeap.cpp)

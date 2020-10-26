@@ -13,9 +13,8 @@
 #endif
 
 namespace utils{
-    extern ObjPool g_RefCntHeap;
 
-    template <typename T>
+    template <typename T=void*, typename Allocator=DefaultAllocator>
     class ESharedPtr
     {
 
@@ -67,11 +66,11 @@ namespace utils{
             }
 
             void * operator new(size_t size) noexcept {
-                return g_RefCntHeap.allocate(size);
+                return Allocator::allocate(size);
             }
 
             void operator delete(void * p) {
-                g_RefCntHeap.deallocate((uint8_t *) p);
+                Allocator::deallocate(p);
             }
         };
 
@@ -97,7 +96,7 @@ namespace utils{
 
         /* 拷贝构造器，
          * 从另一个智能指针实例构造新智能指针 */
-        ESharedPtr(const ESharedPtr<T>& other)
+        ESharedPtr(const ESharedPtr<T, Allocator>& other)
                 : p_ref_cnt(other.p_ref_cnt){
             p_ref_cnt->inc();
         }
@@ -133,7 +132,7 @@ namespace utils{
          * 则需将原来指向目标的引用计数-1（减至0则删除）
          * 同时将新数据进行拷贝。
          * */
-        ESharedPtr<T>& operator=(const ESharedPtr<T>& other){
+        ESharedPtr<T, Allocator>& operator=(const ESharedPtr<T, Allocator>& other){
             if (this == &other) {
                 return *this;
             }
@@ -159,9 +158,9 @@ namespace utils{
         }
     };
 
-    template< class T, class... Args >
-    ESharedPtr<T> makeESharedPtr( Args&&... args ){
-        ESharedPtr<T> ptr(new T(args...));
+    template< typename T, typename Allocator, class... Args >
+    ESharedPtr<T, Allocator> makeESharedPtr( Args&&... args ){
+        ESharedPtr<T, Allocator> ptr(new T(args...));
         return ptr;
     }
 
