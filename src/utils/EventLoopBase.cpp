@@ -5,7 +5,7 @@
 #include "EventLoopBase.hpp"
 #include "utils/CppUtils.hpp"
 #include <cstdlib>
-using namespace emros;
+using namespace utils;
 
 #ifdef EVENTLOOP_THREADING
 #include <algorithm>

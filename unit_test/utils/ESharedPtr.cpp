@@ -144,14 +144,14 @@ namespace esharedptr_test{
 
     class EpopTest{
     public:
-        ESharedPtr<DataLinkFrame>* working_frame_p{nullptr};
+        FrameShrPtr* working_frame_p{nullptr};
         thread* working_thread;
-        void takeFromQueue(LinkedList<ESharedPtr<DataLinkFrame>>& queue){
+        void takeFromQueue(LinkedList<FrameShrPtr>& queue){
             if(working_frame_p != nullptr){
                 delete working_frame_p;
             }
 
-            working_frame_p = new ESharedPtr<DataLinkFrame>(queue.head()->val);
+            working_frame_p = new FrameShrPtr(queue.head()->val);
 //            queue.popHead();
         }
 
@@ -166,10 +166,10 @@ namespace esharedptr_test{
     };
 
     TEST(AutoPtr, FrameLinkedListThreading) {
-        LinkedList<ESharedPtr<DataLinkFrame>> frame_queue;
+        LinkedList<FrameShrPtr> frame_queue;
 
         for(int i = 0; i < 3; i++){
-            ESharedPtr<DataLinkFrame> data(new DataLinkFrame());
+            FrameShrPtr data(new DataLinkFrame());
             data->msg_id = i;
             frame_queue.append(data);
         }

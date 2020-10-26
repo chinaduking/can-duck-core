@@ -18,21 +18,45 @@ TEST(ObjPool, dec) {
 }
 
 
-TEST(ObjPool, StaticInit){
-    ObjPool<int, 100> int_obj_pool;
+TEST(ObjPool, alloc){
+    ObjPool<int, 2> int_obj_pool;
 
-    int* data = (int*)int_obj_pool.allocate();
-
+    int* data_0 = (int*)int_obj_pool.allocate();
     ASSERT_EQ(int_obj_pool.usage(), 1);
 
-    int_obj_pool.deallocate(data);
+    int* data_1 = (int*)int_obj_pool.allocate();
+    ASSERT_EQ(int_obj_pool.usage(), 2);
 
+    ASSERT_EQ((size_t)(data_1 - data_0), 1);
+
+    ASSERT_EQ((size_t)((uint8_t *)data_1 - (uint8_t *)data_0),
+              sizeof(int));
+
+    int* data_2 = (int*)int_obj_pool.allocate();
+
+
+    ASSERT_EQ(data_2, nullptr);
+
+    ASSERT_EQ(int_obj_pool.usage(), 2);
+
+
+
+    int_obj_pool.deallocate(data_0);
+
+    data_0 = nullptr;
+
+    int_obj_pool.deallocate(data_0);
+    ASSERT_EQ(int_obj_pool.usage(), 1);
+
+
+    int_obj_pool.deallocate(data_1);
     ASSERT_EQ(int_obj_pool.usage(), 0);
+//    ASSERT_EQ(int_obj_pool.usage(), 0);
 }
 
 namespace obj_pool_test{
 
-    ObjPool<int, 100> intObjPool;
+    ObjPool<int, 1> intObjPool;
 
     struct IntAllocator{
         static void* allocate(size_t size){
@@ -44,7 +68,14 @@ namespace obj_pool_test{
         }
     };
 
+    TEST(ObjPool, StaticInit){
+        int* data = (int*)IntAllocator::allocate(0);
 
+        ASSERT_EQ(intObjPool.usage(), 1);
 
+        IntAllocator::deallocate(data);
+
+        ASSERT_EQ(intObjPool.usage(), 0);
+    }
 }
 

@@ -29,19 +29,19 @@ namespace dataver_test{
     }
     TEST(DataVerifyTest, CheckSum1ByteIn1ByteOut_retv){
         ASSERT_EQ(CheckSum1ByteIn1ByteOut_retv,
-                  emros::CheckSum1x1(test_buffer, test_buffer_len));
+                  CheckSum1x1(test_buffer, test_buffer_len));
     }
     TEST(DataVerifyTest, CheckSum1ByteIn2ByteOut_retv){
         ASSERT_EQ(CheckSum1ByteIn2ByteOut_retv,
-                  emros::CheckSum1x2(test_buffer, test_buffer_len));
+                  CheckSum1x2(test_buffer, test_buffer_len));
     }
     TEST(DataVerifyTest, CheckSum1ByteIn4ByteOut_retv){
         ASSERT_EQ(CheckSum1ByteIn4ByteOut_retv,
-                  emros::CheckSum1x4(test_buffer, test_buffer_len));
+                  CheckSum1x4(test_buffer, test_buffer_len));
     }
     TEST(DataVerifyTest, CheckSum4ByteIn4ByteOut_retv){
         ASSERT_EQ(CheckSum4ByteIn4ByteOut_retv,
-                  emros::CheckSum4x4(test_buffer, test_buffer_len));
+                  CheckSum4x4(test_buffer, test_buffer_len));
     }
 
 

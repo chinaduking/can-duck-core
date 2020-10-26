@@ -14,7 +14,7 @@ namespace libfcn_v2_test{
     };
 
 #pragma pack(2)
-    struct TestRODict : public libfcn_v2::RealtimeObjectDict{
+    struct testServoRtoDict : public libfcn_v2::RealtimeObjectDict{
     public:
         /*可以直接访问的元信息*/
         libfcn_v2::RealtimeObjectNoCb<int16_t> speed;
@@ -23,13 +23,13 @@ namespace libfcn_v2_test{
         libfcn_v2::RealtimeObjectNoCb<int32_t> target_angle;
         libfcn_v2::RealtimeObjectNoCb<int16_t> mode;
 
-        TestRODict() : RealtimeObjectDict(5),
+        testServoRtoDict() : RealtimeObjectDict(5),
 
-                       speed(0),
-                       angle(1),
-                       current(2),
-                       target_angle(3),
-                       mode(4)
+                             speed(0),
+                             angle(1),
+                             current(2),
+                             target_angle(3),
+                             mode(4)
 
                        {
 

@@ -7,7 +7,7 @@
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "TestRODict.hpp"
+#include "testServoRtoDict.hpp"
 #include "FrameUtils.hpp"
 
 using namespace libfcn_v2;
@@ -44,7 +44,7 @@ namespace network_test {
         DataLinkFrame frame_tmp;
 
         auto rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::TestRODict>(local_addr);
+                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(local_addr);
 
         uint32_t cnt = 0;
 
@@ -80,7 +80,7 @@ namespace network_test {
         int servo_addr = SERVO_ADDR;
 
         auto servo_rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::TestRODict>(servo_addr);
+                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(servo_addr);
 
         while(1){
             fcn_node.spin();

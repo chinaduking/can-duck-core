@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 #include "RealtimeObject.hpp"
-#include "TestRODict.hpp"
+#include "testServoRtoDict.hpp"
 using namespace libfcn_v2;
 
 namespace rto_io_test{
@@ -29,22 +29,22 @@ namespace rto_io_test{
 
 
 
-    #include "TestRODict.hpp"
+    #include "testServoRtoDict.hpp"
 
     TEST(RealtimeObject, Dict){
-        libfcn_v2_test::TestRODict testRoDict;
+        libfcn_v2_test::testServoRtoDict testRoDict;
         testRoDict.angle << 100;
 
-        cout<< "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
-        (libfcn_v2_test::TestRODict) << endl;
+        cout << "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
+        (libfcn_v2_test::testServoRtoDict) << endl;
 
         ASSERT_EQ(sizeof(RealtimeObjectBase), 4);
 
         cout<< "sizeof(RealtimeObjectBase) = "
         << sizeof(RealtimeObjectBase) << endl;
 
-        cout<< "sizeof(libfcn_v2_test::TestRODict::angle) = " << sizeof
-                (libfcn_v2_test::TestRODict::angle) << endl;
+        cout << "sizeof(libfcn_v2_test::TestRODict::angle) = " << sizeof
+                (libfcn_v2_test::testServoRtoDict::angle) << endl;
 
         cout<< "sizeof(FcnCallbackInterface*) = " << sizeof
         (FcnCallbackInterface*) << endl;
@@ -80,8 +80,8 @@ namespace rto_io_test{
     } while(0)
 
     TEST(RealtimeObject, singleWrite){
-        libfcn_v2_test::TestRODict testRoDict_src;
-        libfcn_v2_test::TestRODict testRoDict_dest;
+        libfcn_v2_test::testServoRtoDict testRoDict_src;
+        libfcn_v2_test::testServoRtoDict testRoDict_dest;
 
         SingleWriteTest(speed, 0x5566);
         SingleWriteTest(angle, 0x55667788);
@@ -158,13 +158,13 @@ namespace rto_shm_test{
     public:
         Node(){
             rto_dict = RtoShmManager::getInstance()
-                    ->getSharedDict<libfcn_v2_test::TestRODict>(OWNER_ADDR);
+                    ->getSharedDict<libfcn_v2_test::testServoRtoDict>(OWNER_ADDR);
         }
 
         virtual void spin(){ }
 
     protected:
-        libfcn_v2_test::TestRODict* rto_dict;
+        libfcn_v2_test::testServoRtoDict* rto_dict;
     };
 
 
