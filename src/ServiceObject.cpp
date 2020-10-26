@@ -12,10 +12,11 @@ using namespace libfcn_v2;
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回0为成功，否则为失败
  * */
-obj_size_t ServiceObjectDict::serverWrite(obj_idx_t index, uint8_t *data,
-                                          obj_size_t len){
+obj_size_t libfcn_v2::svoServerWrite(ServiceObjectDict* dict,
+                                     obj_idx_t index,
+                                     uint8_t *data, obj_size_t len){
 
-    if(index > obj_dict.size()){
+    if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
          * 可记录错误log
@@ -23,7 +24,7 @@ obj_size_t ServiceObjectDict::serverWrite(obj_idx_t index, uint8_t *data,
         return 2;
     }
 
-    auto p_obj = obj_dict[index];
+    auto p_obj = dict->obj_dict[index];
 
     USER_ASSERT(p_obj != nullptr);
 
@@ -50,10 +51,11 @@ obj_size_t ServiceObjectDict::serverWrite(obj_idx_t index, uint8_t *data,
 }
 
 
-void ServiceObjectDict::readAckHandle(obj_idx_t index, uint8_t *data,
-                                      obj_size_t len){
+void libfcn_v2::svoReadAckHandle(ServiceObjectDict* dict,
+                                 obj_idx_t index,
+                                 uint8_t *data, obj_size_t len){
 
-    if(index > obj_dict.size()){
+    if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
          * 可记录错误log
@@ -61,7 +63,7 @@ void ServiceObjectDict::readAckHandle(obj_idx_t index, uint8_t *data,
         return;
     }
 
-    auto p_obj = obj_dict[index];
+    auto p_obj = dict->obj_dict[index];
 
     USER_ASSERT(p_obj != nullptr);
 
@@ -82,9 +84,9 @@ void ServiceObjectDict::readAckHandle(obj_idx_t index, uint8_t *data,
     }
 }
 
-void ServiceObjectDict::writeAckHandle(obj_idx_t index, uint8_t result){
+void libfcn_v2::svoWriteAckHandle(ServiceObjectDict* dict, obj_idx_t index, uint8_t result){
 
-    if(index > obj_dict.size()){
+    if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
          * 可记录错误log
@@ -92,7 +94,7 @@ void ServiceObjectDict::writeAckHandle(obj_idx_t index, uint8_t result){
         return;
     }
 
-    auto p_obj = obj_dict[index];
+    auto p_obj = dict->obj_dict[index];
 
     USER_ASSERT(p_obj != nullptr);
 
@@ -112,8 +114,7 @@ void ServiceObjectDict::writeAckHandle(obj_idx_t index, uint8_t result){
 
 SvoServer::SvoServer():
         network(NetworkLayer::getInstance())
-        {
-}
+{}
 
 DataLinkFrame server_frame;
 
@@ -155,9 +156,9 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             }
 
             server_frame.payload[0] =
-                    dict->serverWrite(frame->msg_id,
-                                      frame->payload,
-                                      frame->payload_len);
+                    svoServerWrite(dict, frame->msg_id,
+                                   frame->payload,
+                                   frame->payload_len);
 
             server_frame.payload_len = 1;
 
@@ -176,9 +177,9 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
                 break;
             }
 #ifndef USE_EVLOOP
-            dict->readAckHandle(frame->msg_id,
-                                frame->payload,
-                                frame->payload_len);
+            svoReadAckHandle(dict, frame->msg_id,
+                             frame->payload,
+                             frame->payload_len);
 #else  //USE_EVLOOP
             //TODO: notify event loop
 #endif //USE_EVLOOP
@@ -191,8 +192,8 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
                 break;
             }
 #ifndef USE_EVLOOP
-            dict->writeAckHandle(frame->msg_id,
-                                frame->payload[0]);
+            svoWriteAckHandle(dict, frame->msg_id,
+                              frame->payload[0]);
 
 #else  //USE_EVLOOP
             //TODO: notify event loop

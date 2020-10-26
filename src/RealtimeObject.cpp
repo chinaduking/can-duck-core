@@ -9,8 +9,9 @@ using namespace libfcn_v2;
 
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t RealtimeObjectDict::continuousWrite(obj_idx_t index, uint8_t *data,
-                                     obj_size_t len){
+obj_size_t libfcn_v2::RtoDictContinuousWrite(RealtimeObjectDict* dict,
+                                      obj_idx_t index,
+                                      uint8_t *data, obj_size_t len){
 
     /* 不一次直接memcpy，有两个原因：
      * 1. 每次均检查index是否已溢出
@@ -18,7 +19,7 @@ obj_size_t RealtimeObjectDict::continuousWrite(obj_idx_t index, uint8_t *data,
      * */
     while (len > 0){
 
-        if(index > obj_dict.size()){
+        if(index > dict->obj_dict.size()){
             /* 仅做写保护，不使程序assert failed崩溃：
              * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
              * 可记录错误log
@@ -26,7 +27,7 @@ obj_size_t RealtimeObjectDict::continuousWrite(obj_idx_t index, uint8_t *data,
             return 1;
         }
 
-        auto p_obj = obj_dict[index];
+        auto p_obj = dict->obj_dict[index];
 
 
         USER_ASSERT(p_obj != nullptr);
@@ -135,7 +136,8 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
     switch (opcode) {
         case OpCode::RTO_PUB:
-            dict->continuousWrite(frame->msg_id, frame->payload, frame->payload_len);
+            RtoDictContinuousWrite(dict, frame->msg_id, frame->payload,
+                               frame->payload_len);
             break;
         case OpCode::RTO_REQUEST:
             break;
