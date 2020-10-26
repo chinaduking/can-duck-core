@@ -16,6 +16,7 @@ namespace libfcn_v2 {
  * */
     typedef uint8_t obj_idx_t;
     typedef uint8_t obj_size_t;
+    typedef uint16_t rto_timestamp_t;
 
     /*非阻塞式任务的回调函数*/
     struct FcnCallbackInterface {
@@ -34,8 +35,7 @@ namespace libfcn_v2 {
      * 对象字典（Object Dictionary）成员.
      * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 2
      * */
-    class RealtimeObjectBase{
-    public:
+    struct RealtimeObjectBase{
         RealtimeObjectBase(obj_idx_t index,
                            obj_size_t data_size,
                            bool derived_has_callback=false)
@@ -45,8 +45,6 @@ namespace libfcn_v2 {
                 data_size(data_size){
             USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
-
-        virtual ~RealtimeObjectBase() = default;
 
 
         /* 消息索引 */
@@ -60,7 +58,9 @@ namespace libfcn_v2 {
         /* 消息数据大小，最长128字节。不支持变长 */
         const obj_size_t data_size : 7;
 
-        static const int MAX_OBJ_SZIE = 0x7F;
+        static const int MAX_OBJ_SZIE = 64;
+
+        rto_timestamp_t timestamp_01ms{0};
 
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
@@ -130,14 +130,12 @@ namespace libfcn_v2 {
 #pragma pack(0)
 
 
-    class RealtimeObjectDict{
-
-    public:
-        explicit RealtimeObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
+    struct RealtimeObjectDict{
+        RealtimeObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
             obj_dict.resize(dict_size);
         }
 
-        virtual ~RealtimeObjectDict()  = default;
+//        virtual ~RealtimeObjectDict()  = default;
 
         /*默认字段
          * TODO: 版本校验？
@@ -173,8 +171,7 @@ namespace libfcn_v2{
      * 对象字典（Object Dictionary）成员.
      * 内存按2Byte对齐，更改时要注意, sizeof(ServiceObjectBase) = 4
      * */
-    class ServiceObjectBase{
-    public:
+    struct ServiceObjectBase{
         ServiceObjectBase(obj_idx_t index,
                           obj_size_t data_size,
                           bool wr_access=false)
@@ -190,9 +187,6 @@ namespace libfcn_v2{
                              (SvoClientStat::Idle)){
             USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
-
-        virtual ~ServiceObjectBase() = default;
-
 
         /* 消息索引 */
         const obj_idx_t index{0};
@@ -240,14 +234,12 @@ namespace libfcn_v2{
 
 #pragma pack(0)
 
-    class ServiceObjectDict{
-
-    public:
+    struct ServiceObjectDict{
         explicit ServiceObjectDict(obj_idx_t dict_size) : obj_dict(dict_size){
             obj_dict.resize(dict_size);
         }
 
-        virtual ~ServiceObjectDict()  = default;
+//        virtual ~ServiceObjectDict()  = default;
 
         /*默认字段
          * TODO: 版本校验？

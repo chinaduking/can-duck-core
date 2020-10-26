@@ -35,6 +35,21 @@ namespace rto_io_test{
         libfcn_v2_test::TestRODict testRoDict;
         testRoDict.angle << 100;
 
+        cout<< "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
+        (libfcn_v2_test::TestRODict) << endl;
+
+        ASSERT_EQ(sizeof(RealtimeObjectBase), 4);
+
+        cout<< "sizeof(RealtimeObjectBase) = "
+        << sizeof(RealtimeObjectBase) << endl;
+
+        cout<< "sizeof(libfcn_v2_test::TestRODict::angle) = " << sizeof
+                (libfcn_v2_test::TestRODict::angle) << endl;
+
+        cout<< "sizeof(FcnCallbackInterface*) = " << sizeof
+        (FcnCallbackInterface*) << endl;
+
+
         int32_t angle = 0;
         testRoDict.angle >> angle;
         ASSERT_EQ(angle, 100);

@@ -67,6 +67,12 @@ void SvoNetworkHandler::onReadAck(ServiceObjectDict* dict,
 
     USER_ASSERT(p_obj != nullptr);
 
+    /* 仅对应答进行一次响应。必须是正在等待响应的请求，收到ACK才有效。
+     * 而后续ACK不会被响应。再次发起请求任务才响应 */
+    if(p_obj->read_status != (uint8_t)SvoClientStat::Pendding){
+        return;
+    }
+
     /* 单数据写入，要求长度要求必须匹配 */
     if(len != p_obj->data_size){
         return;
@@ -81,6 +87,8 @@ void SvoNetworkHandler::onReadAck(ServiceObjectDict* dict,
 
     if(callback != nullptr){
         callback->callback(p_obj->getDataPtr(), p_obj->read_status);
+        /* 仅对应答进行一次响应。后续应答不响应。再次发起请求任务才响应 */
+        callback = nullptr;
     }
 }
 
