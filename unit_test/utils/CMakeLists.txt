@@ -21,14 +21,12 @@ add_executable(testPosixSerial PosixSerial.cpp
 target_link_libraries(testPosixSerial  GTest::GTest GTest::Main)
 
 
-add_executable(testESharedPtr ESharedPtr.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/ObjPool.cpp)
+add_executable(testESharedPtr ESharedPtr.cpp)
 
 target_link_libraries(testESharedPtr  GTest::GTest GTest::Main)
 
 
-add_executable(testEHeap EHeap.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/ObjPool.cpp)
+add_executable(testEHeap EHeap.cpp)
 
 target_link_libraries(testEHeap  GTest::GTest GTest::Main)
 

@@ -64,7 +64,7 @@ namespace utils{
             }
         }
 
-        T *allocate(){
+        void *allocate(){
 #ifdef SYSTYPE_FULL_OS
             std::lock_guard<std::mutex> lock_guard(io_mutex);
 #endif
@@ -79,7 +79,7 @@ namespace utils{
         }
 
 
-        void  deallocate(T* data){
+        void  deallocate(void* data){
 #ifdef SYSTYPE_FULL_OS
             std::lock_guard<std::mutex> lock_guard(io_mutex);
 #endif

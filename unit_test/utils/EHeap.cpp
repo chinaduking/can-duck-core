@@ -21,7 +21,7 @@ TEST(ObjPool, dec) {
 TEST(ObjPool, StaticInit){
     ObjPool<int, 100> int_obj_pool;
 
-    int* data = int_obj_pool.allocate();
+    int* data = (int*)int_obj_pool.allocate();
 
     ASSERT_EQ(int_obj_pool.usage(), 1);
 
@@ -30,4 +30,21 @@ TEST(ObjPool, StaticInit){
     ASSERT_EQ(int_obj_pool.usage(), 0);
 }
 
+namespace obj_pool_test{
+
+    ObjPool<int, 100> intObjPool;
+
+    struct IntAllocator{
+        static void* allocate(size_t size){
+            return intObjPool.allocate();
+        }
+
+        static void deallocate(void* p){
+            intObjPool.deallocate(p);
+        }
+    };
+
+
+
+}
 
