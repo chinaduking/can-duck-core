@@ -9,6 +9,7 @@
 #include "DataLinkLayer.hpp"
 #include "RealtimeObject.hpp"
 #include "ServiceObject.hpp"
+#include "DefaultAllocate.h"
 
 namespace libfcn_v2{
     class NetworkLayer {
@@ -27,11 +28,13 @@ namespace libfcn_v2{
 
         utils::vector_s<FrameIODevice*> data_link_dev;
         RtoNetworkHandler rto_network_handler;
-        SvoServer svo_server;
+
+        utils::vector_s<SvoServer*> svo_server_local;
 
     private:
         NetworkLayer():
             data_link_dev(4),
+            svo_server_local(MAX_LOCAL_NODE),
             rto_network_handler(
                     1000){ //TODO: ferq ctrl??
         }
@@ -40,7 +43,7 @@ namespace libfcn_v2{
 
 
 
-        void recvDispatcher(DataLinkFrame* frame);
+        void recvDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
 
     };
 }

@@ -249,7 +249,7 @@ namespace libfcn_v2 {
             return rto_manager->getSharedDict<T_Dict>(address);
         }
 
-        void handleWrtie(DataLinkFrame* frame);
+        void handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id);
 
 
         struct PubCtrlRule{

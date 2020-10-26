@@ -130,7 +130,9 @@ namespace libfcn_v2{
         bool is_blocking_recv;
 
         /* 最大传输长度 */
-        uint32_t max_payload_size;
+        uint16_t max_payload_size;
+
+        uint16_t local_device_id;
     };
 
     /*

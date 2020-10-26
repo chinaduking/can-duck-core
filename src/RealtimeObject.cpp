@@ -64,14 +64,19 @@ void libfcn_v2::RtoFrameBuilder(
         RealtimeObjectDict* dict,
         obj_idx_t index_start, obj_idx_t index_end){
 
+    USER_ASSERT(result_frame != nullptr);
+    USER_ASSERT(dict != nullptr);
     /* 保证起始地址不高于结束地址 */
-    USER_ASSERT(index_start <= index_end);
+    USER_ASSERT((index_start <= index_end));
+
+
 
     /* 初始化 */
     result_frame->op_code = static_cast<uint8_t>(OpCode::RTO_PUB);
     result_frame->payload_len = 0;      /* 开始对数据长度进行累加 */
     result_frame->msg_id = index_start; /* 消息ID为起始ID */
     uint8_t * payload_ptr = result_frame->payload;
+
 
     /* 填充数据 */
     for(int index = index_start; index <= index_end; index++){
@@ -118,7 +123,7 @@ RealtimeObjectDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
     return nullptr;
 }
 
-void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame) {
+void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
     auto dict = rto_manager->getSharedDictByAddr(frame->src_id);
 
     /* 未找到对应地址的字典不代表运行错误，一般是因为数据包到达，但本地字典尚未注册 */

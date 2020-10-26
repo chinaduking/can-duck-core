@@ -4,6 +4,9 @@
 
 #include "ServiceObject.hpp"
 #include "OperationCode.hpp"
+
+#include "NetworkLayer.hpp"
+
 using namespace libfcn_v2;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
@@ -44,15 +47,23 @@ obj_size_t ServiceObjectDict::singleWrite(obj_idx_t index, uint8_t *data,
     return 0;
 }
 
+SvoServer::SvoServer():
+        network(NetworkLayer::getInstance())
+        {
+}
 
-void SvoServer::handleRecv(DataLinkFrame *frame) {
+DataLinkFrame server_frame;
+
+void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     switch (opcode) {
         case OpCode::SVO_SINGLE_READ_REQ:
+            network->data_link_dev[recv_port_id]->write(&server_frame);
             break;
 
         case OpCode::SVO_SINGLE_WRITE_REQ:
+            network->data_link_dev[recv_port_id]->write(&server_frame);
             break;
         default:
             break;

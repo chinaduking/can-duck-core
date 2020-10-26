@@ -9,8 +9,6 @@
 
 namespace libfcn_v2 {
 
-
-
     /*参数表任务状态：包括读、写*/
     enum class SvoClientStat : uint8_t {
         Idle = 0,   /*初始状态/无任务状态*/
@@ -20,7 +18,6 @@ namespace libfcn_v2 {
         Timeout,    /*访问超时（可能原因：服务器上的元信息和数据包不匹配、网络层通信失败）*/
         Unknown     /*未知错误*/
     };
-
 
 
 #pragma pack(2)
@@ -95,14 +92,6 @@ namespace libfcn_v2 {
 
 #pragma pack(0)
 
-    class SvoServer{
-    public:
-        SvoServer() = default;
-        ~SvoServer() = default;
-        void handleRecv(DataLinkFrame* frame);
-    };
-
-
     class ServiceObjectDict{
 
     public:
@@ -125,6 +114,24 @@ namespace libfcn_v2 {
 
         utils::vector_s<ServiceObjectBase*> obj_dict;
     };
+
+
+    class NetworkLayer;
+
+    class SvoServer{
+    public:
+        SvoServer();
+        ~SvoServer() = default;
+        void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
+
+        ServiceObjectDict* dict{nullptr};
+
+        NetworkLayer* network{nullptr};
+
+        uint16_t address;
+    };
+
+
 
 
     class SvoClient{
