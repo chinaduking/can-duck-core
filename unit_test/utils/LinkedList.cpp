@@ -28,6 +28,8 @@ TEST(LinkedList, io){
     ASSERT_EQ(int_list.size(), 1);
     ASSERT_EQ(int_list.tail(), 5);
 
+    ASSERT_EQ(listNodeObjPool.usage(), 1);
+
 
     int data = 10;
     int_list.push(data);
@@ -35,6 +37,9 @@ TEST(LinkedList, io){
 
     ASSERT_EQ(int_list.size(), 2);
     ASSERT_EQ(int_list.tail(), 10);
+
+    ASSERT_EQ(listNodeObjPool.usage(), 2);
+
 
 
     for(auto& i : int_list){
@@ -46,5 +51,8 @@ TEST(LinkedList, io){
     for(auto& i : int_list){
         cout << "data:  " << i << endl;
     }
+
+    ASSERT_EQ(listNodeObjPool.usage(), 1);
+
 }
 
