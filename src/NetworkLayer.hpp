@@ -29,8 +29,8 @@ namespace libfcn_v2{
         utils::vector_s<FrameIODevice*> data_link_dev;
         RtoNetworkHandler rto_network_handler;
 
-        utils::vector_s<SvoServer*> svo_server_local;
-        utils::vector_s<SvoServer*> svo_client_local;
+        utils::vector_s<SvoNetworkHandler*> svo_server_local;
+        utils::vector_s<SvoNetworkHandler*> svo_client_local;
 
 
     private:

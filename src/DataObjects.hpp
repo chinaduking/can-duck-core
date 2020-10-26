@@ -6,6 +6,9 @@
 #define LIBFCN_V2_DATAOBJECTS_HPP
 
 #include <cstdint>
+#include "utils/CppUtils.hpp"
+#include "utils/vector_s.hpp"
+
 
 namespace libfcn_v2 {
 

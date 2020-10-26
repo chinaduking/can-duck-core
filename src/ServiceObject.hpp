@@ -15,20 +15,24 @@ namespace libfcn_v2 {
     class NetworkLayer;
 
 
-    /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-    obj_size_t svoServerWrite(ServiceObjectDict* dict, obj_idx_t index, uint8_t
-    *data, obj_size_t len);
-
-    void svoReadAckHandle(ServiceObjectDict* dict, obj_idx_t index, uint8_t *data, obj_size_t len);
-
-    void svoWriteAckHandle(ServiceObjectDict* dict, obj_idx_t index, uint8_t result);
-
-
-    class SvoServer{
+    class SvoNetworkHandler{
     public:
-        SvoServer();
-        ~SvoServer() = default;
-//        void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
+        SvoNetworkHandler();
+        ~SvoNetworkHandler() = default;
+        void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
+
+        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+        static obj_size_t onWriteReq(ServiceObjectDict* dict,
+                                     obj_idx_t index,
+                                     uint8_t *data, obj_size_t len);
+
+        static void onReadAck(ServiceObjectDict* dict,
+                              obj_idx_t index,
+                              uint8_t *data, obj_size_t len);
+
+        static void onWriteAck(ServiceObjectDict* dict,
+                               obj_idx_t index, uint8_t result);
+
 
         ServiceObjectDict* dict{nullptr};
 
@@ -37,8 +41,6 @@ namespace libfcn_v2 {
         uint16_t address{0};
 
         uint8_t is_server{0};
-
-        void handleRecv(DataLinkFrame *frame, uint16_t recv_port_id);
     };
 
     class SvoClient{

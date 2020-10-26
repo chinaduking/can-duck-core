@@ -12,9 +12,9 @@ using namespace libfcn_v2;
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回0为成功，否则为失败
  * */
-obj_size_t libfcn_v2::svoServerWrite(ServiceObjectDict* dict,
-                                     obj_idx_t index,
-                                     uint8_t *data, obj_size_t len){
+obj_size_t SvoNetworkHandler::onWriteReq(ServiceObjectDict* dict,
+                                         obj_idx_t index,
+                                         uint8_t *data, obj_size_t len){
 
     if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
@@ -51,9 +51,9 @@ obj_size_t libfcn_v2::svoServerWrite(ServiceObjectDict* dict,
 }
 
 
-void libfcn_v2::svoReadAckHandle(ServiceObjectDict* dict,
-                                 obj_idx_t index,
-                                 uint8_t *data, obj_size_t len){
+void SvoNetworkHandler::onReadAck(ServiceObjectDict* dict,
+                                  obj_idx_t index,
+                                  uint8_t *data, obj_size_t len){
 
     if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
@@ -84,7 +84,7 @@ void libfcn_v2::svoReadAckHandle(ServiceObjectDict* dict,
     }
 }
 
-void libfcn_v2::svoWriteAckHandle(ServiceObjectDict* dict, obj_idx_t index, uint8_t result){
+void SvoNetworkHandler::onWriteAck(ServiceObjectDict* dict, obj_idx_t index, uint8_t result){
 
     if(index > dict->obj_dict.size()){
         /* 仅做写保护，不使程序assert failed崩溃：
@@ -112,13 +112,13 @@ void libfcn_v2::svoWriteAckHandle(ServiceObjectDict* dict, obj_idx_t index, uint
 }
 
 
-SvoServer::SvoServer():
+SvoNetworkHandler::SvoNetworkHandler():
         network(NetworkLayer::getInstance())
 {}
 
 DataLinkFrame server_frame;
 
-void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
+void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     switch (opcode) {
@@ -156,9 +156,9 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             }
 
             server_frame.payload[0] =
-                    svoServerWrite(dict, frame->msg_id,
-                                   frame->payload,
-                                   frame->payload_len);
+                    onWriteReq(dict, frame->msg_id,
+                               frame->payload,
+                               frame->payload_len);
 
             server_frame.payload_len = 1;
 
@@ -177,9 +177,9 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
                 break;
             }
 #ifndef USE_EVLOOP
-            svoReadAckHandle(dict, frame->msg_id,
-                             frame->payload,
-                             frame->payload_len);
+            onReadAck(dict, frame->msg_id,
+                      frame->payload,
+                      frame->payload_len);
 #else  //USE_EVLOOP
             //TODO: notify event loop
 #endif //USE_EVLOOP
@@ -192,8 +192,8 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
                 break;
             }
 #ifndef USE_EVLOOP
-            svoWriteAckHandle(dict, frame->msg_id,
-                              frame->payload[0]);
+            onWriteAck(dict, frame->msg_id,
+                       frame->payload[0]);
 
 #else  //USE_EVLOOP
             //TODO: notify event loop
