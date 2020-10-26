@@ -31,6 +31,7 @@ void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
 
     auto op_code = frame->op_code;
 
+    /* 实时消息 */
     if(op_code >= (uint8_t)OpCode::RTO_PUB
         && op_code <= (uint8_t)OpCode::RTO_REQUEST){
 
@@ -38,30 +39,41 @@ void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
         return;
     }
 
-    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
-       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
+    /* 服务请求消息 */
+    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_REQ
+       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_REQ){
 
         for(auto& server : svo_server_local){
-
             /* 收到发给自己的数据包，进行处理 */
             if(frame->dest_id == server->address){
                 server->handleRecv(frame, recv_port_id);
                 break;
             }
-
-            /* 收到了发给别人的数据包，直接广播到所有端口（收到该数据包的端口除外，
-             * 避免数据包死循环）*/
-            for(auto& port : data_link_dev){
-                if(port->local_device_id != recv_port_id){
-                    //TODO: shared pointer needed??
-                    port->write(frame);
-                }
-            }
-
         }
-
-        return;
     }
+
+    /* 服务应答消息 */
+    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_ACK
+       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
+
+    }
+
+
+    /*
+     * 服务消息的多端口转发:
+     * 模拟了CAN总线的"总线模式"，任何消息均为全网转发。
+     * 收到了发给别人的数据包，直接广播到所有端口（收到该数据包的端口除外，
+     * 避免数据包死循环）*/
+    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
+    && op_code <= (uint8_t)OpCode::SVO_MULTI_WRITE_VERIFY_ACK){
+        for(auto& port : data_link_dev){
+            if(port->local_device_id != recv_port_id){
+                //TODO: shared pointer needed??
+                port->write(frame);
+            }
+        }
+    }
+
 }
 
 void NetworkLayer::recvPolling() {

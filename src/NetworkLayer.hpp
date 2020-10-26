@@ -30,14 +30,16 @@ namespace libfcn_v2{
         RtoNetworkHandler rto_network_handler;
 
         utils::vector_s<SvoServer*> svo_server_local;
+        utils::vector_s<SvoServer*> svo_client_local;
+
 
     private:
         NetworkLayer():
             data_link_dev(4),
             svo_server_local(MAX_LOCAL_NODE),
-            rto_network_handler(
-                    1000){ //TODO: ferq ctrl??
-        }
+            svo_client_local(MAX_LOCAL_NODE),
+            rto_network_handler(1000)//TODO: ferq ctrl??
+        {}
 
         static NetworkLayer* instance;
 

@@ -18,11 +18,14 @@ namespace libfcn_v2{
          *               实时对象
          * -------------------------------------------------
          */
-        /* 实时对象发布 */
+        /* 实时对象发布，在未配置转发规则时，仅限本地广播 */
         RTO_PUB              = 0x01,
 
-        /* 请求实时对象发布 */
+        /* 请求一次实时对象发布 */
         RTO_REQUEST          = 0x02,
+
+        /* 紧急事件发布，不进行频率控制，不论转发规则，都进行全网广播 */
+        RTO_EMERGENCY        = 0x03,
 
 
         /* -------------------------------------------------
@@ -30,16 +33,16 @@ namespace libfcn_v2{
          * -------------------------------------------------
          */
         /* 服务对象单帧读请求 */
-        SVO_SINGLE_READ_REQ  = 0x03,
+        SVO_SINGLE_READ_REQ  = 0x04,
 
         /* 服务对象单帧读应答 */
-        SVO_SINGLE_READ_ACK  = 0x04,
+        SVO_SINGLE_READ_ACK  = 0x05,
 
         /* 服务对象单帧写请求 */
-        SVO_SINGLE_WRITE_REQ = 0x05,
+        SVO_SINGLE_WRITE_REQ = 0x06,
 
         /* 服务对象单帧写应答 */
-        SVO_SINGLE_WRITE_ACK = 0x06,
+        SVO_SINGLE_WRITE_ACK = 0x07,
 
 
 
@@ -48,22 +51,22 @@ namespace libfcn_v2{
          * -------------------------------------------------
          */
         /* 服务对象多帧写，起始请求 */
-        SVO_MULTI_WRITE_START_REQ  = 0x07,
+        SVO_MULTI_WRITE_START_REQ  = 0x08,
 
         /* 服务对象多帧写，起始应答 */
-        SVO_MULTI_WRITE_START_ACK  = 0x08,
+        SVO_MULTI_WRITE_START_ACK  = 0x09,
 
         /* 服务对象多帧写，传输请求 */
-        SVO_MULTI_WRITE_TRANS_REQ  = 0x09,
+        SVO_MULTI_WRITE_TRANS_REQ  = 0x0A,
 
         /* 服务对象多帧写，传输应答 */
-        SVO_MULTI_WRITE_TRANS_ACK  = 0x0A,
+        SVO_MULTI_WRITE_TRANS_ACK  = 0x0B,
 
         /* 服务对象多帧写，校验请求 */
-        SVO_MULTI_WRITE_VERIFY_REQ = 0x0B,
+        SVO_MULTI_WRITE_VERIFY_REQ = 0x0C,
 
         /* 服务对象多帧写，校验应答 */
-        SVO_MULTI_WRITE_VERIFY_ACK = 0x0C,
+        SVO_MULTI_WRITE_VERIFY_ACK = 0x0D,
 
 
 
@@ -71,7 +74,7 @@ namespace libfcn_v2{
          *           CAN总线分包发送
          * -------------------------------------------------
          */
-        MULTIFRAME_PAYLOAD   = 0x0D
+        MULTIFRAME_PAYLOAD   = 0x0E
     };
 
 //

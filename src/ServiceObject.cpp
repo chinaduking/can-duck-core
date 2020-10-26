@@ -12,7 +12,7 @@ using namespace libfcn_v2;
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回0为成功，否则为失败
  * */
-obj_size_t ServiceObjectDict::singleWrite(obj_idx_t index, uint8_t *data,
+obj_size_t ServiceObjectDict::serverWrite(obj_idx_t index, uint8_t *data,
                                           obj_size_t len){
 
     if(index > obj_dict.size()){
@@ -49,6 +49,67 @@ obj_size_t ServiceObjectDict::singleWrite(obj_idx_t index, uint8_t *data,
     return 0;
 }
 
+
+void ServiceObjectDict::readAckHandle(obj_idx_t index, uint8_t *data,
+                                      obj_size_t len){
+
+    if(index > obj_dict.size()){
+        /* 仅做写保护，不使程序assert failed崩溃：
+         * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
+         * 可记录错误log
+         * */
+        return;
+    }
+
+    auto p_obj = obj_dict[index];
+
+    USER_ASSERT(p_obj != nullptr);
+
+    /* 单数据写入，要求长度要求必须匹配 */
+    if(len != p_obj->data_size){
+        return;
+    }
+
+    utils::memcpy(p_obj->getDataPtr(), data,
+                  p_obj->data_size);
+
+    auto callback = p_obj->callback;
+
+    p_obj->read_status = (uint8_t)SvoClientStat::Ok;
+
+    if(callback != nullptr){
+        callback->callback(p_obj->getDataPtr(), p_obj->read_status);
+    }
+}
+
+void ServiceObjectDict::writeAckHandle(obj_idx_t index, uint8_t result){
+
+    if(index > obj_dict.size()){
+        /* 仅做写保护，不使程序assert failed崩溃：
+         * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
+         * 可记录错误log
+         * */
+        return;
+    }
+
+    auto p_obj = obj_dict[index];
+
+    USER_ASSERT(p_obj != nullptr);
+
+    auto callback = p_obj->callback;
+
+    if(result == 0){
+        p_obj->write_status = (uint8_t)SvoClientStat::Ok;
+    } else{
+        p_obj->write_status = (uint8_t)SvoClientStat::Rejected;
+    }
+
+    if(callback != nullptr){
+        callback->callback(p_obj->getDataPtr(), p_obj->write_status);
+    }
+}
+
+
 SvoServer::SvoServer():
         network(NetworkLayer::getInstance())
         {
@@ -62,9 +123,12 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
     switch (opcode) {
 
         case OpCode::SVO_SINGLE_READ_REQ: {
+            if(!is_server){
+                break;
+            }
 
             if (frame->msg_id >= dict->obj_dict.size()) {
-                return;
+                break;
             }
 
             auto obj = dict->obj_dict[frame->msg_id];
@@ -79,12 +143,16 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             //TODO: rd ack
             network->data_link_dev[recv_port_id]->write(&server_frame);
         }
-        break;
+            break;
 
 
         case OpCode::SVO_SINGLE_WRITE_REQ: {
+            if(!is_server){
+                break;
+            }
+
             server_frame.payload[0] =
-                    dict->singleWrite(frame->msg_id,
+                    dict->serverWrite(frame->msg_id,
                                       frame->payload,
                                       frame->payload_len);
 
@@ -97,9 +165,30 @@ void SvoServer::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
 
             network->data_link_dev[recv_port_id]->write(&server_frame);
         }
-        break;
+            break;
 
 
+        case OpCode::SVO_SINGLE_READ_ACK: {
+            if(is_server){
+                break;
+            }
+
+            dict->readAckHandle(frame->msg_id,
+                                frame->payload,
+                                frame->payload_len);
+        }
+            break;
+
+
+        case OpCode::SVO_SINGLE_WRITE_ACK: {
+            if(is_server){
+                break;
+            }
+
+            dict->writeAckHandle(frame->msg_id,
+                                frame->payload[0]);
+        }
+            break;
         default:
             break;
     }

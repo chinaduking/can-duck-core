@@ -53,7 +53,7 @@ namespace libfcn_v2 {
         const obj_size_t data_size{0};
 
         uint8_t is_server    : 1;
-        uint8_t wr_access    : 1;
+        const uint8_t wr_access    : 1;
 
         /* 客户端 读取任务状态（用户只能通过fetchStatus方法进行只读访问）*/
         uint8_t read_status  : 3;
@@ -103,7 +103,13 @@ namespace libfcn_v2 {
 
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        obj_size_t singleWrite(obj_idx_t index, uint8_t *data, obj_size_t len);
+        obj_size_t serverWrite(obj_idx_t index, uint8_t *data, obj_size_t len);
+
+        void readAckHandle(obj_idx_t index, uint8_t *data, obj_size_t len);
+
+        void writeAckHandle(obj_idx_t index, uint8_t result);
+
+
 
 
         /*默认字段
@@ -128,7 +134,9 @@ namespace libfcn_v2 {
 
         NetworkLayer* network{nullptr};
 
-        uint16_t address;
+        uint16_t address{0};
+
+        uint8_t is_server{0};
     };
 
 
