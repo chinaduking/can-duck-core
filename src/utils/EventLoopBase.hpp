@@ -21,7 +21,6 @@
 #endif //EVENTLOOP_THREADING
 
 namespace utils {
-    extern EHeap g_EvloopTaskHeap;
 
     enum EventStatus{
         /* just created, or restart() called,

@@ -12,19 +12,15 @@
 
 namespace utils{
 
-#ifdef SYSTYPE_FULL_OS
-    #include <mutex>
-    #define LINKED_LIST_LOCKGUARD std::lock_guard<std::mutex> updating_lk(update_mutex)
-#else
-    #define LINKED_LIST_LOCKGUARD
-#endif //SYSTYPE_FULL_OS
+//#ifdef SYSTYPE_FULL_OS
+//    #include <mutex>
+//#endif //SYSTYPE_FULL_OS
 
     template <typename val_T=void*, typename Allocator=DefaultAllocator>
     class LinkedList{
     public:
 
         /* 节点 */
-        //TODO: use EHeap at new / delete
         struct Node{
             val_T val;
             Node* p_next{nullptr};
@@ -87,7 +83,7 @@ namespace utils{
         }
 
 #ifdef SYSTYPE_FULL_OS
-
+#if 0
         /* 等待推入数据 */
         void wait(int32_t timeout = -1){
             if(timeout > 0){
@@ -103,6 +99,7 @@ namespace utils{
         void notify(){
             sched_ctrl_cv.notify_all();
         }
+#endif //0
 #endif //SYSTYPE_FULL_OS
 
         void push(val_T&& val){
@@ -124,11 +121,6 @@ namespace utils{
             p_node->val = val;
             p_node->p_next = nullptr;
             tail_node = p_node;
-
-            //TODO: remove if no OS support!
-#ifdef SYSTYPE_FULL_OS
-            sched_ctrl_cv.notify_all();
-#endif
         }
 
         void push(val_T& val){
@@ -202,12 +194,12 @@ namespace utils{
         Node* tail_node{nullptr};
         uint64_t size_{0};
 
-#ifdef SYSTYPE_FULL_OS
-
-        std::condition_variable sched_ctrl_cv;
-        std::mutex update_mutex;
-
-#endif //SYSTYPE_FULL_OS
+//#ifdef SYSTYPE_FULL_OS
+//
+//        std::condition_variable sched_ctrl_cv;
+//        std::mutex update_mutex;
+//
+//#endif //SYSTYPE_FULL_OS
 
     };
 
