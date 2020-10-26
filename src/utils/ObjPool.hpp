@@ -34,18 +34,7 @@
  * */
 
 namespace utils{
-//    #define EHEAP_STATIC_INIT(instance, bloack_size, block_num) \
-//        uint8_t m_##instance##_memblock[bloack_size * block_num]; \
-//        uint8_t* m_##instance##_freestack[block_num]; \
-//        EHeap instance( \
-//                m_##instance##_memblock, m_##instance##_freestack, \
-//                bloack_size, block_num);
-
     typedef uint32_t eheap_size_t;
-
-    class ObjPoolImpl{
-
-    };
 
     template<typename T, uint32_t N>
     class ObjPool{
@@ -57,20 +46,18 @@ namespace utils{
         ~ObjPool() = default;
 
         void init(){
-            free_stack_top = 0;
             for(int i = 0; i < N; i ++){
                 obj_pool[i] = T();
                 free_block_stack[i] = &obj_pool[i];
             }
         }
 
-        void *allocate(){
+        void* allocate(){
 #ifdef SYSTYPE_FULL_OS
             std::lock_guard<std::mutex> lock_guard(io_mutex);
 #endif
             /* 栈已空 */
             if(free_stack_top == N){
-                /* TODO: trace.. */
                 return nullptr;
             }
 
@@ -92,9 +79,7 @@ namespace utils{
              * （常因为对应了错误的returnMemBlock，或重复调用了delete） */
             if(free_stack_top > 0){
                 free_stack_top --;
-                free_block_stack[free_stack_top] = data;
-            } else{
-                //TODO: trace or set error code!!
+                free_block_stack[free_stack_top] = (T*)data;
             }
         }
 
@@ -103,13 +88,14 @@ namespace utils{
             return free_stack_top;
         }
 
+        const eheap_size_t capicity  {N};
 
     private:
 
         T  obj_pool[N];
         T* free_block_stack[N];
 
-        eheap_size_t free_stack_top;
+        eheap_size_t free_stack_top {0};
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex io_mutex;
