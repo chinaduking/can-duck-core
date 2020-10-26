@@ -10,7 +10,7 @@
 namespace libfcn_v2 {
 
 
-    #define USE_EVLOOP
+
     /*参数表任务状态：包括读、写*/
     enum class SvoClientStat : uint8_t {
         Idle = 0,   /*初始状态/无任务状态*/
@@ -26,7 +26,7 @@ namespace libfcn_v2 {
 #pragma pack(2)
     /*
      * 对象字典（Object Dictionary）成员.
-     * 内存按2Byte对齐，更改时要注意, sizeof(ObjDictItemBase) = 2
+     * 内存按2Byte对齐，更改时要注意, sizeof(ServiceObjectBase) = 4
      * */
     class ServiceObjectBase{
     public:
@@ -64,6 +64,8 @@ namespace libfcn_v2 {
         /* 客户端 写入任务状态（用户只能通过fetchStatus方法进行只读访问）**/
         uint8_t write_status : 3;
 
+        uint8_t placeholdler{0};
+
         FcnCallbackInterface* callback{nullptr};
 
         static const int MAX_OBJ_SZIE = 0xFF;
@@ -71,7 +73,7 @@ namespace libfcn_v2 {
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
          */
-        inline uint8_t* getDataPtr(){
+        inline void* getDataPtr(){
             return ((uint8_t*)this) + sizeof(ServiceObjectBase);
         }
     };
@@ -93,6 +95,12 @@ namespace libfcn_v2 {
 
 #pragma pack(0)
 
+    class SvoServer{
+    public:
+        SvoServer() = default;
+        ~SvoServer() = default;
+        void handleRecv(DataLinkFrame* frame);
+    };
 
 
     class ServiceObjectDict{
@@ -137,9 +145,6 @@ namespace libfcn_v2 {
         RealtimeObjectDict* svo_dict{nullptr};
     };
 
-    class SvoServer{
-
-    };
 
 }
 

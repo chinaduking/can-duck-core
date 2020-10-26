@@ -8,6 +8,7 @@
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "RealtimeObject.hpp"
+#include "ServiceObject.hpp"
 
 namespace libfcn_v2{
     class NetworkLayer {
@@ -26,12 +27,12 @@ namespace libfcn_v2{
 
         utils::vector_s<FrameIODevice*> data_link_dev;
         RtoNetworkHandler rto_network_handler;
+        SvoServer svo_server;
 
     private:
         NetworkLayer():
             data_link_dev(4),
             rto_network_handler(
-                    RtoShmManager::getInstance(),
                     1000){ //TODO: ferq ctrl??
         }
 

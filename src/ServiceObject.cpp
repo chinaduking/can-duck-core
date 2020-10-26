@@ -41,6 +41,20 @@ obj_size_t ServiceObjectDict::singleWrite(obj_idx_t index, uint8_t *data,
         callback->callback(p_obj->getDataPtr(), 0);
     }
 
-
     return 0;
+}
+
+
+void SvoServer::handleRecv(DataLinkFrame *frame) {
+    auto opcode = static_cast<OpCode>(frame->op_code);
+
+    switch (opcode) {
+        case OpCode::SVO_SINGLE_READ_REQ:
+            break;
+
+        case OpCode::SVO_SINGLE_WRITE_REQ:
+            break;
+        default:
+            break;
+    }
 }

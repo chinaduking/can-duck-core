@@ -20,6 +20,10 @@ namespace libfcn_v2{
  * 最多支持的本地节点数目
  * */
 #define MAX_LOCAL_NODE 6
+
+
+#define USE_EVLOOP
+
 }
 
 #endif //LIBFCN_V2_DEFAULTALLOCATE_H

@@ -27,19 +27,20 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 
 void NetworkLayer::recvDispatcher(DataLinkFrame *frame) {
 
-    auto op_code = static_cast<OpCode>(frame->op_code);
+    auto op_code = frame->op_code;
 
-    switch (op_code) {
-        case OpCode::RTO_PUB:
-            rto_network_handler.handleWrtie(frame);
-            break;
+    if(op_code >= (uint8_t)OpCode::RTO_PUB
+        && op_code <= (uint8_t)OpCode::RTO_REQUEST){
 
-        case OpCode::RTO_REQUEST:
-            break;
+        rto_network_handler.handleWrtie(frame);
+        return;
+    }
 
+    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
+       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
 
-        default:
-            break;
+        svo_server.handleRecv(frame);
+        return;
     }
 }
 

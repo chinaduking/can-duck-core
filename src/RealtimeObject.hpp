@@ -64,7 +64,7 @@ namespace libfcn_v2 {
         /*
          * 取得子类数据对象。无回调，则子类必须将数据放在第一个成员；有回调，则放在回调对象之后
          */
-        inline uint8_t* getDataPtr(){
+        inline void* getDataPtr(){
             if(!derived_has_callback){
                 return ((uint8_t*)this) + sizeof(RealtimeObjectBase);
             } else{
@@ -237,8 +237,8 @@ namespace libfcn_v2 {
      * */
     class RtoNetworkHandler{
     public:
-        RtoNetworkHandler(RtoShmManager* rto_manager, uint16_t poll_freq_hz)
-            : rto_manager(rto_manager),
+        RtoNetworkHandler( uint16_t poll_freq_hz)
+            : rto_manager(RtoShmManager::getInstance()),
             poll_freq_hz(poll_freq_hz) ,
             pub_ctrl_rules(MAX_PUB_CTRL_RULES){ }
 
@@ -254,20 +254,25 @@ namespace libfcn_v2 {
 
         struct PubCtrlRule{
             PubCtrlRule() : data_link_dev(MAX_COM_PORT_NUM){}
-            uint16_t freq_hz     { 100 };
-            uint16_t src_address {  0  };
-            uint16_t dest_address{  0  };
+
+            /* 发送频率。-1代表直接转发不过滤 */
+            int16_t freq_hz     { -1 };
+
+            /* 源地址。-1代表任意地址 */
+            int16_t src_address {  -1  };
+
+            /* 目标地址。-1代表任意地址 */
+            int16_t dest_address{  -1  };
 
             /*
              * end_idx != -1 : start_idx
              * end_idx == -1 : single_idx
              **/
-            RealtimeObjectDict* dict{nullptr};
             obj_idx_t start_or_single_idx  {0};
-            int end_idx    { -1 };
+            int16_t end_idx    { -1 };
 
-            /* TODO: Random write mode? Is it necessary? */
-            //utils::StaticSet<uint16_t> rto;
+            /* 需要转发到的端口列表 */
+            utils::vector_s<FrameIODevice*> data_link_dev;
 
         private:
             uint32_t freq_divier{0};
@@ -276,7 +281,6 @@ namespace libfcn_v2 {
             uint32_t send_busy_cnt {0};
             friend class RtoNetworkHandler;
 
-            utils::vector_s<FrameIODevice*> data_link_dev;
         };
 
         void addPubCtrlRule(PubCtrlRule& rule);

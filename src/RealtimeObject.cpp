@@ -126,7 +126,18 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame) {
         return;
     }
 
-    dict->continuousWrite(frame->msg_id, frame->payload, frame->payload_len);
+    auto opcode = static_cast<OpCode>(frame->op_code);
+
+    switch (opcode) {
+        case OpCode::RTO_PUB:
+            dict->continuousWrite(frame->msg_id, frame->payload, frame->payload_len);
+            break;
+        case OpCode::RTO_REQUEST:
+            break;
+        default:
+            break;
+    }
+
 }
 
 void RtoNetworkHandler::addPubCtrlRule(PubCtrlRule& rule){
@@ -145,12 +156,12 @@ void RtoNetworkHandler::update(){
             //TODO..
             if(pub_ctrl_rule.end_idx == -1){
                 /* Single Write */
-                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
-                                pub_ctrl_rule.start_or_single_idx);
+//                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                                pub_ctrl_rule.start_or_single_idx);
             }else{
                 /* Continuous Write */
-                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict, pub_ctrl_rule
-                        .start_or_single_idx, pub_ctrl_rule.end_idx);
+//                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict, pub_ctrl_rule
+//                        .start_or_single_idx, pub_ctrl_rule.end_idx);
             }
 
             frame_tmp.src_id = pub_ctrl_rule.src_address;
