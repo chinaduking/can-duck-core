@@ -120,13 +120,17 @@ void SvoNetworkHandler::onWriteAck(ServiceObjectDict* dict, obj_idx_t index, uin
 }
 
 
-SvoNetworkHandler::SvoNetworkHandler():
-        network(NetworkLayer::getInstance())
-{}
-
 DataLinkFrame server_frame;
 
 void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
+    auto dict = dict_manager.find(frame->src_id);
+
+    /* 未找到对应地址的字典不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
+    if(dict == nullptr){
+        return;
+    }
+
+
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     switch (opcode) {
@@ -216,3 +220,16 @@ void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) 
 
 
 
+
+
+void SvoClient::readUnblocking(RealtimeObjectBase &item,
+                               FcnCallbackInterface* callback) {
+
+
+}
+
+
+void SvoClient::writeUnblocking(RealtimeObjectBase &item,
+                                FcnCallbackInterface *callback) {
+
+}

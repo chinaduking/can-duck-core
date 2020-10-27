@@ -10,14 +10,15 @@
 #include "DataLinkLayer.hpp"
 #include "DataObjects.hpp"
 #include "OperationCode.hpp"
-
+#include "SharedObjManager.hpp"
+#include "DefaultAllocate.h"
 
 /* ---------------------------------------------------------
  *            Realtime Object Transfer Controller
  * ---------------------------------------------------------
  */
 namespace libfcn_v2 {
-    
+
     void coutinuousWriteFrameBuilder(
             DataLinkFrame* result_frame,
             RealtimeObjectDict* dict,
@@ -32,58 +33,10 @@ namespace libfcn_v2 {
                                obj_idx_t index,
                                uint8_t *data, obj_size_t len);
 
-    #define MAX_LOCAL_NODE 6
+    class NetworkLayer;
 
-    class RtoNetworkHandler;
-
-    /*
-     * 共享内存管理器
-     * 对于同一地址，RTOD实例是单例的，返回指针。
-     * */
-    class RtoShmManager {
-    public:
-        friend class RtoNetworkHandler;
-
-        static RtoShmManager* getInstance();
-
-        virtual ~RtoShmManager() = default;
-
-        template<typename T_Dict>
-        T_Dict* getSharedDict(uint16_t address){
-
-            /* if we can find an exsiting shm, return it */
-            for(auto & managed_item : managed_items){
-                if(managed_item.address == address){
-                    return (T_Dict*)(managed_item.p_dict);
-                }
-            }
-
-            /* else, create a new one */
-            MaganedItem item = {
-                    .address = address,
-                    .p_dict  = new T_Dict()
-            };
-
-            managed_items.push_back(item);
-            return (T_Dict*)(item.p_dict);
-        }
-
-
-        RealtimeObjectDict* getSharedDictByAddr(uint16_t address);
-
-    private:
-        RtoShmManager() : managed_items(MAX_LOCAL_NODE){}
-
-        struct MaganedItem{
-            uint32_t address {1000};
-            RealtimeObjectDict* p_dict {nullptr};
-        };
-
-        utils::vector_s<MaganedItem> managed_items;
-
-        static RtoShmManager* instance;
-    };
-
+    /* 共享字典管理器 */
+    typedef SharedObjManager<RealtimeObjectDict> RtoDictManager;
 
     #define MAX_PUB_CTRL_RULES 10
 
@@ -92,16 +45,16 @@ namespace libfcn_v2 {
      * */
     class RtoNetworkHandler{
     public:
-        RtoNetworkHandler( uint16_t poll_freq_hz)
-            : rto_manager(RtoShmManager::getInstance()),
-            poll_freq_hz(poll_freq_hz) ,
-            pub_ctrl_rules(MAX_PUB_CTRL_RULES){ }
+        RtoNetworkHandler(NetworkLayer* network)
+            : network(network),
+              dict_manager(MAX_LOCAL_NODE_NUM),
+              pub_ctrl_rules(MAX_PUB_CTRL_RULES){ }
 
         virtual ~RtoNetworkHandler() = default;
 
         template<typename T_Dict>
         T_Dict* bindDictToChannel(uint16_t address){
-            return rto_manager->getSharedDict<T_Dict>(address);
+            return dict_manager.create<T_Dict>(address);
         }
 
         void handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id);
@@ -144,10 +97,13 @@ namespace libfcn_v2 {
 
 
     protected:
-        RtoShmManager* rto_manager;
+        NetworkLayer* const network{nullptr};
+
+        RtoDictManager dict_manager;
         uint16_t poll_freq_hz{1000};
 
         utils::vector_s<PubCtrlRule> pub_ctrl_rules;
+
     };
 }
 

@@ -100,33 +100,11 @@ void libfcn_v2::coutinuousWriteFrameBuilder(
  * ---------------------------------------------------------
  */
 
-RtoShmManager* RtoShmManager::instance = nullptr;
-
-/* RtoShmManager is a single-instance */
-RtoShmManager* RtoShmManager::getInstance(){
-    if(instance == nullptr){
-        instance = new RtoShmManager();
-    }
-
-    return instance;
-}
-
-
-RealtimeObjectDict* RtoShmManager::getSharedDictByAddr(uint16_t address){
-    /* if we can find an exsiting shm, return it */
-    for(auto & managed_item : managed_items){
-        if(managed_item.address == address){
-            return managed_item.p_dict;
-        }
-    }
-
-    return nullptr;
-}
 
 void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
-    auto dict = rto_manager->getSharedDictByAddr(frame->src_id);
+    auto dict = dict_manager.find(frame->src_id);
 
-    /* 未找到对应地址的字典不代表运行错误，一般是因为数据包到达，但本地字典尚未注册 */
+    /* 未找到对应地址的字典不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
     if(dict == nullptr){
         return;
     }

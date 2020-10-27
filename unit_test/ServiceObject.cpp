@@ -26,37 +26,17 @@ namespace network_test {
 
         DataLinkFrame frame_tmp;
 
-        auto rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(local_addr);
 
         fcn_node.spin();
 
         uint32_t cnt = 0;
 
         while(1){
-            rto_dict->speed << cnt;
-            rto_dict->angle << cnt;
-            rto_dict->current << cnt;
 
-            coutinuousWriteFrameBuilder(&frame_tmp, rto_dict,
-                                        rto_dict->speed.index,
-                                        rto_dict->current.index,
-                                        local_addr,
-                                        0x00,
-                                        static_cast<uint8_t>(OpCode::RTO_PUB));
-
-            frame_tmp.src_id = local_addr;
-            frame_tmp.dest_id = 0x00; /*ANY*/
-
-            cout << DataLinkFrameToString(frame_tmp) << endl;
-
-            fcn_node.frame_dev->write(&frame_tmp);
-
-            //fcn_node.spin();
             perciseSleep(0.1);
-
             cnt ++;
         }
+        fcn_node.join();
     }
 
 
@@ -67,20 +47,16 @@ namespace network_test {
 
         int servo_addr = SERVO_ADDR;
 
-        auto servo_rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(servo_addr);
-
         fcn_node.spin();
 
         while(1){
-//            fcn_node.spin();
             perciseSleep(0.1);
 
-            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
-                                          ", current = %d \n",
-                         servo_rto_dict->speed.data,
-                         servo_rto_dict->angle.data,
-                         servo_rto_dict->current.data);
+//            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
+//                                          ", current = %d \n",
+//                         servo_rto_dict->speed.data,
+//                         servo_rto_dict->angle.data,
+//                         servo_rto_dict->current.data);
         }
 
         fcn_node.join();

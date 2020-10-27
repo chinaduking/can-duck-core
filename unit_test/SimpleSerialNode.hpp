@@ -11,10 +11,12 @@
 #include "utils/Tracer.hpp"
 
 namespace network_test{
+    libfcn_v2::NetworkLayer gNetworkLayer;
+
     class Node {
     public:
         Node(int sid) :
-                network_layer(libfcn_v2::NetworkLayer::getInstance()) {
+                network_layer(&gNetworkLayer) {
 
             serial = new utils::PosixSerial(sid);
             frame_dev = new libfcn_v2::ByteFrameIODevice(serial);

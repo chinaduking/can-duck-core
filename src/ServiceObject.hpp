@@ -9,18 +9,41 @@
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "DataObjects.hpp"
+#include "SharedObjManager.hpp"
+#include "DefaultAllocate.h"
 
 namespace libfcn_v2 {
 
     class NetworkLayer;
 
+    /* 共享字典管理器 */
+    typedef SharedObjManager<ServiceObjectDict> SvoDictManager;
+
+    /* 共享字典管理器 */
 
     class SvoNetworkHandler{
     public:
-        SvoNetworkHandler();
-        ~SvoNetworkHandler() = default;
+        SvoNetworkHandler(NetworkLayer* network):
+                network(network),
+                dict_manager(MAX_NODE_NUM)
+        {}
+
+
+        virtual ~SvoNetworkHandler() = default;
+
+        ServiceObjectDict* bindDictAsServer(uint16_t address);
+        ServiceObjectDict* bindDictAsClient(uint16_t address);
+
         void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
+        NetworkLayer* network{nullptr};
+
+        uint16_t address{0};
+
+        uint8_t is_server{0};
+
+
+    protected:
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
         static obj_size_t onWriteReq(ServiceObjectDict* dict,
                                      obj_idx_t index,
@@ -33,32 +56,28 @@ namespace libfcn_v2 {
         static void onWriteAck(ServiceObjectDict* dict,
                                obj_idx_t index, uint8_t result);
 
-
-        ServiceObjectDict* dict{nullptr};
-
-        NetworkLayer* network{nullptr};
-
-        uint16_t address{0};
-
-        uint8_t is_server{0};
+        SvoDictManager dict_manager;
     };
 
     class SvoClient{
     public:
-        SvoClient();
-        ~SvoClient();
+        SvoClient() = default;
+        ~SvoClient() = default;
 
-        void  readUnblocking(RealtimeObjectBase& item, FcnCallbackInterface callback);
-        void writeUnblocking(RealtimeObjectBase& item, FcnCallbackInterface callback);
+        void  readUnblocking(RealtimeObjectBase& item,
+                             FcnCallbackInterface* callback=nullptr);
+
+        void writeUnblocking(RealtimeObjectBase& item,
+                             FcnCallbackInterface* callback=nullptr);
 
 #ifdef SYSTYPE_FULL_OS
-        void  readBlocking(RealtimeObjectBase& item);
-        void writeBlocking(RealtimeObjectBase& item);
+//        void  readBlocking(RealtimeObjectBase& item);
+//        void writeBlocking(RealtimeObjectBase& item);
 #endif
         uint16_t server_addr { 0 };
 
     private:
-        RealtimeObjectDict* svo_dict{nullptr};
+        RealtimeObjectDict* const svo_dict{nullptr};
     };
 
 

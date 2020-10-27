@@ -14,8 +14,12 @@
 namespace libfcn_v2{
     class NetworkLayer {
     public:
-
-        static NetworkLayer* getInstance();
+        NetworkLayer()
+            :
+            data_link_dev(MAX_COM_PORT_NUM),
+            rto_network_handler(this),
+            svo_network_handler(this)
+            {}
 
         ~NetworkLayer() = default;
 
@@ -28,22 +32,11 @@ namespace libfcn_v2{
 
         utils::vector_s<FrameIODevice*> data_link_dev;
         RtoNetworkHandler rto_network_handler;
-
-        utils::vector_s<SvoNetworkHandler*> svo_server_local;
-        utils::vector_s<SvoNetworkHandler*> svo_client_local;
+        SvoNetworkHandler svo_network_handler;
+        //LargeDataHandler large_data_handler;
 
 
     private:
-        NetworkLayer():
-            data_link_dev(4),
-            svo_server_local(MAX_LOCAL_NODE),
-            svo_client_local(MAX_LOCAL_NODE),
-            rto_network_handler(1000)//TODO: ferq ctrl??
-        {}
-
-        static NetworkLayer* instance;
-
-
 
         void recvDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
 

@@ -9,15 +9,15 @@
 using namespace libfcn_v2;
 
 
-NetworkLayer* NetworkLayer::instance = nullptr;
-
-NetworkLayer * NetworkLayer::getInstance() {
-    if(instance == nullptr){
-        instance = new NetworkLayer();
-    }
-
-    return instance;
-}
+//NetworkLayer* NetworkLayer::instance = nullptr;
+//
+//NetworkLayer * NetworkLayer::getInstance() {
+//    if(instance == nullptr){
+//        instance = new NetworkLayer();
+//    }
+//
+//    return instance;
+//}
 
 int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 
@@ -39,24 +39,25 @@ void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
         return;
     }
 
-    /* 服务请求消息 */
-    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_REQ
-       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_REQ){
+    /* 服务消息 */
+    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
+       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
 
-        for(auto& server : svo_server_local){
-            /* 收到发给自己的数据包，进行处理 */
-            if(frame->dest_id == server->address){
-                server->handleRecv(frame, recv_port_id);
-                break;
-            }
-        }
+        svo_network_handler.handleRecv(frame, recv_port_id);
+//        for(auto& server : svo_server_local){
+//            /* 收到发给自己的数据包，进行处理 */
+//            if(frame->dest_id == server->address){
+//                server->handleRecv(frame, recv_port_id);
+//                break;
+//            }
+//        }
     }
 
-    /* 服务应答消息 */
-    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_ACK
-       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
-
-    }
+//    /* 服务应答消息 */
+//    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_ACK
+//       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
+//
+//    }
 
 
     /*
