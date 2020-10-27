@@ -68,6 +68,8 @@ add_definitions(-DSYSTYPE_FULL_OS)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 add_subdirectory(${PROJECT_SOURCE_DIR}/example)

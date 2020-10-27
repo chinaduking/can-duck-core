@@ -38,6 +38,10 @@ namespace libfcn_v2_test{
             obj_dict[this->current.index] = &this->current;
             obj_dict[this->target_angle.index] = &this->target_angle;
             obj_dict[this->mode.index] = &this->mode;
+
+            /*self test*/
+            USER_ASSERT(obj_dict[5]->index == obj_dict.size
+            () - 1);
         }
     };
 #pragma pack(0)

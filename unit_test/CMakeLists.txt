@@ -5,13 +5,15 @@ target_link_libraries(testDataObjects  GTest::GTest GTest::Main)
 
 add_executable(testRealtimeObject RealtimeObject.cpp
         ${PROJECT_SOURCE_DIR}/src/RealtimeObject.cpp)
-target_link_libraries(testRealtimeObject  GTest::GTest GTest::Main)
+target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
+        GTest::Main)
 
 
 
 add_executable(testServiceObject ServiceObject.cpp
         ${PROJECT_SOURCE_DIR}/src/ServiceObject.cpp)
-target_link_libraries(testServiceObject  GTest::GTest GTest::Main)
+target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest
+        GTest::Main)
 
 
 
