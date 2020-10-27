@@ -8,19 +8,24 @@
 #include <cstdint>
 //#include <cassert>
 #include "CppUtils.hpp"
+#include "ObjPool.hpp"
 namespace utils{
 
-    template<class T>
+    template<typename T, typename Allocator=DefaultAllocator>
     class vector_s{
     public:
         explicit vector_s(uint32_t capicity_): member_cnt(0), capicity_
         (capicity_) {
             array = new T[capicity_];
+//          array = Allocator::allocate(capicity_*sizeof(T));
             USER_ASSERT(array != nullptr);
         }
 
         ~vector_s() {
+
             delete [] array;
+
+//            Allocator::deallocate(array);
         }
 
         uint32_t push_back(T x){

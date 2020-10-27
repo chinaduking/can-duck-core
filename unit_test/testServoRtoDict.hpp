@@ -3,15 +3,15 @@
 //
 #include "DataObjects.hpp"
 
-#ifndef TESTRODICT_HPP
-#define TESTRODICT_HPP
+#ifndef TESTSERVORTODICT_HPP
+#define TESTSERVORTODICT_HPP
 
 namespace libfcn_v2_test{
-    struct _idl_MsgMap{
-        uint16_t speed;
-        uint16_t angle;
-        uint16_t current;
-    };
+//    struct _idl_MsgMap{
+//        uint16_t speed;
+//        uint16_t angle;
+//        uint16_t current;
+//    };
 
 #pragma pack(2)
     struct testServoRtoDict : public libfcn_v2::RealtimeObjectDict{
@@ -19,7 +19,7 @@ namespace libfcn_v2_test{
         /*可以直接访问的元信息*/
         libfcn_v2::RealtimeObjectNoCb<int16_t> speed;
         libfcn_v2::RealtimeObjectNoCb<int32_t> angle;
-        libfcn_v2::RealtimeObjectNoCb<int8_t> current;
+        libfcn_v2::RealtimeObjectNoCb<int8_t>  current;
         libfcn_v2::RealtimeObjectNoCb<int32_t> target_angle;
         libfcn_v2::RealtimeObjectNoCb<int16_t> mode;
 
@@ -46,4 +46,4 @@ namespace libfcn_v2_test{
 
 }
 
-#endif //TESTRODICT_HPP
+#endif //TESTSERVORTODICT_HPP

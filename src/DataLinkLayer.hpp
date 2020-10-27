@@ -27,26 +27,17 @@ namespace libfcn_v2{
     static const framesize_t DATALINK_MTU = 64;
 
     struct DataLinkFrame{
-        DataLinkFrame():
-                payload_len(0),
-                src_id(0), dest_id(0),
-                op_code(0), msg_id(0),
-                ts_100us(0)
-        {}
-
-        ~DataLinkFrame() = default;
-
         /* 注意，已经测试以下成员地址连续，为了能快速计算CRC，请
          * 保证内存对齐。*/
 
-        framesize_t payload_len;       /*数据内容长度*/
-        frameid_t src_id;     /* 源节点ID   */
-        frameid_t dest_id;    /* 目标节点ID */
-        uint8_t   op_code;    /* 操作码     */
-        uint8_t   msg_id;     /* 消息ID     */
-        uint8_t   payload[DATALINK_MTU]{}; /*数据内容。*/
+        framesize_t payload_len { 0 };       /*数据内容长度*/
+        frameid_t src_id  { 0 };     /* 源节点ID   */
+        frameid_t dest_id { 0 };     /* 目标节点ID */
+        uint8_t   op_code { 0 };     /* 操作码     */
+        uint8_t   msg_id  { 0 };     /* 消息ID     */
+        uint8_t   payload[DATALINK_MTU] {}; /*数据内容。*/
 
-        framets_t ts_100us;   /* 时间戳，精度为0.1ms。
+        framets_t ts_100us{ 0 };     /* 时间戳，精度为0.1ms。
                                * 进行传输时，最大值为65535
                                * （6.5535s）*/
 
