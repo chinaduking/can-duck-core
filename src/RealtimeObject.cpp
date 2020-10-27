@@ -51,19 +51,13 @@ obj_size_t libfcn_v2::RtoDictContinuousWrite(RealtimeObjectDict* dict,
     return 0;
 }
 
-
-void libfcn_v2::RtoFrameBuilder(
+void libfcn_v2::coutinuousWriteFrameBuilder(
         DataLinkFrame* result_frame,
         RealtimeObjectDict* dict,
-        obj_idx_t index){
-
-    RtoFrameBuilder(result_frame, dict, index, index);
-}
-
-void libfcn_v2::RtoFrameBuilder(
-        DataLinkFrame* result_frame,
-        RealtimeObjectDict* dict,
-        obj_idx_t index_start, obj_idx_t index_end){
+        obj_idx_t index_start, obj_idx_t index_end,
+        uint16_t src_id,
+        uint16_t dest_id,
+        uint16_t op_code){
 
     USER_ASSERT(result_frame != nullptr);
     USER_ASSERT(dict != nullptr);
@@ -73,9 +67,14 @@ void libfcn_v2::RtoFrameBuilder(
 
 
     /* 初始化 */
-    result_frame->op_code = static_cast<uint8_t>(OpCode::RTO_PUB);
+//    result_frame->op_code = ;
+    result_frame->src_id  = src_id;
+    result_frame->dest_id = dest_id;
+    result_frame->op_code = op_code;
+    result_frame->msg_id  = index_start; /* 消息ID为起始ID */
+
     result_frame->payload_len = 0;      /* 开始对数据长度进行累加 */
-    result_frame->msg_id = index_start; /* 消息ID为起始ID */
+
     uint8_t * payload_ptr = result_frame->payload;
 
 
@@ -163,12 +162,20 @@ void RtoNetworkHandler::update(){
             //TODO..
             if(pub_ctrl_rule.end_idx == -1){
                 /* Single Write */
-//                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
-//                                pub_ctrl_rule.start_or_single_idx);
+//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                                            pub_ctrl_rule.start_or_single_idx,
+//                                            pub_ctrl_rule.start_or_single_idx,
+//                                            pub_ctrl_rule.src_address,
+//                                            pub_ctrl_rule.dest_address,
+//                                            static_cast<uint8_t>(OpCode::RTO_PUB));
             }else{
                 /* Continuous Write */
-//                RtoFrameBuilder(&frame_tmp, pub_ctrl_rule.dict, pub_ctrl_rule
-//                        .start_or_single_idx, pub_ctrl_rule.end_idx);
+//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                                            pub_ctrl_rule.start_or_single_idx,
+//                                            pub_ctrl_rule.end_idx,
+//                                            pub_ctrl_rule.src_address,
+//                                            pub_ctrl_rule.dest_address,
+//                                            static_cast<uint8_t>(OpCode::RTO_PUB));
             }
 
             frame_tmp.src_id = pub_ctrl_rule.src_address;

@@ -9,6 +9,7 @@
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "DataObjects.hpp"
+#include "OperationCode.hpp"
 
 
 /* ---------------------------------------------------------
@@ -16,16 +17,14 @@
  * ---------------------------------------------------------
  */
 namespace libfcn_v2 {
-
-    void RtoFrameBuilder(
+    
+    void coutinuousWriteFrameBuilder(
             DataLinkFrame* result_frame,
             RealtimeObjectDict* dict,
-            obj_idx_t index);
-
-    void RtoFrameBuilder(
-            DataLinkFrame* result_frame,
-            RealtimeObjectDict* dict,
-            obj_idx_t index_start, obj_idx_t index_end);
+            obj_idx_t index_start, obj_idx_t index_end,
+            uint16_t src_id,
+            uint16_t dest_id,
+            uint16_t op_code);
 
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/

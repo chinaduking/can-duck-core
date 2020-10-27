@@ -38,9 +38,12 @@ namespace network_test {
             rto_dict->angle << cnt;
             rto_dict->current << cnt;
 
-            RtoFrameBuilder(&frame_tmp, rto_dict,
-                            rto_dict->speed.index,
-                            rto_dict->current.index);
+            coutinuousWriteFrameBuilder(&frame_tmp, rto_dict,
+                                        rto_dict->speed.index,
+                                        rto_dict->current.index,
+                                        local_addr,
+                                        0x00,
+                                        static_cast<uint8_t>(OpCode::RTO_PUB));
 
             frame_tmp.src_id = local_addr;
             frame_tmp.dest_id = 0x00; /*ANY*/
