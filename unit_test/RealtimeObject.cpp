@@ -35,11 +35,13 @@ namespace rto_test{
 
     const int OWNER_ADDR = 0x07;
 
+    RtoDictManager rtoDictManager(10);
+
     class Node{
     public:
         Node(){
-            rto_dict = RtoDictManager::getInstance()
-                    ->getSharedDict<libfcn_v2_test::testServoRtoDict>(OWNER_ADDR);
+            rto_dict = rtoDictManager
+                    .create<libfcn_v2_test::testServoRtoDict>(OWNER_ADDR);
         }
 
         virtual void spin(){ }
