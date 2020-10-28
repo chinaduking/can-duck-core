@@ -13,6 +13,28 @@
 #include "DefaultAllocate.h"
 
 namespace libfcn_v2 {
+    class SvoClient{
+    public:
+        SvoClient() = default;
+        ~SvoClient() = default;
+
+        void readUnblocking(RealtimeObjectBase& item,
+                            FcnCallbackInterface* callback=nullptr);
+
+        void writeUnblocking(RealtimeObjectBase& item,
+                             FcnCallbackInterface* callback=nullptr);
+
+#ifdef SYSTYPE_FULL_OS
+//        void  readBlocking(RealtimeObjectBase& item);
+//        void writeBlocking(RealtimeObjectBase& item);
+#endif
+        uint16_t server_addr { 0 };
+
+    private:
+        ServiceObjectDict* const obj_dict{nullptr};
+    };
+
+
 
     class NetworkLayer;
 
@@ -31,14 +53,20 @@ namespace libfcn_v2 {
 
         virtual ~SvoNetworkHandler() = default;
 
-        ServiceObjectDict* bindDictAsServer(uint16_t address);
-        ServiceObjectDict* bindDictAsClient(uint16_t address);
+        template<typename T_Dict>
+        ServiceObjectDict* bindDictAsServer(uint16_t address){
+            dict_manager.create<T_Dict>(address);
+        }
+
+
+        template<typename T_Dict>
+        SvoClient* bindDictAsClient(uint16_t address){
+            dict_manager.create<T_Dict>(address);
+        }
 
         void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
         NetworkLayer* network{nullptr};
-
-        uint16_t address{0};
 
         uint8_t is_server{0};
 
@@ -57,27 +85,6 @@ namespace libfcn_v2 {
                                obj_idx_t index, uint8_t result);
 
         SvoDictManager dict_manager;
-    };
-
-    class SvoClient{
-    public:
-        SvoClient() = default;
-        ~SvoClient() = default;
-
-        void  readUnblocking(RealtimeObjectBase& item,
-                             FcnCallbackInterface* callback=nullptr);
-
-        void writeUnblocking(RealtimeObjectBase& item,
-                             FcnCallbackInterface* callback=nullptr);
-
-#ifdef SYSTYPE_FULL_OS
-//        void  readBlocking(RealtimeObjectBase& item);
-//        void writeBlocking(RealtimeObjectBase& item);
-#endif
-        uint16_t server_addr { 0 };
-
-    private:
-        RealtimeObjectDict* const svo_dict{nullptr};
     };
 
 

@@ -28,3 +28,7 @@ target_link_libraries(testDataLinkLayer  GTest::GTest GTest::Main)
 add_executable(testNetworkLayer NetworkLayer.cpp
         ${PROJECT_SOURCE_DIR}/src/utils/PosixSerial.cpp)
 target_link_libraries(testNetworkLayer fcn_v2 GTest::GTest GTest::Main)
+
+
+add_executable(testMemMap MemMap.cpp)
+target_link_libraries(testMemMap  GTest::GTest GTest::Main)
