@@ -5,7 +5,7 @@
 #ifndef LIBFCN_V2_MEMMAP_HPP
 #define LIBFCN_V2_MEMMAP_HPP
 
-namespace libfcn_v2{
+namespace utils{
 
     /* 将小范围的指针映射到大范围 */
     class MemMap{

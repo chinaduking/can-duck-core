@@ -2,11 +2,11 @@
 // Created by sdong on 2020/10/28.
 //
 
-#include "MemMap.hpp"
+#include "utils/MemMap.hpp"
 #include "TestUtils.hpp"
 
 
-using namespace libfcn_v2;
+using namespace utils;
 
 MemMap pint_map(100);
 

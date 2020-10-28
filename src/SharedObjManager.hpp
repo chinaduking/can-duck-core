@@ -36,7 +36,8 @@ namespace libfcn_v2{
 
             SharedObj item = {
                 .id = id,
-                .p_obj   = new Inherit()
+                .p_obj   = new Inherit(),
+                .mem_id = shared_objects.size()
             };
 
             shared_objects.push_back(item);
@@ -55,10 +56,30 @@ namespace libfcn_v2{
             return nullptr;
         }
 
+
+        int getMemoryID(uint16_t id){
+            for(auto & obj : shared_objects){
+                if(obj.id == id){
+                    return obj.mem_id;
+                }
+            }
+            return -1;
+        }
+
+        Base* findByMemID(int id){
+            if(id >= shared_objects.size()
+            || id < 0){
+                return nullptr;
+            }
+
+            return shared_objects[id];
+        }
+
     private:
         struct SharedObj{
             uint32_t id {1000};
             Base*    p_obj {nullptr};
+            uint32_t mem_id;
         };
 
         utils::vector_s<SharedObj> shared_objects;

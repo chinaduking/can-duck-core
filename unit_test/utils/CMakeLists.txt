@@ -35,3 +35,8 @@ add_executable(testLinkedList LinkedList.cpp)
 
 target_link_libraries(testLinkedList  GTest::GTest GTest::Main)
 
+
+
+add_executable(testMemMap MemMap.cpp)
+target_link_libraries(testMemMap  GTest::GTest GTest::Main)
+
