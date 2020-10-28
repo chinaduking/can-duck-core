@@ -117,7 +117,7 @@ namespace network_test {
 
         uint32_t cnt = 0;
 
-        while(1){
+        for(int __i = 0; __i < 1; ){
             rto_dict->speed << cnt;
             rto_dict->angle << cnt;
             rto_dict->current << cnt;
@@ -156,7 +156,7 @@ namespace network_test {
 
         fcn_node.spin();
 
-        while(1){
+        for(int __i = 0; __i < 1; ){
 //            fcn_node.spin();
             perciseSleep(0.1);
 

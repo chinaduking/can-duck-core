@@ -12,41 +12,65 @@
 //#include "utils/ESharedPtr.hpp"
 #include "DefaultAllocate.h"
 #include "utils/vector_s.hpp"
+#include "utils/CppUtils.hpp"
 
 namespace libfcn_v2{
     /* IDs */
-    typedef uint8_t frameid_t;
-    static const uint16_t  MAX_NODE_NUM = 64;
-    static const frameid_t MAX_NODE_ID = MAX_NODE_NUM - 1;
-
-    /* Frame */
-    typedef uint32_t framesize_t;
     typedef uint64_t framets_t;
 
     /* 注意：为了能快速计算CRC，选择数组长度时请保证Frame的内存对齐。*/
-    static const framesize_t DATALINK_MTU = 64;
+    static const int DATALINK_MTU = 64;
+    static const int MAX_NODE_NUM = 64;
+    static const int MAX_NODE_ID = MAX_NODE_NUM - 1;
 
+#pragma pack(4)
     struct DataLinkFrame{
-        /* 注意，已经测试以下成员地址连续，为了能快速计算CRC，请
+        /* 为了能快速计算CRC，请
          * 保证内存对齐。*/
+        uint16_t payload_len { 0 };   /* [3:2] 数据内容长度，放在第一个，CRC计算时跳过*/
 
-        framesize_t payload_len { 0 };       /*数据内容长度*/
-        frameid_t src_id  { 0 };     /* 源节点ID   */
-        frameid_t dest_id { 0 };     /* 目标节点ID */
-        uint8_t   op_code { 0 };     /* 操作码     */
-        uint8_t   msg_id  { 0 };     /* 消息ID     */
-        uint8_t   payload[DATALINK_MTU] {}; /*数据内容。*/
+        uint8_t  src_id      { 0 };   /* [1]   源节点ID   */
+        uint8_t  dest_id     { 0 };   /* [0]   目标节点ID */
 
-        framets_t ts_100us{ 0 };     /* 时间戳，精度为0.1ms。
-                               * 进行传输时，最大值为65535
-                               * （6.5535s）*/
+        uint8_t  op_code     { 0 };   /* [3]   操作码     */
+        uint8_t  msg_id      { 0 };   /* [2]   消息ID     */
+
+        uint8_t  payload[DATALINK_MTU] {}; /*[1:0][...]  数据内容。
+         *
+         * TODO：分长短两种payload。长payload在64byte大小的堆上，地址在payload中存储。
+         * 在payloadlen中进行标记。短Frame为8Byte
+         * */
+
+//        framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。
+//                               * 进行传输时，最大值为65535
+//                               * （6.5535s）*/
+
+        /* 快速数据帧拷贝
+         * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
+        DataLinkFrame& operator=(const DataLinkFrame& other){
+
+            /*单周期拷贝前8字节数据 (src_id ~ payload[2])*/
+            *((uint64_t*) this) = *((uint64_t*)&other);
+
+            /* 小于2字节数据，则在上一操作中已经拷贝完成。不需要知道具体payload大小 */
+            if(payload_len <= 2){
+                return *this;
+            }
+
+            /* 拷贝剩余数据 */
+            utils::memcpy(&payload[2], (void*)&(other.payload[2]),
+                          payload_len - 2);
+            return *this;
+        }
+
+
 
         /* 重载New 和 Delete，以无碎片的方式进行内存分配 */
         void * operator new(size_t size) noexcept;
         void operator delete(void * p) noexcept;
 
-        //        static std::atomic<int> cnt;
     };
+#pragma pack(0)
 
 }
 

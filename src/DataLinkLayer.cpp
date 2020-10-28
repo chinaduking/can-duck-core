@@ -95,7 +95,9 @@ void ByteStreamParser::setHeader(utils::vector_s<uint8_t>& header_){
 }
 
 bool ByteStreamParser::crc(DataLinkFrame *buf, uint16_t len, uint8_t *crc_out) {
-    /* 因Frame成员在内存里地址连续，故可以这样操作 */
+    /* 因Frame成员在内存里地址连续，故可以这样操作。
+     * 注意不要改变DataLinkFrame的内存布局
+     * 跳过第一个长度信息不计算。*/
     uint16_t crc_result = Crc16((uint8_t*)&(buf->src_id), len);
     uint16_t crc_t = crc_out[0];
     crc_t = crc_t<<8 | crc_out[1];
@@ -233,6 +235,8 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
     *p_buf = header[1];  p_buf ++;
 
     uint16_t len = frame2Buffer(&*frame, p_buf);
+
+    /*p_buf + 1, 跳过第一个长度信息不计算。*/
     uint16_t crc = Crc16(p_buf + 1, len - 1);
 
     p_buf += len;

@@ -38,6 +38,32 @@ namespace frame_device_test{
     }
 
 
+    TEST(ByteStreamParserTest, assign){
+        char* src_test_buffer = (char*)"hello world";
+
+        uint16_t src_buffer_len = strlen(src_test_buffer) + 1;
+
+        DataLinkFrame src_frame, dst_frame;
+
+        src_frame.src_id = 0x03;
+        src_frame.dest_id = 0x05;
+        src_frame.op_code = 0x01;
+        src_frame.msg_id = 0x07;
+        src_frame.payload_len = 4;
+        memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
+
+        dst_frame = src_frame;
+
+        cout << DataLinkFrameToString(dst_frame) << endl;
+
+        DataLinkFrame f_array[1];
+        cout << sizeof(f_array) << endl;
+
+        ASSERT_TRUE(DataLinkFrameCompare(src_frame, dst_frame));
+    }
+
+
+
 #if 1
     TEST(ByteStreamParserTest, io) {
 
@@ -51,10 +77,10 @@ namespace frame_device_test{
         auto src_frame = new DataLinkFrame();
 //        ESharedPtr<DataLinkFrame> src_frame(new DataLinkFrame());
 
-        src_frame->src_id = 0x03;
+        src_frame->src_id  = 0x03;
         src_frame->dest_id = 0x05;
         src_frame->op_code = 0x01;
-        src_frame->msg_id = 0x07;
+        src_frame->msg_id  = 0x07;
         src_frame->payload_len = src_buffer_len;
         memcpy(src_frame->payload, src_test_buffer, src_buffer_len);
 

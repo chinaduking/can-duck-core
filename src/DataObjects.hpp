@@ -76,6 +76,10 @@ namespace libfcn_v2 {
 
         /*
          * 取得子类回调对象（如果不支持回调则返回空指针）
+         * TODO: 保留2种回调方式：
+         * 1. 回调在基类，直接调用。速度快，适合大多数对象都需要回调的场合。如果有大量
+         *      空回调，则增加内存开销。
+         * 2. 回调在单独的堆上维护。省内存，但搜索速度较慢
          */
         inline FcnCallbackInterface* getCallbackPtr(){
             if(!derived_has_callback){
