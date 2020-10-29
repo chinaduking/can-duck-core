@@ -138,7 +138,7 @@ namespace libfcn_v2 {
 
             utils::memcpy(&res.data,
                           (uint8_t*)p_buffer +
-                                  getObjBaseByIndex(msg.index)->buffer_offset,
+                                  msg.buffer_offset,
                           sizeof(res.data));
 
             return res;
@@ -149,7 +149,7 @@ namespace libfcn_v2 {
             USER_ASSERT(p_buffer!= nullptr);
 
             utils::memcpy((uint8_t*)p_buffer +
-                                  getObjBaseByIndex(msg.index)->buffer_offset,
+                                  msg.buffer_offset,
                           &msg.data,
                           sizeof(msg.data));
         }
