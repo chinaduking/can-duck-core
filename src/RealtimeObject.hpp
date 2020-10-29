@@ -29,7 +29,7 @@ namespace libfcn_v2 {
 
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-    obj_size_t RtoDictContinuousWrite(ObjectDictMM* dict,
+    obj_size_t RtoDictSingleWrite(ObjectDictMM* dict,
                                       obj_idx_t index,
                                       uint8_t *data, obj_size_t len);
 

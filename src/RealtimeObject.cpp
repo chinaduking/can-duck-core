@@ -9,7 +9,7 @@ using namespace libfcn_v2;
 
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t RtoDictSingleWrite(ObjectDictMM* obj_dict,
+obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
                               obj_idx_t index,
                               uint8_t *data, obj_size_t len){
 
@@ -85,17 +85,23 @@ void libfcn_v2::coutinuousWriteFrameBuilder(
 
     /* 填充数据 */
     for(int index = index_start; index <= index_end; index++){
-        if(index > dict->obj_dict.size()){
+        if(index > dict->dictSize()){
             break;
         }
 
-        auto obj = dict->obj_dict[index];
-        USER_ASSERT(obj != nullptr);
+        auto p_data = dict->getBufferDataPtr(index);
+        USER_ASSERT(p_data != nullptr);
 
-        utils::memcpy(payload_ptr, obj->getDataPtr(), obj->data_size);
+        auto data_size = dict->getBufferDataSize(index);
 
-        result_frame->payload_len += obj->data_size; /* 对数据长度进行累加 */
-        payload_ptr += obj->data_size;  /* 输出指针自增 */
+        if(result_frame->payload_len + data_size > DATALINK_MTU){
+            break;
+        }
+
+        utils::memcpy(payload_ptr, p_data, data_size);
+
+        result_frame->payload_len += data_size; /* 对数据长度进行累加 */
+        payload_ptr += data_size;  /* 输出指针自增 */
     }
 }
 
