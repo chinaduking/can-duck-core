@@ -7,11 +7,13 @@
 #define TESTSERVORTODICT_HPP
 
 namespace libfcn_v2_test{
-//    struct _idl_MsgMap{
-//        uint16_t speed;
-//        uint16_t angle;
-//        uint16_t current;
-//    };
+    struct testServoRtoBuffer{
+        int16_t speed;
+        int32_t angle;
+        int8_t  current;
+        int32_t target_angle;
+        int16_t mode;
+    };
 
 #pragma pack(2)
     struct testServoRtoDict : public libfcn_v2::RealtimeObjectDict{

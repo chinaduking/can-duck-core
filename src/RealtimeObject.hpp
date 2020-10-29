@@ -51,7 +51,7 @@ namespace libfcn_v2 {
 
         void publish(RealtimeObjectBase& msg);
 
-        void fetch(RealtimeObjectBase& msg);
+        void fetchBuffer(RealtimeObjectBase& msg);
     };
 
     #define MAX_PUB_CTRL_RULES 10

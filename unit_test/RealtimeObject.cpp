@@ -7,8 +7,12 @@
 #include "testServoRtoDict.hpp"
 using namespace libfcn_v2;
 
+
 namespace rto_test{
 
+    /*
+     * 测试实时对象字典从二进制数据写入
+     **/
     #define SingleWriteTest(item, data_) do{                                \
                testRoDict_src.item << data_;                                \
                uint16_t index =  testRoDict_src.item.index;                 \
@@ -20,7 +24,7 @@ namespace rto_test{
                 << testRoDict_dest.item.data << std::endl;                  \
         } while(0)
 
-    TEST(RealtimeObject, singleWrite){
+    TEST(RtoDict, localWrite){
         libfcn_v2_test::testServoRtoDict testRoDict_src;
         libfcn_v2_test::testServoRtoDict testRoDict_dest;
 
@@ -33,29 +37,27 @@ namespace rto_test{
     }
 
 
+    /*
+     * 测试实时对象字典在共享内存上进行类型安全的读写
+     **/
     const int OWNER_ADDR = 0x07;
-
     RtoDictManager rtoDictManager(10);
 
     class Node{
     public:
         Node(){
-            rto_dict = rtoDictManager
-                    .create<libfcn_v2_test::testServoRtoDict>(OWNER_ADDR);
+            rto_dict = rtoDictManager.create<libfcn_v2_test::testServoRtoDict>
+                    (OWNER_ADDR);
         }
-
         virtual void spin(){ }
-
     protected:
         libfcn_v2_test::testServoRtoDict* rto_dict;
     };
 
-
     class Node07 : public Node{
     public:
-        Node07():Node(){
-            rto_dict->angle << 200;
-        }
+        Node07():Node(){ rto_dict->angle << 200; }
+
         void spin() override {
             rto_dict->angle << rto_dict->angle.data + 30;
         }
@@ -72,7 +74,7 @@ namespace rto_test{
         }
     };
 
-    TEST(RealtimeObject, LocalShm){
+    TEST(RtoDict, LocalShm){
         Node07 node_07;
         Node02 node_02;
 
@@ -86,7 +88,9 @@ namespace rto_test{
 }
 
 
-
+/*
+ * 测试实时对象字典使用网络进行传输
+ **/
 #include "NetworkLayer.hpp"
 
 #include "utils/PosixSerial.hpp"
