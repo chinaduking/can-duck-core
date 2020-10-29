@@ -50,7 +50,7 @@ namespace libfcn_v2 {
         ~PubSubChannel() = default;
 
         /* 是否为 "多源通道"。 */
-        bool is_multi_source;
+        bool is_multi_source{false};
 
         /* 通道ID */
         int channel_addr{0};
@@ -131,9 +131,26 @@ namespace libfcn_v2 {
 
         template<typename T_Dict>
         PubSubChannel* createChannel(uint16_t address){
-            auto p_buffer = dict_manager.create<T_Dict>(address);
-            auto channel = new PubSubChannel(p_buffer);
+            auto dict = dict_manager.create<T_Dict>(address);
+            if(dict->p_buffer == nullptr){
+                dict->p_buffer = new typename T_Dict::Buffer();
+            }
+
+
+            auto channel = new PubSubChannel(dict);
             channel->network_layer = network;
+            channel->channel_addr = address;
+            return channel;
+        }
+
+        template<typename T_Dict>
+        PubSubChannel* createChannel(uint16_t address, void* static_buffer){
+            auto dict = dict_manager.create<T_Dict>(address);
+            dict->p_buffer = static_buffer;
+
+            auto channel = new PubSubChannel(dict);
+            channel->network_layer = network;
+            channel->channel_addr = address;
             return channel;
         }
 

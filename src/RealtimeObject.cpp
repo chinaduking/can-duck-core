@@ -10,7 +10,7 @@
 #include "TracerSingleton.hpp"
 
 using namespace libfcn_v2;
-
+using namespace utils;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
 obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
@@ -89,6 +89,11 @@ void libfcn_v2::singleWriteFrameBuilder(
 }
 
 void PubSubChannel::networkPublish(DataLinkFrame *frame) {
+    auto tracer = TracerSingleton::getInstance();
+
+    tracer->print(Tracer::INFO, "PubSubChannel::networkPublish.\n%s",
+                  DataLinkFrameToString(*frame).c_str());
+
     if(network_layer != nullptr){
         network_layer->data_link_dev[0]->write(frame);
     }

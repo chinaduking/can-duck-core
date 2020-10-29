@@ -164,7 +164,7 @@ namespace network_test {
 //            fcn_node.frame_dev->write(&frame_tmp);
 
             //fcn_node.spin();
-            perciseSleep(1);
+            perciseSleep(0.1);
 
             cnt ++;
         }
@@ -199,6 +199,7 @@ namespace network_test {
 
         fcn_node.join();
 
-}
     }
+
+}
 #endif //0
