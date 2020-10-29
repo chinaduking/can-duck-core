@@ -30,9 +30,9 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
     auto tracer = TracerSingleton::getInstance();
 
-    tracer->print(Tracer::VERBOSE, "NetworkLayer::recvDispatcher:"
-                                   "\n\r%s", DataLinkFrameToString(*frame)
-                                   .c_str());
+//    tracer->print(Tracer::VERBOSE, "NetworkLayer::recvDispatcher:"
+//                                   "\n\r%s", DataLinkFrameToString(*frame)
+//                                   .c_str());
 
 
     auto op_code = frame->op_code;

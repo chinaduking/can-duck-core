@@ -131,6 +131,9 @@ namespace network_test {
     TEST(RTO, RtoServoNode) {
         int local_addr = SERVO_ADDR;
 
+        Tracer tracer(true);
+
+
         Node fcn_node(0);
 
         DataLinkFrame frame_tmp;
@@ -165,6 +168,19 @@ namespace network_test {
 
             //fcn_node.spin();
             perciseSleep(0.1);
+
+
+            auto rto_channel_2 = fcn_node
+                    .network_layer->rto_network_handler.
+                    createChannel<decltype(fcnmsg::test_ServoRTO)>(local_addr);
+
+            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
+                                          ", current = %d \n",
+                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.speed).data,
+
+                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.angle).data,
+
+                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.current).data);
 
             cnt ++;
         }

@@ -67,7 +67,13 @@ namespace libfcn_v2 {
                 dest_id = channel_addr;
             }
 
+            /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
+            obj_dict_shm->write(msg);
 
+            /* TODO: 进行本地发布的回调 */
+
+            /* 再进行网络发布：
+             * TODO：根据发布管理进行分频*/
             singleWriteFrameBuilder(
                     &frame_tmp,
                     src_id,
