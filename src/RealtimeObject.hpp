@@ -30,6 +30,7 @@ namespace libfcn_v2 {
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
     obj_size_t RtoDictSingleWrite(ObjectDictMM* dict,
+                                  void* buffer,
                                       obj_idx_t index,
                                       uint8_t *data, obj_size_t len);
 
@@ -44,8 +45,10 @@ namespace libfcn_v2 {
 
     class PubSubChannel{
     public:
-        PubSubChannel(ObjectDictMM* obj_dict_shm)
-            :   obj_dict_shm(obj_dict_shm){ }
+        PubSubChannel(ObjectDictMM* obj_dict_shm, void* buffer)
+            : obj_dict_prototype(obj_dict_shm), buffer(buffer){
+            USER_ASSERT(buffer != nullptr);
+        }
 
         ~PubSubChannel() = default;
 
@@ -68,7 +71,7 @@ namespace libfcn_v2 {
             }
 
             /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
-            obj_dict_shm->write(msg);
+            obj_dict_prototype->write(msg, buffer);
 
             /* TODO: 进行本地发布的回调 */
 
@@ -87,21 +90,22 @@ namespace libfcn_v2 {
 
         template<typename Prototype>
         Prototype fetchBuffer(Prototype&& msg){
-            auto p_buffer = obj_dict_shm->p_buffer;
 
-            USER_ASSERT(p_buffer!= nullptr);
+            USER_ASSERT(buffer!= nullptr);
 
             Prototype res = msg;
 
             utils::memcpy(&res.data,
-                          (uint8_t*)p_buffer +
+                          (uint8_t*)buffer +
                           msg.buffer_offset,
                           sizeof(res.data));
 
             return res;
         }
 
-        ObjectDictMM* obj_dict_shm{nullptr};
+        ObjectDictMM* obj_dict_prototype{nullptr};
+
+        void* buffer {nullptr};
 
         /* 将回调函数指针映射到int8整形时，基址偏移量
          * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
@@ -119,42 +123,58 @@ namespace libfcn_v2 {
         libfcn_v2::NetworkLayer *network_layer;
 
         void networkPublish(DataLinkFrame* frame);
+
+
+
     };
 
     #define MAX_PUB_CTRL_RULES 10
 
     /*
-     * 网络处理
+     * 网络处理( 一个协议栈只有一个实例 )
      * */
     class RtoNetworkHandler{
     public:
         RtoNetworkHandler(NetworkLayer* network)
             : network(network),
-              dict_manager(MAX_LOCAL_NODE_NUM),
-              pub_ctrl_rules(MAX_PUB_CTRL_RULES){ }
+              shared_buffers(MAX_LOCAL_NODE_NUM),
+              pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
+              pub_ctrl_rules(MAX_PUB_CTRL_RULES)
+              { }
 
         virtual ~RtoNetworkHandler() = default;
 
-        template<typename T_Dict>
-        PubSubChannel* createChannel(uint16_t address){
-            auto dict = dict_manager.create<T_Dict>(address);
-            if(dict->p_buffer == nullptr){
-                dict->p_buffer = new typename T_Dict::Buffer();
+        PubSubChannel* createChannel(ObjectDictMM& prototype, uint16_t address){
+            void* buffer = nullptr;
+            for(auto & sh_b : shared_buffers){
+                if(sh_b.id == address){
+                    buffer = sh_b.buffer;
+                    USER_ASSERT(buffer != nullptr);
+                }
+            }
+            if(buffer == nullptr){
+                buffer = prototype.createBuffer();
+                SharedBuffer sh_b = {
+                        .id = address,
+                        .buffer = buffer
+                };
+
+                shared_buffers.push_back(sh_b);
             }
 
-
-            auto channel = new PubSubChannel(dict);
+            auto channel = new PubSubChannel(&prototype, buffer);
             channel->network_layer = network;
             channel->channel_addr = address;
+
+
+            pub_sub_channels.push_back(channel);
+
             return channel;
         }
 
-        template<typename T_Dict>
-        PubSubChannel* createChannel(uint16_t address, void* static_buffer){
-            auto dict = dict_manager.create<T_Dict>(address);
-            dict->p_buffer = static_buffer;
-
-            auto channel = new PubSubChannel(dict);
+        PubSubChannel* createChannel(ObjectDictMM& prototype, uint16_t address,
+                                    void* static_buffer){
+            auto channel = new PubSubChannel(&prototype, static_buffer);
             channel->network_layer = network;
             channel->channel_addr = address;
             return channel;
@@ -202,10 +222,19 @@ namespace libfcn_v2 {
     protected:
         NetworkLayer* const network{nullptr};
 
-        RtoDictManager dict_manager;
         uint16_t poll_freq_hz{1000};
 
         utils::vector_s<PubCtrlRule> pub_ctrl_rules;
+
+
+        struct SharedBuffer{
+            int id {-1};
+            void*  buffer {nullptr};
+        };
+
+        utils::vector_s<SharedBuffer> shared_buffers;
+
+        utils::vector_s<PubSubChannel*> pub_sub_channels;
 
     };
 }

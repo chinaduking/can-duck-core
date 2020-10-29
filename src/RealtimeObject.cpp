@@ -14,6 +14,7 @@ using namespace utils;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
 obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
+                              void* buffer,
                               obj_idx_t index,
                               uint8_t *data, obj_size_t len){
 
@@ -22,6 +23,8 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
 //     * 2. 支持未来的回调
 //     * */
 //    while (len > 0){
+
+        USER_ASSERT(buffer != nullptr);
 
         if(index > obj_dict->dictSize()){
             /* 仅做写保护，不使程序assert failed崩溃：
@@ -33,16 +36,13 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
 
 //        auto p_obj = dict->obj_dict[index];
 
-        auto p_data = obj_dict->getBufferDataPtr(index);
-
-        USER_ASSERT(p_data != nullptr);
-
+        auto offset = obj_dict->getBufferDataOffest(index);
         auto data_sz = obj_dict->getBufferDataSize(index);
 
         USER_ASSERT(data_sz != 0);
 
 
-        utils::memcpy(p_data, data, data_sz);
+        utils::memcpy((uint8_t*)buffer+offset, data, data_sz);
 
 //        auto callback = p_obj->getCallbackPtr();
 //
@@ -107,10 +107,17 @@ void PubSubChannel::networkPublish(DataLinkFrame *frame) {
 
 
 void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
-    auto dict = dict_manager.find(frame->src_id);
+    PubSubChannel* channel = nullptr;
 
-    /* 未找到对应地址的字典不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
-    if(dict == nullptr){
+    for(auto& ch : pub_sub_channels){
+        channel = ch;
+    }
+
+    /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
+    if(channel == nullptr){
+        TracerSingleton::getInstance()->print(Tracer::WARNING,
+          "RtoNetworkHandler::handleWrtie,""channel == nullptr\n");
+
         return;
     }
 
@@ -119,7 +126,8 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
     switch (opcode) {
         case OpCode::RTO_PUB:
             RtoDictSingleWrite(
-                    dict,
+                    channel->obj_dict_prototype,
+                    channel->buffer,
                     frame->msg_id,
                     frame->payload, frame->payload_len);
 

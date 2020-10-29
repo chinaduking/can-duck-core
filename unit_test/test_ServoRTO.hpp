@@ -31,31 +31,9 @@ namespace fcnmsg{
         mode    (4)
         {
             init();
-//            if(p_buffer != nullptr){
-//                utils::memset( p_buffer,0, sizeof(Buffer));
-//            }
         }
 
-        void init() {
-            obj_base_offset[speed.index] = (uint8_t *)&speed
-                                           - (uint8_t*)p_first_obj;
-            obj_base_offset[angle.index] = (uint8_t *)&angle
-                                           - (uint8_t*)p_first_obj;
-            obj_base_offset[current.index] = (uint8_t *)&current
-                                             - (uint8_t*)p_first_obj;
-            obj_base_offset[target_angle.index] = (uint8_t *)&target_angle
-                                                  - (uint8_t*)p_first_obj;
-            obj_base_offset[mode.index] = (uint8_t *)&mode
-                                          - (uint8_t*)p_first_obj;
-
-            Buffer buffer_tmp;
-
-            speed.buffer_offset = (uint8_t *)&buffer_tmp.speed - (uint8_t *)&buffer_tmp;
-            angle.buffer_offset = (uint8_t *)&buffer_tmp.angle - (uint8_t *)&buffer_tmp;
-            current.buffer_offset = (uint8_t *)&buffer_tmp.current - (uint8_t *)&buffer_tmp;
-            target_angle.buffer_offset = (uint8_t *)&buffer_tmp.target_angle - (uint8_t *)&buffer_tmp;
-            mode.buffer_offset = (uint8_t *)&buffer_tmp.mode - (uint8_t *)&buffer_tmp;
-        }
+        void init();
 
         struct Buffer{
             int16_t speed;
@@ -64,6 +42,8 @@ namespace fcnmsg{
             int32_t target_angle;
             int16_t mode;
         };
+
+        void* createBuffer() override;
     };
 #pragma pack(0)
 

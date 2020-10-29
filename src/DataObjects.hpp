@@ -48,7 +48,6 @@ namespace libfcn_v2 {
 
         mapped_ptr_t buffer_offset{0};
 
-
         inline void* getDataPtr(){
             return ((uint8_t*)this) + sizeof(ObjectMetaInfo);
         }
@@ -86,9 +85,10 @@ namespace libfcn_v2 {
 
             :
                 p_first_obj(p_first_obj),
-                obj_base_offset(dict_size),
-                dict_size(dict_size),
-                p_buffer(p_buffer){
+                obj_base_offset(dict_size)
+//                ,dict_size(dict_size)
+//                ,p_buffer(p_buffer)
+                {
 
             obj_base_offset.resize(dict_size);
 //            buffer_data_offset.resize(dict_size);
@@ -96,72 +96,52 @@ namespace libfcn_v2 {
 
 
         inline ObjectMetaInfo* getObjBaseByIndex(uint16_t index){
-            if(index >= dict_size){
-                return nullptr;
-            }
+            USER_ASSERT(index < obj_base_offset.size());
 
             return(ObjectMetaInfo*)(
                     (uint8_t*)p_first_obj + obj_base_offset[index]);
         }
 
-
-        inline uint8_t* getBufferDataPtr(uint16_t index){
-            if(p_buffer == nullptr){
-                return nullptr;
-            }
-
-            auto rto_base_ptr = getObjBaseByIndex(index);
-
-            if(rto_base_ptr == nullptr){
-                return 0;
-            }
-
-            return (uint8_t*)p_buffer + rto_base_ptr->buffer_offset;
+        inline uint32_t getBufferDataOffest(uint16_t index){
+            return getObjBaseByIndex(index)->buffer_offset;
         }
 
 
         inline uint8_t getBufferDataSize(uint16_t index){
-            auto rto_base_ptr = getObjBaseByIndex(index);
-
-            if(rto_base_ptr == nullptr){
-                return 0;
-            }
-
-            return rto_base_ptr->data_size;
+            return getObjBaseByIndex(index)->data_size;
         }
-
 
         inline uint8_t dictSize(){
             return obj_base_offset.size();
         }
 
         template<typename Prototype>
-        Prototype read(Prototype&& msg){
+        Prototype read(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             Prototype res = msg;
 
             utils::memcpy(&res.data,
-                          (uint8_t*)p_buffer +
-                                  msg.buffer_offset,
+                          (uint8_t*)p_buffer + msg.buffer_offset,
                           sizeof(res.data));
 
             return res;
         }
 
         template<typename Prototype>
-        void write(Prototype&& msg){
+        void write(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
-            utils::memcpy((uint8_t*)p_buffer +
-                                  msg.buffer_offset,
+            utils::memcpy((uint8_t*)p_buffer + msg.buffer_offset,
                           &msg.data,
                           sizeof(msg.data));
         }
 
-        inline void bindBuffer(void* buffer){
-            p_buffer = buffer;
-        }
+
+        virtual void* createBuffer() = 0;
+//        inline void bindBuffer(void* buffer){
+//            p_buffer = buffer;
+//        }
 
         /*默认字段
          * TODO: 版本校验？
@@ -175,9 +155,7 @@ namespace libfcn_v2 {
 
         utils::vector_s<mapped_ptr_t> obj_base_offset;
 
-        uint16_t const dict_size  {0};
-
-        void* p_buffer{nullptr};
+//        void* p_buffer{nullptr};
 
         //TODO:SVO也可以采用这个dict。权限可使用BIT-LUT实现，不新开obj基类
     };

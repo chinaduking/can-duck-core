@@ -6,7 +6,7 @@
 #include "RealtimeObject.hpp"
 #include "test_ServoRTO.hpp"
 using namespace libfcn_v2;
-
+#if 0
 namespace rto_test{
 
     /*
@@ -107,6 +107,8 @@ namespace rto_test{
     }
 
 }
+
+#endif
 #if 1
 
 /*
@@ -140,7 +142,11 @@ namespace network_test {
 
         auto rto_channel = fcn_node
                 .network_layer->rto_network_handler.
-                createChannel<decltype(fcnmsg::test_ServoRTO)>(local_addr);
+                createChannel(fcnmsg::test_ServoRTO, local_addr);
+
+        auto rto_channel_2 = fcn_node
+                .network_layer->rto_network_handler.
+                createChannel(fcnmsg::test_ServoRTO, local_addr);
 
         fcn_node.spin();
 
@@ -170,10 +176,6 @@ namespace network_test {
             perciseSleep(0.1);
 
 
-            auto rto_channel_2 = fcn_node
-                    .network_layer->rto_network_handler.
-                    createChannel<decltype(fcnmsg::test_ServoRTO)>(local_addr);
-
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
                          rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.speed).data,
@@ -196,7 +198,7 @@ namespace network_test {
 
         auto servo_rto_channel = fcn_node
                 .network_layer->rto_network_handler.
-                createChannel<decltype(fcnmsg::test_ServoRTO)>(servo_addr);
+                createChannel (fcnmsg::test_ServoRTO, servo_addr);
 
         fcn_node.spin();
 
