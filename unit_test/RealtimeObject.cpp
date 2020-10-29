@@ -4,9 +4,8 @@
 
 #include "TestUtils.hpp"
 #include "RealtimeObject.hpp"
-#include "testServoRtoDict.hpp"
+#include "test_ServoRTO.hpp"
 using namespace libfcn_v2;
-
 
 namespace rto_test{
 
@@ -25,8 +24,8 @@ namespace rto_test{
         } while(0)
 
     TEST(RtoDict, localWrite){
-        libfcn_v2_test::testServoRtoDict testRoDict_src;
-        libfcn_v2_test::testServoRtoDict testRoDict_dest;
+        decltype(fcnmsg::test_ServoRTO) testRoDict_src;
+        decltype(fcnmsg::test_ServoRTO) testRoDict_dest;
 
         SingleWriteTest(speed,          0x5566);
         SingleWriteTest(angle,          0x55667788);
@@ -46,20 +45,22 @@ namespace rto_test{
     class Node{
     public:
         Node(){
-            rto_dict = rtoDictManager.create<libfcn_v2_test::testServoRtoDict>
+            rto_dict = rtoDictManager
+                    .create<libfcn_v2_test::test_ServoRTO::Buffer>
                     (OWNER_ADDR);
         }
         virtual void spin(){ }
+
     protected:
-        libfcn_v2_test::testServoRtoDict* rto_dict;
+        libfcn_v2_test::test_ServoRTO::Buffer* rto_dict;
     };
 
     class Node07 : public Node{
     public:
-        Node07():Node(){ rto_dict->angle << 200; }
+        Node07():Node(){ rto_dict->angle = 200; }
 
         void spin() override {
-            rto_dict->angle << rto_dict->angle.data + 30;
+            rto_dict->angle = rto_dict->angle + 30;
         }
     };
 
@@ -70,7 +71,7 @@ namespace rto_test{
             auto angle = rto_dict->angle;
 
             //ASSERT_EQ(angle.data, 200);
-            cout << "angle.data = " << angle.data << endl;
+            cout << "angle.data = " << angle << endl;
         }
     };
 
@@ -96,7 +97,7 @@ namespace rto_test{
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "testServoRtoDict.hpp"
+#include "test_ServoRTO.hpp"
 #include "FrameUtils.hpp"
 #include "SimpleSerialNode.hpp"
 
@@ -114,24 +115,34 @@ namespace network_test {
 
         DataLinkFrame frame_tmp;
 
-        auto rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(local_addr);
+        auto rto_channel = fcn_node
+                .network_layer->rto_network_handler.
+                createChannel<decltype(fcnmsg::test_ServoRTO)>(local_addr);
 
         fcn_node.spin();
 
         uint32_t cnt = 0;
 
         for(int __i = 0; __i < 1; ){
-            rto_dict->speed << cnt;
-            rto_dict->angle << cnt;
-            rto_dict->current << cnt;
+            auto speed_msg = fcnmsg::test_ServoRTO.speed;
+            speed_msg << cnt;
+            rto_channel->publish(speed_msg);
 
-            coutinuousWriteFrameBuilder(&frame_tmp, rto_dict,
-                                        rto_dict->speed.index,
-                                        rto_dict->current.index,
-                                        local_addr,
-                                        0x00,
-                                        static_cast<uint8_t>(OpCode::RTO_PUB));
+            auto angle_msg = fcnmsg::test_ServoRTO.angle;
+            angle_msg << cnt;
+            rto_channel->publish(angle_msg);
+
+            auto current_msg = fcnmsg::test_ServoRTO.current;
+            current_msg << cnt;
+            rto_channel->publish(current_msg);
+
+
+//            coutinuousWriteFrameBuilder(&frame_tmp, rto_dict,
+//                                        rto_dict->speed.index,
+//                                        rto_dict->current.index,
+//                                        local_addr,
+//                                        0x00,
+//                                        static_cast<uint8_t>(OpCode::RTO_PUB));
 
             frame_tmp.src_id = local_addr;
             frame_tmp.dest_id = 0x00; /*ANY*/
@@ -155,10 +166,12 @@ namespace network_test {
 
         int servo_addr = SERVO_ADDR;
 
-        auto servo_rto_dict = fcn_node.network_layer->rto_network_handler.
-                bindDictToChannel<libfcn_v2_test::testServoRtoDict>(servo_addr);
+        auto servo_rto_channel = fcn_node.network_layer->rto_network_handler.
+                createChannel<libfcn_v2_test::test_ServoRTO>(servo_addr);
 
         fcn_node.spin();
+
+        auto angle = servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data;
 
         for(int __i = 0; __i < 1; ){
 //            fcn_node.spin();
@@ -166,9 +179,9 @@ namespace network_test {
 
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
-                         servo_rto_dict->speed.data,
-                         servo_rto_dict->angle.data,
-                         servo_rto_dict->current.data);
+                 servo_rto_channel->fetchBuffer(test_ServoRTO::speed).data,
+                 servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data,
+                 servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data);
         }
 
         fcn_node.join();

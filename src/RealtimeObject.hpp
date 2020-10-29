@@ -21,7 +21,7 @@ namespace libfcn_v2 {
 
     void coutinuousWriteFrameBuilder(
             DataLinkFrame* result_frame,
-            RealtimeObjectDict* dict,
+            ObjectDictMM* dict,
             obj_idx_t index_start, obj_idx_t index_end,
             uint16_t src_id,
             uint16_t dest_id,
@@ -29,18 +29,24 @@ namespace libfcn_v2 {
 
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-    obj_size_t RtoDictContinuousWrite(RealtimeObjectDict* dict,
-                               obj_idx_t index,
-                               uint8_t *data, obj_size_t len);
+    obj_size_t RtoDictContinuousWrite(ObjectDictMM* dict,
+                                      obj_idx_t index,
+                                      uint8_t *data, obj_size_t len);
+
+    obj_size_t RtoBufferWrite(void* buffer,
+                              obj_idx_t index,
+                              uint8_t *data, obj_size_t len);
 
     class NetworkLayer;
 
     /* 共享字典管理器 */
-    typedef SharedObjManager<RealtimeObjectDict> RtoDictManager;
+    typedef SharedObjManager<ObjectDictMM*> RtoDictManager;
 
     class PubSubChannel{
     public:
-        PubSubChannel() = default;
+        PubSubChannel(ObjectDictMM* obj_dict_shm)
+            :   obj_dict_shm(obj_dict_shm){ }
+
         ~PubSubChannel() = default;
 
         /* 是否为 "多源通道"。 */
@@ -49,9 +55,34 @@ namespace libfcn_v2 {
         /* 通道ID */
         int channel_addr{0};
 
-        void publish(RealtimeObjectBase& msg);
+        template<typename Msg>
+        void publish(Msg&& msg){
 
-        void fetchBuffer(RealtimeObjectBase& msg);
+        }
+
+        template<typename Msg>
+        Msg fetchBuffer(Msg&& msg){
+            Msg res;
+
+            utils::memcpy(&res.data,
+                          obj_dict_shm->p_buffer + msg.buffer_offest,
+                          sizeof(res.data));
+
+            return res;
+        }
+
+        ObjectDictMM* obj_dict_shm{nullptr};
+
+        /* 将回调函数指针映射到int8整形时，基址偏移量
+         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
+         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
+        uint16_t*  callback_mapped_ptr_base;
+
+        /* 将回调函数指针映射到int8整形后的指针数组 */
+        uint8_t** callback_mapped_ptr_list;
+
+        /* 上述数组长度 */
+        uint8_t* callback_mapped_ptr_num;
     };
 
     #define MAX_PUB_CTRL_RULES 10
@@ -69,8 +100,10 @@ namespace libfcn_v2 {
         virtual ~RtoNetworkHandler() = default;
 
         template<typename T_Dict>
-        T_Dict* bindDictToChannel(uint16_t address){
-            return dict_manager.create<T_Dict>(address);
+        PubSubChannel* createChannel(uint16_t address){
+            auto p_buffer = dict_manager.create<T_Dict::Buffer>(address);
+            auto channel = new PubSubChannel(p_buffer);
+            return channel;
         }
 
         void handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id);

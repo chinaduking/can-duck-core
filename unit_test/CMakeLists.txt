@@ -1,4 +1,6 @@
-add_executable(testDataObjects DataObjects.cpp)
+add_executable(testDataObjects DataObjects.cpp
+        test_ServoRTO.cpp
+        )
 target_link_libraries(testDataObjects  GTest::GTest GTest::Main)
 
 

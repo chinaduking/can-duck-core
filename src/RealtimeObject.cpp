@@ -9,51 +9,56 @@ using namespace libfcn_v2;
 
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t libfcn_v2::RtoDictContinuousWrite(RealtimeObjectDict* dict,
-                                      obj_idx_t index,
-                                      uint8_t *data, obj_size_t len){
+obj_size_t RtoDictSingleWrite(ObjectDictMM* obj_dict,
+                              obj_idx_t index,
+                              uint8_t *data, obj_size_t len){
 
-    /* 不一次直接memcpy，有两个原因：
-     * 1. 每次均检查index是否已溢出
-     * 2. 支持未来的回调
-     * */
-    while (len > 0){
+//    /* 不一次直接memcpy，有两个原因：
+//     * 1. 每次均检查index是否已溢出
+//     * 2. 支持未来的回调
+//     * */
+//    while (len > 0){
 
-        if(index > dict->obj_dict.size()){
+        if(index > obj_dict->dictSize()){
             /* 仅做写保护，不使程序assert failed崩溃：
              * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
              * 可记录错误log
              * */
-            return 1;
+            return 0;
         }
 
-        auto p_obj = dict->obj_dict[index];
+//        auto p_obj = dict->obj_dict[index];
+
+        auto p_data = obj_dict->getBufferDataPtr(index);
+
+        USER_ASSERT(p_data != nullptr);
+
+        auto data_sz = obj_dict->getBufferDataSize(index);
+
+        USER_ASSERT(data_sz != 0);
 
 
-        USER_ASSERT(p_obj != nullptr);
+        utils::memcpy(p_data, data, data_sz);
 
-        utils::memcpy(p_obj->getDataPtr(), data,
-                p_obj->data_size);
+//        auto callback = p_obj->getCallbackPtr();
+//
+//        if(callback != nullptr){
+//            callback->callback(p_obj->getDataPtr(), 0);
+//        }
+//
+//        data += p_obj->data_size;
+//
+//        len -= p_obj->data_size;
 
-        auto callback = p_obj->getCallbackPtr();
+//        index ++;
+//    }
 
-        if(callback != nullptr){
-            callback->callback(p_obj->getDataPtr(), 0);
-        }
-
-        data += p_obj->data_size;
-
-        len -= p_obj->data_size;
-
-        index ++;
-    }
-
-    return 0;
+    return data_sz;
 }
 
 void libfcn_v2::coutinuousWriteFrameBuilder(
         DataLinkFrame* result_frame,
-        RealtimeObjectDict* dict,
+        ObjectDictMM* dict,
         obj_idx_t index_start, obj_idx_t index_end,
         uint16_t src_id,
         uint16_t dest_id,
@@ -113,11 +118,16 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
     switch (opcode) {
         case OpCode::RTO_PUB:
-            RtoDictContinuousWrite(dict, frame->msg_id, frame->payload,
-                               frame->payload_len);
+            RtoDictSingleWrite(
+                    *dict,
+                    frame->msg_id,
+                    frame->payload, frame->payload_len);
+
             break;
+
         case OpCode::RTO_REQUEST:
             break;
+
         default:
             break;
     }
