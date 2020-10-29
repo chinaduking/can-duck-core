@@ -47,6 +47,11 @@ namespace libfcn_v2 {
         const obj_size_t data_size{0};
 
         mapped_ptr_t buffer_offset{0};
+
+
+        inline void* getDataPtr(){
+            return ((uint8_t*)this) + sizeof(ObjectMetaInfo);
+        }
     };
 
 

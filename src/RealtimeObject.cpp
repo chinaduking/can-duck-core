@@ -3,6 +3,7 @@
 //
 
 #include "RealtimeObject.hpp"
+#include "NetworkLayer.hpp"
 #include "OperationCode.hpp"
 #include "utils/CppUtils.hpp"
 using namespace libfcn_v2;
@@ -56,19 +57,15 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
     return data_sz;
 }
 
-void libfcn_v2::coutinuousWriteFrameBuilder(
+void libfcn_v2::singleWriteFrameBuilder(
         DataLinkFrame* result_frame,
-        ObjectDictMM* dict,
-        obj_idx_t index_start, obj_idx_t index_end,
         uint16_t src_id,
         uint16_t dest_id,
-        uint16_t op_code){
+        uint16_t op_code,
+        uint16_t msg_id,
+        uint8_t* p_data, uint16_t len){
 
     USER_ASSERT(result_frame != nullptr);
-    USER_ASSERT(dict != nullptr);
-    /* 保证起始地址不高于结束地址 */
-    USER_ASSERT((index_start <= index_end));
-
 
 
     /* 初始化 */
@@ -76,32 +73,21 @@ void libfcn_v2::coutinuousWriteFrameBuilder(
     result_frame->src_id  = src_id;
     result_frame->dest_id = dest_id;
     result_frame->op_code = op_code;
-    result_frame->msg_id  = index_start; /* 消息ID为起始ID */
+    result_frame->msg_id  = msg_id; /* 消息ID为起始ID */
 
-    result_frame->payload_len = 0;      /* 开始对数据长度进行累加 */
+    result_frame->payload_len = len;      /* 开始对数据长度进行累加 */
 
     uint8_t * payload_ptr = result_frame->payload;
 
 
     /* 填充数据 */
-    for(int index = index_start; index <= index_end; index++){
-        if(index > dict->dictSize()){
-            break;
-        }
+    utils::memcpy(payload_ptr, p_data, len);
 
-        auto p_data = dict->getBufferDataPtr(index);
-        USER_ASSERT(p_data != nullptr);
+}
 
-        auto data_size = dict->getBufferDataSize(index);
-
-        if(result_frame->payload_len + data_size > DATALINK_MTU){
-            break;
-        }
-
-        utils::memcpy(payload_ptr, p_data, data_size);
-
-        result_frame->payload_len += data_size; /* 对数据长度进行累加 */
-        payload_ptr += data_size;  /* 输出指针自增 */
+void PubSubChannel::networkPublish(DataLinkFrame *frame) {
+    if(network_layer != nullptr){
+        network_layer->data_link_dev[0]->write(frame);
     }
 }
 
@@ -156,7 +142,7 @@ void RtoNetworkHandler::update(){
             //TODO..
             if(pub_ctrl_rule.end_idx == -1){
                 /* Single Write */
-//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.src_address,
@@ -164,7 +150,7 @@ void RtoNetworkHandler::update(){
 //                                            static_cast<uint8_t>(OpCode::RTO_PUB));
             }else{
                 /* Continuous Write */
-//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.end_idx,
 //                                            pub_ctrl_rule.src_address,

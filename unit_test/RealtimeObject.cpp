@@ -107,7 +107,7 @@ namespace rto_test{
     }
 
 }
-#if 0
+#if 1
 
 /*
  * 测试实时对象字典使用网络进行传输
@@ -156,14 +156,6 @@ namespace network_test {
             current_msg << cnt;
             rto_channel->publish(current_msg);
 
-
-//            coutinuousWriteFrameBuilder(&frame_tmp, rto_dict,
-//                                        rto_dict->speed.index,
-//                                        rto_dict->current.index,
-//                                        local_addr,
-//                                        0x00,
-//                                        static_cast<uint8_t>(OpCode::RTO_PUB));
-
             frame_tmp.src_id = local_addr;
             frame_tmp.dest_id = 0x00; /*ANY*/
 
@@ -186,12 +178,11 @@ namespace network_test {
 
         int servo_addr = SERVO_ADDR;
 
-        auto servo_rto_channel = fcn_node.network_layer->rto_network_handler.
-                createChannel<libfcn_v2_test::test_ServoRTO>(servo_addr);
+        auto servo_rto_channel = fcn_node
+                .network_layer->rto_network_handler.
+                createChannel<decltype(fcnmsg::test_ServoRTO)>(servo_addr);
 
         fcn_node.spin();
-
-        auto angle = servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data;
 
         for(int __i = 0; __i < 1; ){
 //            fcn_node.spin();
@@ -199,9 +190,11 @@ namespace network_test {
 
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
-                 servo_rto_channel->fetchBuffer(test_ServoRTO::speed).data,
-                 servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data,
-                 servo_rto_channel->fetchBuffer(test_ServoRTO::angle).data);
+                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.speed).data,
+
+                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.angle).data,
+
+                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.current).data);
         }
 
         fcn_node.join();

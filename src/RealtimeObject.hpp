@@ -19,13 +19,13 @@
  */
 namespace libfcn_v2 {
 
-    void coutinuousWriteFrameBuilder(
+    void singleWriteFrameBuilder(
             DataLinkFrame* result_frame,
-            ObjectDictMM* dict,
-            obj_idx_t index_start, obj_idx_t index_end,
             uint16_t src_id,
             uint16_t dest_id,
-            uint16_t op_code);
+            uint16_t op_code,
+            uint16_t msg_id,
+            uint8_t* p_data, uint16_t len);
 
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
@@ -57,15 +57,39 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void publish(Msg&& msg){
+            uint16_t src_id = 0, dest_id = 0;
 
+            if(!is_multi_source){
+                src_id = channel_addr;
+                dest_id = 0;
+            } else{
+                src_id = 0;
+                dest_id = channel_addr;
+            }
+
+
+            singleWriteFrameBuilder(
+                    &frame_tmp,
+                    src_id,
+                    dest_id,
+                    static_cast<uint8_t>(OpCode::RTO_PUB),
+                    msg.index,
+                    (uint8_t *)msg.getDataPtr(), msg.data_size);
+
+            networkPublish(&frame_tmp);
         }
 
-        template<typename Msg>
-        Msg fetchBuffer(Msg&& msg){
-            Msg res;
+        template<typename Prototype>
+        Prototype fetchBuffer(Prototype&& msg){
+            auto p_buffer = obj_dict_shm->p_buffer;
+
+            USER_ASSERT(p_buffer!= nullptr);
+
+            Prototype res = msg;
 
             utils::memcpy(&res.data,
-                          obj_dict_shm->p_buffer + msg.buffer_offest,
+                          (uint8_t*)p_buffer +
+                          msg.buffer_offset,
                           sizeof(res.data));
 
             return res;
@@ -83,6 +107,12 @@ namespace libfcn_v2 {
 
         /* 上述数组长度 */
         uint8_t* callback_mapped_ptr_num;
+
+        DataLinkFrame frame_tmp;
+
+        libfcn_v2::NetworkLayer *network_layer;
+
+        void networkPublish(DataLinkFrame* frame);
     };
 
     #define MAX_PUB_CTRL_RULES 10
@@ -101,8 +131,9 @@ namespace libfcn_v2 {
 
         template<typename T_Dict>
         PubSubChannel* createChannel(uint16_t address){
-            auto p_buffer = dict_manager.create<T_Dict::Buffer>(address);
+            auto p_buffer = dict_manager.create<T_Dict>(address);
             auto channel = new PubSubChannel(p_buffer);
+            channel->network_layer = network;
             return channel;
         }
 
