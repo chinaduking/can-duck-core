@@ -147,6 +147,7 @@ namespace libfcn_v2 {
          * 2. 在网络配置阶段，使用专用协议读取*/
 //        RtoDictItemNoCb<uint32_t> version;
 
+        //TODO: 不使用指针，存储Offset。
         utils::vector_s<RealtimeObjectBase*> obj_dict;
     };
 
@@ -181,33 +182,36 @@ namespace libfcn_v2{
                           bool wr_access=false)
                 :
                 index(index),
-                data_size(data_size),
-
-                is_server(0),
                 wr_access(wr_access),
-                read_status(static_cast<uint8_t>
-                            (SvoClientStat::Idle)),
-                write_status(static_cast<uint8_t>
-                             (SvoClientStat::Idle)){
+                data_size(data_size)
+
+
+//                is_server(0),
+//                read_status(static_cast<uint8_t>
+//                            (SvoClientStat::Idle)),
+//                write_status(static_cast<uint8_t>
+//                             (SvoClientStat::Idle))
+                             {
             USER_ASSERT(data_size <= MAX_OBJ_SZIE);
         }
 
         /* 消息索引 */
         const obj_idx_t index{0};
 
-        /* 消息数据大小，最长128字节。不支持变长 */
-        const obj_size_t data_size{0};
+        /* 消息数据大小，最长64字节。不支持变长 */
+        const obj_size_t wr_access : 1;
 
-        uint8_t is_server    : 1;
-        const uint8_t wr_access    : 1;
+        const obj_size_t data_size : 7;
+//        uint8_t is_server    : 1;
+//        const uint8_t wr_access    : 1;
 
-        /* 客户端 读取任务状态（用户只能通过fetchStatus方法进行只读访问）*/
-        uint8_t read_status  : 3;
-
-        /* 客户端 写入任务状态（用户只能通过fetchStatus方法进行只读访问）**/
-        uint8_t write_status : 3;
-
-        uint8_t placeholdler{0};
+//        /* 客户端 读取任务状态（用户只能通过fetchStatus方法进行只读访问）*/
+//        uint8_t read_status  : 3;
+//
+//        /* 客户端 写入任务状态（用户只能通过fetchStatus方法进行只读访问）**/
+//        uint8_t write_status : 3;
+//
+//        uint8_t placeholdler{0};
 
         FcnCallbackInterface* callback{nullptr};
 

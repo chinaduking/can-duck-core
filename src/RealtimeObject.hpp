@@ -38,6 +38,22 @@ namespace libfcn_v2 {
     /* 共享字典管理器 */
     typedef SharedObjManager<RealtimeObjectDict> RtoDictManager;
 
+    class PubSubChannel{
+    public:
+        PubSubChannel() = default;
+        ~PubSubChannel() = default;
+
+        /* 是否为 "多源通道"。 */
+        bool is_multi_source;
+
+        /* 通道ID */
+        int channel_addr{0};
+
+        void publish(RealtimeObjectBase& msg);
+
+        void fetch(RealtimeObjectBase& msg);
+    };
+
     #define MAX_PUB_CTRL_RULES 10
 
     /*

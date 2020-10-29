@@ -103,7 +103,7 @@ namespace network_test {
 
 #define SERVO_ADDR 0x02
 
-    TEST(NetworkLayer, RtoServoNode) {
+    TEST(RTO, RtoServoNode) {
         int local_addr = SERVO_ADDR;
 
         Node fcn_node(0);
@@ -144,7 +144,7 @@ namespace network_test {
     }
 
 
-    TEST(NetworkLayer, RtoHostNode) {
+    TEST(RTO, RtoHostNode) {
         Node fcn_node(1);
         Tracer tracer(true);
         tracer.setFilter(Tracer::INFO);

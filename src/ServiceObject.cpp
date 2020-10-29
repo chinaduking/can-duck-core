@@ -67,11 +67,11 @@ void SvoNetworkHandler::onReadAck(ServiceObjectDict* dict,
 
     USER_ASSERT(p_obj != nullptr);
 
-    /* 仅对应答进行一次响应。必须是正在等待响应的请求，收到ACK才有效。
-     * 而后续ACK不会被响应。再次发起请求任务才响应 */
-    if(p_obj->read_status != (uint8_t)SvoClientStat::Pendding){
-        return;
-    }
+//    /* 仅对应答进行一次响应。必须是正在等待响应的请求，收到ACK才有效。
+//     * 而后续ACK不会被响应。再次发起请求任务才响应 */
+//    if(p_obj->read_status != (uint8_t)SvoClientStat::Pendding){
+//        return;
+//    }
 
     /* 单数据写入，要求长度要求必须匹配 */
     if(len != p_obj->data_size){
@@ -83,11 +83,12 @@ void SvoNetworkHandler::onReadAck(ServiceObjectDict* dict,
 
     auto callback = p_obj->callback;
 
-    p_obj->read_status = (uint8_t)SvoClientStat::Ok;
+//    p_obj->read_status = (uint8_t)SvoClientStat::Ok;
 
     if(callback != nullptr){
-        callback->callback(p_obj->getDataPtr(), p_obj->read_status);
-        /* 仅对应答进行一次响应。后续应答不响应。再次发起请求任务才响应 */
+        callback->callback(p_obj->getDataPtr(), (uint8_t)SvoClientStat::Ok);
+        /* 仅对应答进行一次响应。必须是正在等待响应的请求，收到ACK才有效。
+          * 而后续ACK不会被响应。再次发起请求任务才响应 */
         callback = nullptr;
     }
 }
@@ -108,14 +109,16 @@ void SvoNetworkHandler::onWriteAck(ServiceObjectDict* dict, obj_idx_t index, uin
 
     auto callback = p_obj->callback;
 
+    uint8_t write_status;
+
     if(result == 0){
-        p_obj->write_status = (uint8_t)SvoClientStat::Ok;
+        write_status = (uint8_t)SvoClientStat::Ok;
     } else{
-        p_obj->write_status = (uint8_t)SvoClientStat::Rejected;
+        write_status = (uint8_t)SvoClientStat::Rejected;
     }
 
     if(callback != nullptr){
-        callback->callback(p_obj->getDataPtr(), p_obj->write_status);
+        callback->callback(p_obj->getDataPtr(), write_status);
     }
 }
 
@@ -221,14 +224,14 @@ void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) 
 
 
 
-void SvoClient::readUnblocking(RealtimeObjectBase &item,
+void SvoClient::readUnblocking(ServiceObjectBase &item,
                                FcnCallbackInterface* callback) {
 
 
 }
 
 
-void SvoClient::writeUnblocking(RealtimeObjectBase &item,
+void SvoClient::writeUnblocking(ServiceObjectBase &item,
                                 FcnCallbackInterface *callback) {
 
 }
