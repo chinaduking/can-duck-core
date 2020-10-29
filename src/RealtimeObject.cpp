@@ -125,7 +125,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
     switch (opcode) {
         case OpCode::RTO_PUB:
             RtoDictSingleWrite(
-                    *dict,
+                    dict,
                     frame->msg_id,
                     frame->payload, frame->payload_len);
 

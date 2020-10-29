@@ -154,6 +154,10 @@ namespace libfcn_v2 {
                           sizeof(msg.data));
         }
 
+        inline void bindBuffer(void* buffer){
+            p_buffer = buffer;
+        }
+
         /*默认字段
          * TODO: 版本校验？
          * 1. 可手动校验：使用快照指令
@@ -168,7 +172,7 @@ namespace libfcn_v2 {
 
         uint16_t const dict_size  {0};
 
-        void* const p_buffer{nullptr};
+        void* p_buffer{nullptr};
 
         //TODO:SVO也可以采用这个dict。权限可使用BIT-LUT实现，不新开obj基类
     };

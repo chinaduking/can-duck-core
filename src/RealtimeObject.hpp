@@ -40,7 +40,7 @@ namespace libfcn_v2 {
     class NetworkLayer;
 
     /* 共享字典管理器 */
-    typedef SharedObjManager<ObjectDictMM*> RtoDictManager;
+    typedef SharedObjManager<ObjectDictMM> RtoDictManager;
 
     class PubSubChannel{
     public:

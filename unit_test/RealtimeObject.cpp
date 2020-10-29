@@ -42,7 +42,7 @@ namespace rto_test{
         cout << "pass!" << endl;
     }
 
-#if 0
+
     /*
      * 测试实时对象字典在共享内存上进行类型安全的读写
      **/
@@ -53,29 +53,42 @@ namespace rto_test{
     public:
         Node(){
             rto_dict = rtoDictManager
-                    .create<libfcn_v2_test::test_ServoRTO::Buffer>
+                    .create<fcnmsg::test_ServoRTO_C>
                     (OWNER_ADDR);
+
+            if(rto_dict->p_buffer == nullptr) {
+                rto_dict->p_buffer = new decltype(fcnmsg::test_ServoRTO)
+                        ::Buffer;
+                cout << "---> create a buffer!" << endl;
+            }
         }
         virtual void spin(){ }
 
     protected:
-        libfcn_v2_test::test_ServoRTO::Buffer* rto_dict;
+        decltype(fcnmsg::test_ServoRTO)* rto_dict;
     };
+
+
 
     class Node07 : public Node{
     public:
-        Node07():Node(){ rto_dict->angle = 200; }
+        Node07():Node(){}
 
         void spin() override {
-            rto_dict->angle = rto_dict->angle + 30;
+            auto msg = fcnmsg::test_ServoRTO.angle;
+            msg << servo_angle;
+            servo_angle += 30;
+            rto_dict->write(msg);
         }
+
+        int servo_angle{200};
     };
 
     class Node02 : public Node{
     public:
         Node02():Node(){}
         void spin() override {
-            auto angle = rto_dict->angle;
+            auto angle = rto_dict->read(fcnmsg::test_ServoRTO.angle).data;
 
             //ASSERT_EQ(angle.data, 200);
             cout << "angle.data = " << angle << endl;
@@ -94,7 +107,7 @@ namespace rto_test{
     }
 
 }
-
+#if 0
 
 /*
  * 测试实时对象字典使用网络进行传输
@@ -192,6 +205,7 @@ namespace network_test {
         }
 
         fcn_node.join();
+
+}
     }
 #endif //0
-}
