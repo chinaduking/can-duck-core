@@ -6,6 +6,9 @@
 #include "NetworkLayer.hpp"
 #include "OperationCode.hpp"
 #include "utils/CppUtils.hpp"
+
+#include "TracerSingleton.hpp"
+
 using namespace libfcn_v2;
 
 

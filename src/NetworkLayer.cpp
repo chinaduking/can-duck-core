@@ -4,10 +4,10 @@
 
 #include "NetworkLayer.hpp"
 #include "OperationCode.hpp"
-
+#include "TracerSingleton.hpp"
 
 using namespace libfcn_v2;
-
+using namespace utils;
 
 //NetworkLayer* NetworkLayer::instance = nullptr;
 //
@@ -28,6 +28,12 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 }
 
 void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
+    auto tracer = TracerSingleton::getInstance();
+
+    tracer->print(Tracer::VERBOSE, "NetworkLayer::recvDispatcher:"
+                                   "\n\r%s", DataLinkFrameToString(*frame)
+                                   .c_str());
+
 
     auto op_code = frame->op_code;
 
