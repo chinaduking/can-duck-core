@@ -223,15 +223,15 @@ void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) 
 
 
 
-
-void SvoClient::readUnblocking(ServiceObjectBase &item,
-                               FcnCallbackInterface* callback) {
-
-
-}
-
-
-void SvoClient::writeUnblocking(ServiceObjectBase &item,
-                                FcnCallbackInterface *callback) {
-
-}
+//
+//void SvoClient::readUnblocking(ServiceObjectBase &item,
+//                               FcnCallbackInterface* callback) {
+//
+//
+//}
+//
+//
+//void SvoClient::writeUnblocking(ServiceObjectBase &item,
+//                                FcnCallbackInterface *callback) {
+//
+//}

@@ -20,11 +20,20 @@ namespace libfcn_v2 {
         SvoClient() = default;
         ~SvoClient() = default;
 
-        void readUnblocking(ServiceObjectBase& item,
-                            FcnCallbackInterface* callback=nullptr);
+        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+        template<typename Msg>
+        void readUnblocking(Msg&& item,
+                            FcnCallbackInterface* callback=nullptr){
 
-        void writeUnblocking(ServiceObjectBase& item,
-                             FcnCallbackInterface* callback=nullptr);
+        }
+
+
+        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+        template<typename Msg>
+        void writeUnblocking(Msg&& item,
+                             FcnCallbackInterface* callback=nullptr){
+
+        }
 
 #ifdef SYSTYPE_FULL_OS
 //        void  readBlocking(ServiceObjectBase& item);
@@ -54,13 +63,18 @@ namespace libfcn_v2 {
         SvoServer() = default;
         ~SvoServer() = default;
 
-        void readUnblocking(ServiceObjectBase& item,
-                            FcnCallbackInterface* callback=nullptr);
+        //TODO: 任何表项目被从网络写入，均回调
+        void onDataChaged(FcnCallbackInterface* callback);
 
-#ifdef SYSTYPE_FULL_OS
-//        void  readBlocking(ServiceObjectBase& item);
-//        void writeBlocking(ServiceObjectBase& item);
-#endif
+
+        //TODO: 对应数据的网络写入回调
+        template<typename Msg>
+        void onDataChaged(Msg&& item, FcnCallbackInterface* callback){
+
+        }
+
+
+
         uint16_t server_addr { 0 };
 
         /*

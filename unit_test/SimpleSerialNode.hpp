@@ -25,7 +25,7 @@ namespace network_test{
 
         void spin() {
             recv_thread = std::make_shared<std::thread>([&](){
-                while (true){
+                for (int __i = 0 ; __i < 1; ){
                     network_layer->recvPolling();
                 }
             });
