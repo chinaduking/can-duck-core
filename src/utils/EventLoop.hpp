@@ -50,7 +50,6 @@ namespace utils {
     class EventLoop{
     public:
 
-
         class Task{
             friend class EventLoop;
         public:
@@ -63,18 +62,16 @@ namespace utils {
 
             enum EventStatus status{EVSTAT_WaitingRun};
 
-            virtual bool matchNotifyMsg(Msg_T& msg){
-                return false;
-            }
+            virtual bool matchNotifyMsg(Msg_T& msg) = 0;
 
             void setStatus(EventStatus status){
                 this->status = status;
             }
 
         protected:
-            virtual void evUpdate(){}
-            virtual void evTimeoutCallback(){}
-            virtual void evNotifyCallback(Msg_T& msg){}
+            virtual void evUpdate() = 0;
+            virtual void evTimeoutCallback() = 0;
+            virtual void evNotifyCallback(Msg_T& msg) = 0;
 
             void evWaitNotify(int timeout_ms = -1){
                 /* 传入非正整数使超时时间为无穷 */
@@ -186,7 +183,8 @@ namespace utils {
 
 
         /* 旧的添加任务方式 */
-        void addTask(Task&& task){
+        void addTask(Task* task){
+            task->context_evloop = this;
             task_list.push(task);
         }
 
@@ -202,7 +200,7 @@ namespace utils {
             checkRun();
 
             /* cv is notified.
-             * there may exsit two reasons:
+             * there may exist two reasons:
              * notified by new task added,
              * or notified by an event.
              * don't know which task is notified,
@@ -239,7 +237,7 @@ namespace utils {
 //        SharedMQ<EventBase> task_pool;
 //        SharedMQ<DataLinkFrame> notify_queue;
 
-        LinkedList<Task, TaskAllocator> task_list;
+        LinkedList<Task*, TaskAllocator> task_list;
 
     private:
         void notify(){
@@ -268,17 +266,17 @@ namespace utils {
             for(auto& task : task_list){
                 /* 如果有正在等待运行的任务，则返回0直接进入下一个循环。
                  * 一般是因调用了Restart */
-                if(task.status == EVSTAT_WaitingRun){
+                if(task->status == EVSTAT_WaitingRun){
                     min_time_out = 0;
                     break;
                 }
 
                 /* 如果没有需要立即重启的任务，
                  * 则在正在等待通知且设置了超时的任务中，搜索下一个最小超时*/
-                if(task.status == EVSTAT_WaitingNofity
-                   && task.timeout_time_ms != 0) {
+                if(task->status == EVSTAT_WaitingNofity
+                   && task->timeout_time_ms != 0) {
 
-                    uint64_t sleep_time = task.timeout_time_ms -
+                    uint64_t sleep_time = task->timeout_time_ms -
                             current_time_us;
 
                     if (min_time_out > (int) sleep_time) {
@@ -299,10 +297,10 @@ namespace utils {
         void checkNotify(){
             if(is_notify_pending){
                 for (auto& task : task_list) {
-                    if (task.matchNotifyMsg(pending_notify)
-                        && task.status == EVSTAT_WaitingNofity) {
-                        task.setStatus(EVSTAT_WaitingDelete);
-                        task.evNotifyCallback(pending_notify);
+                    if (task->matchNotifyMsg(pending_notify)
+                        && task->status == EVSTAT_WaitingNofity) {
+                        task->setStatus(EVSTAT_WaitingDelete);
+                        task->evNotifyCallback(pending_notify);
                     }
                 }
 
@@ -314,13 +312,13 @@ namespace utils {
 
         void checkRun(){
             for(auto& task : task_list) {
-                if(task.status == EVSTAT_WaitingRun){
+                if(task->status == EVSTAT_WaitingRun){
                     /*set task status to delete at first,
                      *if restart() or waitNofify() is called,
                      * task->status will be changed. if neither is
                      * called, task will be deleted*/
-                    task.setStatus(EVSTAT_WaitingDelete);
-                    task.evUpdate();
+                    task->setStatus(EVSTAT_WaitingDelete);
+                    task->evUpdate();
                 }
             }
         }
@@ -331,15 +329,15 @@ namespace utils {
 
         void checkTimeout(){
             for(auto& task : task_list){
-                if(task.status != EVSTAT_WaitingNofity){
+                if(task->status != EVSTAT_WaitingNofity){
                     continue;
                 }
 
-                if(task.timeout_time_ms != 0 && getCurrentTimeMs() >
-                task.timeout_time_ms){
+                if(task->timeout_time_ms != 0 && getCurrentTimeMs() >
+                task->timeout_time_ms){
                     /*same reason as above. set to delete first.*/
-                    task.setStatus(EVSTAT_WaitingDelete);
-                    task.evTimeoutCallback();
+                    task->setStatus(EVSTAT_WaitingDelete);
+                    task->evTimeoutCallback();
                 }
             }
         }
@@ -347,8 +345,8 @@ namespace utils {
         bool is_start{true};
         bool is_nested_in_evloop{false};
 
-        static bool isWaitingDelete(Task& ev){
-            return ev.status == EVSTAT_WaitingDelete;
+        static bool isWaitingDelete(Task*& task){
+            return task->status == EVSTAT_WaitingDelete;
         }
 
         uint64_t getCurrentTimeMs(){

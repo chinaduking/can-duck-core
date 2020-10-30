@@ -13,8 +13,8 @@ using namespace utils;
 using namespace libfcn_v2;
 
 namespace evloop_test{
-    typedef EventLoop<DataLinkFrame> FcnEvLoop;
 
+    using FcnEvLoop = EventLoop<DataLinkFrame> ;
 
     class TestTask : public FcnEvLoop::Task {
     public:
@@ -108,17 +108,20 @@ namespace evloop_test{
     TEST(EventLoop, TaskTimeout1){
         /* 由于智能指针作用域，会造成内存泄漏。仅供测试使用。 */
         FcnEvLoop evloop;
+        evloop.setTimeSource(evloopTimeSrouceMS);
+
+
         cout << "-------- time out 1ms test:" << endl;
-        evloop.addTask(TestTask(1, "1ms_task"));
+        evloop.addTask(new TestTask(1, "1ms_task"));
         cout << "-------- time out 10ms test:" << endl;
 
-        evloop.addTask(TestTask(10, "10ms_task"));
+        evloop.addTask(new TestTask(10, "10ms_task"));
 
         cout << "-------- time out 100ms test:" << endl;
-        evloop.addTask(TestTask(10, "10ms_task"));
+        evloop.addTask(new TestTask(10, "10ms_task"));
 
         cout << "-------- time out 1s test:" << endl;
-        evloop.addTask(TestTask(1000, "1000ms_task"));
+        evloop.addTask(new TestTask(1000, "1000ms_task"));
         sleep(7);
 
         evloop.stop();
