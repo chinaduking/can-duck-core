@@ -5,15 +5,20 @@
 #include <string>
 
 #include "utils/CppUtils.hpp"
-#include "utils/EventLoopBase.hpp"
-#include "utils/FrameUtils.hpp"
+#include "utils/EventLoop.hpp"
+#include "FrameUtils.hpp"
 
 using namespace std;
-using namespace emros;
-namespace emros_test{
-    class TestTask : public EventBase {
+using namespace utils;
+using namespace libfcn_v2;
+
+namespace evloop_test{
+    typedef EventLoop<DataLinkFrame> FcnEvLoop;
+
+
+    class TestTask : public FcnEvLoop::Task {
     public:
-        TestTask(int timeout_ms=1000, string name="") : EventBase() {
+        TestTask(int timeout_ms=1000, string name="") : FcnEvLoop::Task() {
             cnt = 0;
             this->timeout_ms = timeout_ms;
             this->name = name;
@@ -88,95 +93,97 @@ namespace emros_test{
     }
 
     TEST(EventLoop, EmptyRun) {
-        EventLoopBase evloop;
+        FcnEvLoop evloop;
+        evloop.setTimeSource(evloopTimeSrouceMS);
+        cout<< "evloop spinning.." << endl;
         sleep(3);
+
+        cout<< "evloop stopping.." << endl;
+
         evloop.stop();
+        cout<< "evloop stopped" << endl;
+
     }
 
     TEST(EventLoop, TaskTimeout1){
         /* 由于智能指针作用域，会造成内存泄漏。仅供测试使用。 */
-        EventLoopBase evloop;
+        FcnEvLoop evloop;
         cout << "-------- time out 1ms test:" << endl;
-        ESharedPtr<EventBase> task1(new TestTask(1, "1ms_task"));
-        evloop.addTask(task1);
+        evloop.addTask(TestTask(1, "1ms_task"));
         cout << "-------- time out 10ms test:" << endl;
 
-        ESharedPtr<EventBase> task2(new TestTask(10, "10ms_task"));
-        evloop.addTask(task2);
+        evloop.addTask(TestTask(10, "10ms_task"));
 
         cout << "-------- time out 100ms test:" << endl;
-        ESharedPtr<EventBase> task3(new TestTask(100, "100ms_task"));
-        evloop.addTask(task3);
+        evloop.addTask(TestTask(10, "10ms_task"));
 
         cout << "-------- time out 1s test:" << endl;
-        ESharedPtr<EventBase> task4(new TestTask(1000, "1000ms_task"));
-
-        evloop.addTask(task4);
+        evloop.addTask(TestTask(1000, "1000ms_task"));
         sleep(7);
 
         evloop.stop();
     }
 
 
-    TEST(EventLoop, TaskTimeoutTemplate){
-        EventLoopBase evloop;
-        cout << "-------- time out 1ms test:" << endl;
-        evloop.addTask<TestTask>(1,    "1ms_task");
-        cout << "-------- time out 10ms test:" << endl;
-        evloop.addTask<TestTask>(10,   "10ms_task");
-        cout << "-------- time out 100ms test:" << endl;
-        evloop.addTask<TestTask>(100,  "100ms_task");
-        cout << "-------- time out 1s test:" << endl;
-        evloop.addTask<TestTask>(1000, "1000ms_task");
-        sleep(7);
-
-        evloop.stop();
-    }
-
-    TEST(EventLoop, TaskTimeoutShort){
-        EventLoopBase evloop;
-        evloop.addTask<TestTask>(1,  "1ms_task");
-        evloop.addTask<TestTask>(3,  "3ms_task");
-        evloop.addTask<TestTask>(4,  "4ms_task");
-        evloop.addTask<TestTask>(10, "10ms_task");
-        evloop.addTask<TestTask>(7,  "7ms_task");
-        evloop.addTask<TestTask>(1,  "1_ms_task");
-
-        sleep(12);
-        evloop.stop();
-    }
-
-    TEST(EventLoop, Notify1){
-        EventLoopBase evloop;
-        evloop.addTask<TestTask>(300, "500ms_task");
-        sleep(1);
-
-        auto msg = makeESharedPtr<DataLinkFrame>();
-
-        char* payload = "hello world";
-        int payload_size = strlen(payload) + 1;
-        msg->src_id = 1;
-
-        msg->payload_len = payload_size;
-        memcpy(msg->payload, payload, payload_size);
-
-        for(int i = 0; i < 4; i ++){
-            cout << "evloop.notify(0x01) 1  " << getCurrentTimeUs() << endl;
-            evloop.notify(msg);
-            sleep(1);
-        }
-
-        cout << "evloop.notify(0x01) 2   " << getCurrentTimeUs() << endl;
-        evloop.notify(msg);
-
-        sleep(3);
-        evloop.stop();
-    }
-
-
-    TEST(EventLoop, NotifyN){
-
-    }
+//        TEST(EventLoop, TaskTimeoutTemplate){
+//            FcnEvLoop evloop;
+//            cout << "-------- time out 1ms test:" << endl;
+//            evloop.addTask<TestTask>(1,    "1ms_task");
+//            cout << "-------- time out 10ms test:" << endl;
+//            evloop.addTask<TestTask>(10,   "10ms_task");
+//            cout << "-------- time out 100ms test:" << endl;
+//            evloop.addTask<TestTask>(100,  "100ms_task");
+//            cout << "-------- time out 1s test:" << endl;
+//            evloop.addTask<TestTask>(1000, "1000ms_task");
+//            sleep(7);
+//
+//            evloop.stop();
+//        }
+//
+//        TEST(EventLoop, TaskTimeoutShort){
+//            FcnEvLoop evloop;
+//            evloop.addTask<TestTask>(1,  "1ms_task");
+//            evloop.addTask<TestTask>(3,  "3ms_task");
+//            evloop.addTask<TestTask>(4,  "4ms_task");
+//            evloop.addTask<TestTask>(10, "10ms_task");
+//            evloop.addTask<TestTask>(7,  "7ms_task");
+//            evloop.addTask<TestTask>(1,  "1_ms_task");
+//
+//            sleep(12);
+//            evloop.stop();
+//        }
+//
+//        TEST(EventLoop, Notify1){
+//            FcnEvLoop evloop;
+//            evloop.addTask<TestTask>(300, "500ms_task");
+//            sleep(1);
+//
+//            auto msg = makeESharedPtr<DataLinkFrame>();
+//
+//            char* payload = "hello world";
+//            int payload_size = strlen(payload) + 1;
+//            msg->src_id = 1;
+//
+//            msg->payload_len = payload_size;
+//            memcpy(msg->payload, payload, payload_size);
+//
+//            for(int i = 0; i < 4; i ++){
+//                cout << "evloop.notify(0x01) 1  " << getCurrentTimeUs() << endl;
+//                evloop.notify(msg);
+//                sleep(1);
+//            }
+//
+//            cout << "evloop.notify(0x01) 2   " << getCurrentTimeUs() << endl;
+//            evloop.notify(msg);
+//
+//            sleep(3);
+//            evloop.stop();
+//        }
+//
+//
+//        TEST(EventLoop, NotifyN){
+//
+//        }
 }
 
 

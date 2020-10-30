@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-using namespace emros;
+using namespace utils;
 using namespace std;
 
 TEST(CppUtils, existInVector) {
@@ -30,7 +30,7 @@ TEST(CppUtils, perciseSleep) {
 
 }
 
-TEST(CppUtils, myMemcpy) {
+TEST(CppUtils, memcpy) {
 
     uint8_t src[7], dest[7];
 
@@ -38,7 +38,7 @@ TEST(CppUtils, myMemcpy) {
         src[i] = i;
     }
 
-    myMemcpy(dest, src, 7);
+    utils::memcpy(dest, src, 7);
 
     for(int i = 0; i < 7; i ++){
         cout<< std::to_string(dest[i]) << ",";

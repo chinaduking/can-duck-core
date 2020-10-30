@@ -36,7 +36,17 @@ namespace utils {
     };
 
 
-    template <typename Task_T, typename Msg_T, typename TaskAllocator=DefaultAllocator>
+#ifdef EVENTLOOP_THREADING
+#define EVENTLOOP_LOCKGURAD(m_) std::lock_guard<std::mutex> evloop_lock_guard(m_)
+
+    inline uint64_t evloopTimeSrouceMS(){
+        return (getCurrentTimeUs() / 1000);
+    }
+#else
+#define EVENTLOOP_LOCKGURAD(m_)
+#endif
+
+    template <typename Msg_T, typename TaskAllocator=DefaultAllocator>
     class EventLoop{
     public:
 
@@ -45,9 +55,9 @@ namespace utils {
             friend class EventLoop;
         public:
             Task()
-                :timeout_time_us(0),
-                 status(EVSTAT_WaitingRun),
-                 context_evloop(){}
+                : timeout_time_ms(0),
+                  status(EVSTAT_WaitingRun),
+                  context_evloop(){}
 
             virtual ~Task() = default;
 
@@ -69,9 +79,9 @@ namespace utils {
             void evWaitNotify(int timeout_ms = -1){
                 /* 传入非正整数使超时时间为无穷 */
                 if(timeout_ms <= 0){
-                    timeout_time_us = 0;
+                    timeout_time_ms = 0;
                 }else{
-                    timeout_time_us = getCurrentTimeUs() + timeout_ms * 1000;
+                    timeout_time_ms = context_evloop->getCurrentTimeMs() + timeout_ms;
                 }
 
                 setStatus(EVSTAT_WaitingNofity);
@@ -81,7 +91,7 @@ namespace utils {
             void evRestart(){
                 /*clear timeout to clear waiting signal state.*/
 
-                this->timeout_time_us = 0;
+                this->timeout_time_ms = 0;
 
                 setStatus(EVSTAT_WaitingRun);
             }
@@ -93,8 +103,12 @@ namespace utils {
 
             EventLoop* context_evloop{nullptr};
 
+
+
+
+            //TODO: override new /delete using TaskAllocator
         private:
-            uint64_t timeout_time_us{0};
+            uint64_t timeout_time_ms{0};
         };
 
 
@@ -118,6 +132,10 @@ namespace utils {
 #endif
 
 //            std::cout << "EventLoopBase deleted.\n";
+        }
+
+        void setTimeSource(uint64_t (*ms_timesource)()){
+            this->ms_timesource = ms_timesource;
         }
 
 
@@ -168,13 +186,13 @@ namespace utils {
 
 
         /* 旧的添加任务方式 */
-        void addTask(Task& task){
-
+        void addTask(Task&& task){
+            task_list.push(task);
         }
 
         bool scheduleWorker(){
 #ifdef EVENTLOOP_THREADING
-            unique_lock<mutex> updating_lk(update_mutex);
+            std::unique_lock<std::mutex> updating_lk(update_mutex);
 #endif
             /*is_nested_in_evloop flag is use for adding task inside scheduleWorker().
              * without it, adding task will cause deadlock!*/
@@ -208,7 +226,7 @@ namespace utils {
                  * at main scheduler sleeping.*/
                 is_nested_in_evloop = false;
                 sched_ctrl_cv.wait_for(
-                        updating_lk, chrono::microseconds(min_time_out));
+                        updating_lk, std::chrono::microseconds(min_time_out));
                 is_nested_in_evloop = true;
             }
 #endif
@@ -227,7 +245,7 @@ namespace utils {
         void notify(){
             //TODO: 只实现深度为1的通知队列：填入一个消息，并阻塞至所有接收处理完成！
 #ifdef EVENTLOOP_THREADING
-            unique_lock<mutex> updating_lk(update_mutex);
+            std::unique_lock<std::mutex> updating_lk(update_mutex);
             sched_ctrl_cv.notify_all();
 #endif //EVENTLOOP_THREADING
 
@@ -247,20 +265,21 @@ namespace utils {
             int min_time_out = MAX_SLEEP_GAP;
 
             auto current_time_us = getCurrentTimeUs();
-            for(auto task : task_pool){
+            for(auto& task : task_list){
                 /* 如果有正在等待运行的任务，则返回0直接进入下一个循环。
                  * 一般是因调用了Restart */
-                if(task->status == EVSTAT_WaitingRun){
+                if(task.status == EVSTAT_WaitingRun){
                     min_time_out = 0;
                     break;
                 }
 
                 /* 如果没有需要立即重启的任务，
                  * 则在正在等待通知且设置了超时的任务中，搜索下一个最小超时*/
-                if(task->status == EVSTAT_WaitingNofity
-                   && task->timeout_time_us != 0) {
+                if(task.status == EVSTAT_WaitingNofity
+                   && task.timeout_time_ms != 0) {
 
-                    uint64_t sleep_time = task->timeout_time_us - current_time_us;
+                    uint64_t sleep_time = task.timeout_time_ms -
+                            current_time_us;
 
                     if (min_time_out > (int) sleep_time) {
                         min_time_out = (int) sleep_time;
@@ -279,29 +298,29 @@ namespace utils {
 
         void checkNotify(){
             if(is_notify_pending){
-                for (auto task : task_list) {
-                    if (task->matchNotifyMsg(pending_notify)
-                        && task->status == EVSTAT_WaitingNofity) {
-                        task->setStatus(EVSTAT_WaitingDelete);
-                        task->evNotifyCallback(pending_notify);
+                for (auto& task : task_list) {
+                    if (task.matchNotifyMsg(pending_notify)
+                        && task.status == EVSTAT_WaitingNofity) {
+                        task.setStatus(EVSTAT_WaitingDelete);
+                        task.evNotifyCallback(pending_notify);
                     }
                 }
 
                 is_notify_pending = false;
 
-                notifyUnblock();//TODO: 解除notify调用的阻塞
+//                notifyUnblock();//TODO: 解除notify调用的阻塞
             }
         }
 
         void checkRun(){
-            for(auto task : task_pool) {
-                if(task->status == EVSTAT_WaitingRun){
+            for(auto& task : task_list) {
+                if(task.status == EVSTAT_WaitingRun){
                     /*set task status to delete at first,
                      *if restart() or waitNofify() is called,
                      * task->status will be changed. if neither is
                      * called, task will be deleted*/
-                    task->setStatus(EVSTAT_WaitingDelete);
-                    task->evUpdate();
+                    task.setStatus(EVSTAT_WaitingDelete);
+                    task.evUpdate();
                 }
             }
         }
@@ -311,15 +330,16 @@ namespace utils {
         }
 
         void checkTimeout(){
-            for(auto task : task_list){
-                if(task->status != EVSTAT_WaitingNofity){
+            for(auto& task : task_list){
+                if(task.status != EVSTAT_WaitingNofity){
                     continue;
                 }
 
-                if(task->timeout_time_us != 0 && getCurrentTimeUs() > task->timeout_time_us){
+                if(task.timeout_time_ms != 0 && getCurrentTimeMs() >
+                task.timeout_time_ms){
                     /*same reason as above. set to delete first.*/
-                    task->setStatus(EVSTAT_WaitingDelete);
-                    task->evTimeoutCallback();
+                    task.setStatus(EVSTAT_WaitingDelete);
+                    task.evTimeoutCallback();
                 }
             }
         }
@@ -331,6 +351,14 @@ namespace utils {
             return ev.status == EVSTAT_WaitingDelete;
         }
 
+        uint64_t getCurrentTimeMs(){
+            if(ms_timesource == nullptr){
+                return 0;
+            }
+            return (*ms_timesource)();
+        }
+
+        uint64_t (*ms_timesource)() {nullptr};
 
 #ifdef EVENTLOOP_THREADING
         static const int MAX_SLEEP_GAP = 500*1000;

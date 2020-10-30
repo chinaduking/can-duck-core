@@ -156,7 +156,7 @@ namespace utils{
             Node* node_iter = head_node;
 
             while (node_iter != nullptr){
-                if(matched((val_T&)*(node_iter->val))){
+                if(matched(node_iter->val)){
                     size_ --;
 
                     if(node_iter_prev != nullptr){
