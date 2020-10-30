@@ -4,6 +4,7 @@ add_library(fcn_v2
         RealtimeObject.cpp
         ServiceObject.cpp
         TracerSingleton.cpp
+        FrameUtils.cpp
 
         utils/DataVerify.cpp
         utils/Tracer.cpp

@@ -18,6 +18,11 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 }
 
 int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
+    tracer->print(Tracer::VERBOSE, "NetworkLayer::sendFrame:"
+                                   "\n\r%s", DataLinkFrameToString(*frame)
+                          .c_str());
+
+
     if(port_id >= data_link_dev.size()){
         return -1;
     }

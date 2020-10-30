@@ -11,6 +11,7 @@
 #include "DataObjects.hpp"
 #include "SharedObjManager.hpp"
 #include "DefaultAllocate.h"
+#include "OperationCode.hpp"
 #include "utils/BitLUT8.hpp"
 
 namespace libfcn_v2 {
@@ -44,21 +45,35 @@ namespace libfcn_v2 {
 
         ~SvoClient() = default;
 
-        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
         template<typename Msg>
-        void readUnblocking(Msg&& item,
+        void readUnblocking(Msg&& msg,
                             FcnCallbackInterface* callback=nullptr){
             DataLinkFrame frame;
-            frame.dest_id =
+            frame.dest_id = server_addr;
+            frame.src_id  = client_addr;
+            frame.op_code = (uint8_t)OpCode::SVO_SINGLE_READ_REQ;
+            frame.msg_id = msg.index;
+            frame.payload_len = 1;
+            frame.payload[0] =  msg.data_size;
+
+            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
             networkSendFrame(port_id, &frame);
         }
 
 
-        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
         template<typename Msg>
-        void writeUnblocking(Msg&& item,
+        void writeUnblocking(Msg&& msg,
                              FcnCallbackInterface* callback=nullptr){
+            DataLinkFrame frame;
+            frame.dest_id = server_addr;
+            frame.src_id  = client_addr;
+            frame.op_code = (uint8_t)OpCode::SVO_SINGLE_WRITE_REQ;
+            frame.msg_id = msg.index;
+            frame.payload_len = msg.data_size;
+            utils::memcpy(frame.payload, &msg.data, msg.data_size);
 
+            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+            networkSendFrame(port_id, &frame);
         }
 
 #ifdef SYSTYPE_FULL_OS
@@ -215,7 +230,7 @@ namespace libfcn_v2 {
             return server;
         }
 
-        SvoClient* bindClienttoServer(uint16_t server_addr,
+        SvoClient* bindClientToServer(uint16_t server_addr,
                                       uint16_t client_addr,
                                       uint16_t port_id){
             auto client = new SvoClient(network, server_addr, client_addr,

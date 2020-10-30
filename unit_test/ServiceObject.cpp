@@ -18,6 +18,7 @@ using namespace utils;
 namespace network_test {
 
     #define SERVO_ADDR 0x02
+    #define HOST_ADDR  0x05
 
     TEST(NetworkLayer, SvoServoNode) {
         int local_addr = SERVO_ADDR;
@@ -36,7 +37,7 @@ namespace network_test {
 
         for(int __i = 0; __i < 1; ){
             auto angle_msg = fcnmsg::test_ServoRTO.angle;
-            angle_msg << cnt;
+            angle_msg << 0x55667788;
             server->updateData(angle_msg);
 
             cnt ++;
@@ -53,12 +54,13 @@ namespace network_test {
         tracer.setFilter(Tracer::INFO);
 
         int servo_addr = SERVO_ADDR;
+        int local_addr = HOST_ADDR;
 
         fcn_node.spin();
 
 
         auto servo_client = fcn_node.network_layer->svo_network_handler
-                .bindClienttoServer(servo_addr);
+                .bindClientToServer(servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
             perciseSleep(0.1);
