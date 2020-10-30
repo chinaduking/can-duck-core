@@ -45,7 +45,8 @@ namespace libfcn_v2 {
 
     class PubSubChannel{
     public:
-        PubSubChannel(ObjectDictMM* obj_dict_shm, void* buffer)
+        PubSubChannel(ObjectDictMM* obj_dict_shm, void* buffer,
+                      bool is_source= true)
             : obj_dict_prototype(obj_dict_shm), buffer(buffer){
             USER_ASSERT(buffer != nullptr);
         }
@@ -89,18 +90,9 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        Prototype fetchBuffer(Prototype&& msg){
-
+        Prototype readBuffer(Prototype&& msg){
             USER_ASSERT(buffer!= nullptr);
-
-            Prototype res = msg;
-
-            utils::memcpy(&res.data,
-                          (uint8_t*)buffer +
-                          msg.buffer_offset,
-                          sizeof(res.data));
-
-            return res;
+            return obj_dict_prototype->read(msg, buffer);
         }
 
         ObjectDictMM* obj_dict_prototype{nullptr};
@@ -123,8 +115,6 @@ namespace libfcn_v2 {
         libfcn_v2::NetworkLayer *network_layer;
 
         void networkPublish(DataLinkFrame* frame);
-
-
 
     };
 

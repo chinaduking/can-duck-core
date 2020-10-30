@@ -7,7 +7,10 @@
 #include <cstdarg>
 #include <iostream>
 
+#define OP_CODE_DECODE
+
 using namespace utils;
+
 
 #define TRACE_BUFFER_SIZE 1024
 #define MAX_BINDING_OUTPUT_DEVICE 3

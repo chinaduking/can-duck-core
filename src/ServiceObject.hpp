@@ -32,8 +32,9 @@ namespace libfcn_v2 {
     public:
         SvoClient(NetworkLayer* network_layer,
                   uint16_t server_addr) :
-                    network_layer(network_layer),
+
                     server_addr(server_addr),
+                    network_layer(network_layer),
                     pending_reqs(CLIENT_MAX_REQ_NUM)
                   {}
 
@@ -120,6 +121,16 @@ namespace libfcn_v2 {
 
         uint16_t server_addr { 0 };
 
+        template<typename Msg>
+        void updateData(Msg&& msg){
+            obj_dict_prototype->write(msg, buffer);
+        }
+
+        template<typename Prototype>
+        Prototype getData(Prototype&& msg){
+            USER_ASSERT(buffer!= nullptr);
+            return obj_dict_prototype->read(msg, buffer);
+        }
         /*
          * TODO:
          * 回调分配在堆上。堆为连续的，插入时会将不够的空间向后推。

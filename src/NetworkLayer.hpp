@@ -10,35 +10,40 @@
 #include "RealtimeObject.hpp"
 #include "ServiceObject.hpp"
 #include "DefaultAllocate.h"
+#include "TracerSingleton.hpp"
 
 namespace libfcn_v2{
     class NetworkLayer {
     public:
         NetworkLayer()
             :
-            data_link_dev(MAX_COM_PORT_NUM),
             rto_network_handler(this),
-            svo_network_handler(this)
-            {}
+            svo_network_handler(this),
+            data_link_dev(MAX_COM_PORT_NUM) {
+                tracer = TracerSingleton::getInstance();
+           }
 
         ~NetworkLayer() = default;
 
         int addDataLinkDevice(FrameIODevice* device);
 
-        //bool sendFrame(uint16_t port_id, DataLinkFrame* frame);
+        int sendFrame(uint16_t port_id, DataLinkFrame* frame);
 
         void recvPolling();
         void sendPolling();
 
-        utils::vector_s<FrameIODevice*> data_link_dev;
+
         RtoNetworkHandler rto_network_handler;
         SvoNetworkHandler svo_network_handler;
         //LargeDataHandler large_data_handler;
 
 
     private:
+        utils::vector_s<FrameIODevice*> data_link_dev;
+        void recvProtocolDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
 
-        void recvDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
+
+        utils::Tracer* tracer={nullptr};
 
     };
 }

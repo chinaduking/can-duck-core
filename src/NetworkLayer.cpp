@@ -9,16 +9,6 @@
 using namespace libfcn_v2;
 using namespace utils;
 
-//NetworkLayer* NetworkLayer::instance = nullptr;
-//
-//NetworkLayer * NetworkLayer::getInstance() {
-//    if(instance == nullptr){
-//        instance = new NetworkLayer();
-//    }
-//
-//    return instance;
-//}
-
 int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 
     data_link_dev.push_back(device);
@@ -27,12 +17,20 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
     return device->local_device_id;
 }
 
-void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
-    auto tracer = TracerSingleton::getInstance();
+int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
+    if(port_id >= data_link_dev.size()){
+        return -1;
+    }
 
-//    tracer->print(Tracer::VERBOSE, "NetworkLayer::recvDispatcher:"
-//                                   "\n\r%s", DataLinkFrameToString(*frame)
-//                                   .c_str());
+    return data_link_dev[port_id]->write(frame);
+}
+
+/* 将不同命令字分配到不同协议上
+ * */
+void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
+    tracer->print(Tracer::VERBOSE, "NetworkLayer::recvProtocolDispatcher:"
+                                   "\n\r%s", DataLinkFrameToString(*frame)
+                                   .c_str());
 
 
     auto op_code = frame->op_code;
@@ -42,28 +40,14 @@ void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
         && op_code <= (uint8_t)OpCode::RTO_REQUEST){
 
         rto_network_handler.handleWrtie(frame, recv_port_id);
-        return;
     }
 
-    /* 服务消息 */
+    /* 服务消息-d */
     if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
-       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
+       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK) {
 
         svo_network_handler.handleRecv(frame, recv_port_id);
-//        for(auto& server : svo_server_local){
-//            /* 收到发给自己的数据包，进行处理 */
-//            if(frame->dest_id == server->address){
-//                server->handleRecv(frame, recv_port_id);
-//                break;
-//            }
-//        }
     }
-
-//    /* 服务应答消息 */
-//    if(op_code == (uint8_t)OpCode::SVO_SINGLE_READ_ACK
-//       || op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
-//
-//    }
 
 
     /*
@@ -80,14 +64,19 @@ void NetworkLayer::recvDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
             }
         }
     }
-
 }
 
 void NetworkLayer::recvPolling() {
     DataLinkFrame frame_tmp;
 
+    /* 轮询读取数据
+     * 注意，如果有多个端口，且读为阻塞模式，则会多个端口
+     * 之间会互相阻塞，因此需要多线程。但一般上位机只有一个端口（串口）
+     * 因此先不做优化。下位机一般不采用OS，为非阻塞读取，不受影响。
+     * */
     for(auto& dev : data_link_dev){
-        dev->read(&frame_tmp);
-        recvDispatcher(&frame_tmp, dev->local_device_id);
+        if(dev->read(&frame_tmp)){
+            recvProtocolDispatcher(&frame_tmp, dev->local_device_id);
+        }
     }
 }

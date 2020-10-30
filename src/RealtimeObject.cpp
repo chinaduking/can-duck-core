@@ -95,7 +95,8 @@ void PubSubChannel::networkPublish(DataLinkFrame *frame) {
 //                  DataLinkFrameToString(*frame).c_str());
 
     if(network_layer != nullptr){
-        network_layer->data_link_dev[0]->write(frame);
+        //TODO: by publish ctrl rules!!
+        network_layer->sendFrame(0, frame);
     }
 }
 

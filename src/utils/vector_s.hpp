@@ -112,11 +112,13 @@ namespace utils{
             remove(matched_idx);
         }
 
+
         void remove(uint32_t index){
             if(index >= member_cnt){
                 return;
             }
 
+            //TODO!!: call destructor???
             /* 最后一个，直接-1 */
             if(index == member_cnt - 1){
                 member_cnt --;

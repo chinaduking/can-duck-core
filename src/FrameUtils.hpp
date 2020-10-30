@@ -9,6 +9,9 @@
 #include "DataLinkLayer.hpp"
 
 namespace libfcn_v2{
+
+
+
     inline std::string DataLinkFrameToString(DataLinkFrame& frame){
         static const int BUFFER_RESERVE = 120;
 

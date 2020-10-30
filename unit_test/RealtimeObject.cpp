@@ -175,14 +175,14 @@ namespace network_test {
             //fcn_node.spin();
             perciseSleep(0.1);
 
-
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
-                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.speed).data,
+                         rto_channel_2->readBuffer(fcnmsg::test_ServoRTO.speed).data,
 
-                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.angle).data,
+                         rto_channel_2->readBuffer(fcnmsg::test_ServoRTO.angle).data,
 
-                         rto_channel_2->fetchBuffer(fcnmsg::test_ServoRTO.current).data);
+                         rto_channel_2->readBuffer(
+                                 fcnmsg::test_ServoRTO.current).data);
 
             cnt ++;
         }
@@ -208,11 +208,14 @@ namespace network_test {
 
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
-                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.speed).data,
+                         servo_rto_channel->readBuffer(
+                                 fcnmsg::test_ServoRTO.speed).data,
 
-                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.angle).data,
+                         servo_rto_channel->readBuffer(
+                                 fcnmsg::test_ServoRTO.angle).data,
 
-                 servo_rto_channel->fetchBuffer(fcnmsg::test_ServoRTO.current).data);
+                         servo_rto_channel->readBuffer(
+                                 fcnmsg::test_ServoRTO.current).data);
         }
 
         fcn_node.join();

@@ -68,7 +68,7 @@ obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;
 
-    network_layer->data_link_dev[port_id]->write(&ack_frame);
+    network_layer->sendFrame(port_id, &ack_frame);
 
     return ack_code;
 }
@@ -120,7 +120,7 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;
 
-    network_layer->data_link_dev[port_id]->write(&ack_frame);
+    network_layer->sendFrame(port_id, &ack_frame);
 
     return 0;
 }
