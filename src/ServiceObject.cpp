@@ -137,6 +137,13 @@ void SvoClient::onWriteAck(DataLinkFrame* frame){
 //    event_loop->notify(frame);
 }
 
+int SvoClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {
+    if(network_layer!= nullptr){
+        network_layer->sendFrame(port_id, frame);
+    }
+
+    return 0;
+}
 
 DataLinkFrame server_frame;
 
@@ -166,13 +173,21 @@ void SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) 
 
 
         case OpCode::SVO_SINGLE_READ_ACK: {
-
+            for(auto& client : created_clients){
+                if(client.address == frame->dest_id){
+                    client.instance->onReadAck(frame);
+                }
+            }
         }
             break;
 
 
         case OpCode::SVO_SINGLE_WRITE_ACK: {
-
+            for(auto& client : created_clients){
+                if(client.address == frame->dest_id){
+                    client.instance->onWriteAck(frame);
+                }
+            }
 
         }
             break;

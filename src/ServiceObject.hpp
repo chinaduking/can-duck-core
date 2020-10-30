@@ -31,11 +31,15 @@ namespace libfcn_v2 {
     class SvoClient{
     public:
         SvoClient(NetworkLayer* network_layer,
-                  uint16_t server_addr) :
+                  uint16_t server_addr,
+                  uint16_t client_addr,
+                  uint16_t port_id) :
 
                     server_addr(server_addr),
+                    client_addr(client_addr),
                     network_layer(network_layer),
-                    pending_reqs(CLIENT_MAX_REQ_NUM)
+                    pending_reqs(CLIENT_MAX_REQ_NUM),
+                    port_id(port_id)
                   {}
 
         ~SvoClient() = default;
@@ -44,7 +48,9 @@ namespace libfcn_v2 {
         template<typename Msg>
         void readUnblocking(Msg&& item,
                             FcnCallbackInterface* callback=nullptr){
-
+            DataLinkFrame frame;
+            frame.dest_id =
+            networkSendFrame(port_id, &frame);
         }
 
 
@@ -69,8 +75,12 @@ namespace libfcn_v2 {
 #endif
         //TODO: const
         uint16_t server_addr { 0 };
+        uint16_t client_addr { 0 };
 
     private:
+        int networkSendFrame(uint16_t port_id, DataLinkFrame* frame);
+
+
         NetworkLayer* const network_layer{nullptr};
 
         friend class SvoNetworkHandler;
@@ -85,6 +95,8 @@ namespace libfcn_v2 {
             FcnCallbackInterface* callback;
         };
         utils::vector_s<PendingRequest> pending_reqs;
+
+        uint16_t port_id{0};
     };
 
     /*
@@ -171,7 +183,8 @@ namespace libfcn_v2 {
     public:
         SvoNetworkHandler(NetworkLayer* network):
                 network(network),
-                created_servers(MAX_NODE_NUM)
+                created_servers(MAX_LOCAL_NODE_NUM),
+                created_clients(MAX_LOCAL_NODE_NUM)
         {}
 
 
@@ -202,9 +215,18 @@ namespace libfcn_v2 {
             return server;
         }
 
-        SvoClient* bindClienttoServer(uint16_t address){
-            auto client = new SvoClient(network, address);
-            client->server_addr = address;
+        SvoClient* bindClienttoServer(uint16_t server_addr,
+                                      uint16_t client_addr,
+                                      uint16_t port_id){
+            auto client = new SvoClient(network, server_addr, client_addr,
+                                        port_id);
+
+            CreatedClient cli = {
+                    .address = client_addr,
+                    .instance = client
+            };
+
+            created_clients.push_back(cli);
 
             return client;
         }
@@ -218,11 +240,19 @@ namespace libfcn_v2 {
 
     protected:
         struct CreatedServer{
-            int    address {-1};
+            int         address {-1};
             SvoServer*  instance {nullptr};
         };
 
         utils::vector_s<CreatedServer> created_servers;
+
+
+        struct CreatedClient{
+            int         address {-1};
+            SvoClient*  instance {nullptr};
+        };
+
+        utils::vector_s<CreatedClient> created_clients;
 
     };
 

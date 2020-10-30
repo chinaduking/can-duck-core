@@ -34,18 +34,15 @@ namespace network_test {
         auto server = fcn_node.network_layer->svo_network_handler
                 .createServer(fcnmsg::test_ServoRTO, local_addr);
 
+        for(int __i = 0; __i < 1; ){
+            auto angle_msg = fcnmsg::test_ServoRTO.angle;
+            angle_msg << cnt;
+            server->updateData(angle_msg);
 
+            cnt ++;
 
-//        for(int __i = 0; __i < 1; ){
-//            auto msg = libfcn_v2_test::testServoSvoDict::angle;
-//            msg << 200;
-//
-//            client->writeUnblocking(msg, nullptr);
-//
-////            client->
-//            perciseSleep(0.1);
-//            cnt ++;
-//        }
+            perciseSleep(0.5);
+        }
         fcn_node.join();
     }
 
@@ -59,8 +56,14 @@ namespace network_test {
 
         fcn_node.spin();
 
+
+        auto servo_client = fcn_node.network_layer->svo_network_handler
+                .bindClienttoServer(servo_addr);
+
         for(int __i = 0; __i < 1; ){
             perciseSleep(0.1);
+
+            servo_client->readUnblocking(fcnmsg::test_ServoRTO.angle);
 
 //            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
 //                                          ", current = %d \n",
