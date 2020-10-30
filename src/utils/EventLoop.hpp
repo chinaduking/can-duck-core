@@ -183,7 +183,7 @@ namespace utils {
 
 
         /* 旧的添加任务方式 */
-        void addTask(Task* task){
+        void addTask(std::unique_ptr<Task> task){
             task->context_evloop = this;
             task_list.push(task);
         }
@@ -235,7 +235,7 @@ namespace utils {
 
     protected:
 
-        LinkedList<Task*, ListNodeAlloc> task_list;
+        LinkedList<std::unique_ptr<Task>, ListNodeAlloc> task_list;
 
     private:
         void notify(){
@@ -322,20 +322,20 @@ namespace utils {
         }
 
         void checkDelete(){
-            while(1){
-                auto node = task_list.find(isWaitingDelete);
+//            while(1){
+//                auto node = task_list.find(isWaitingDelete);
+//
+//                if(node == nullptr){
+//                    break;
+//                }
+//
+//                delete node->val;
+//                node->val = nullptr;
+//
+//                task_list.remove(node);
+//            }
 
-                if(node == nullptr){
-                    break;
-                }
-
-                delete node->val;
-                node->val = nullptr;
-
-                task_list.remove(node);
-            }
-            //TODO: use unique ptr to search once!
-//            task_list.remove_if(isWaitingDelete);
+            task_list.remove_if(isWaitingDelete);
         }
 
         void checkTimeout(){
@@ -356,7 +356,7 @@ namespace utils {
         bool is_start{true};
         bool is_nested_in_evloop{false};
 
-        static bool isWaitingDelete(Task*& task){
+        static bool isWaitingDelete(std::unique_ptr<Task>& task){
             return task->status == EVSTAT_WaitingDelete;
         }
 

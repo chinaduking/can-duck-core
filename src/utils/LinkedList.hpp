@@ -109,7 +109,7 @@ namespace utils{
             if(head_node == nullptr){
                 head_node = new Node();
                 p_node = head_node;
-                p_node->val = val;
+                p_node->val = std::move(val);
                 p_node->p_next = nullptr;
 
                 tail_node = head_node;
@@ -118,7 +118,7 @@ namespace utils{
 
             p_node = new Node();
             tail_node->p_next = p_node;
-            p_node->val = val;
+            p_node->val = std::move(val);
             p_node->p_next = nullptr;
             tail_node = p_node;
         }

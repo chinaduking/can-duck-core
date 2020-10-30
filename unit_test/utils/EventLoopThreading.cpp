@@ -113,16 +113,16 @@ namespace evloop_test{
 
 
         cout << "-------- time out 1ms test:" << endl;
-        evloop.addTask(new TestTask(1, "1ms_task"));
+        evloop.addTask(make_unique<TestTask>(1, "1ms_task"));
         cout << "-------- time out 10ms test:" << endl;
 
-        evloop.addTask(new TestTask(10, "10ms_task"));
+        evloop.addTask(make_unique<TestTask>(10, "10ms_task"));
 
         cout << "-------- time out 100ms test:" << endl;
-        evloop.addTask(new TestTask(10, "10ms_task"));
+        evloop.addTask(make_unique<TestTask>(10, "10ms_task"));
 
         cout << "-------- time out 1s test:" << endl;
-        evloop.addTask(new TestTask(1000, "1000ms_task"));
+        evloop.addTask(make_unique<TestTask>(1000, "1000ms_task"));
         sleep(7);
 
         evloop.stop();
