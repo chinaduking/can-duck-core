@@ -147,7 +147,24 @@ namespace utils{
             size_ --;
         }
 
-        void removeIf(bool (*matched)(val_T& val)){
+        Node* find(bool (*matched)(val_T& val)){
+            if(head_node == nullptr){
+                return nullptr;
+            }
+
+            Node* node_iter = head_node;
+            while (node_iter != nullptr) {
+                if ((*matched)(node_iter->val)) {
+                    return node_iter;
+                }
+
+                node_iter = node_iter->p_next;
+            }
+
+            return nullptr;
+        }
+
+        void remove_if(bool (*matched)(val_T& val)){
             if(head_node == nullptr){
                 return;
             }

@@ -56,3 +56,42 @@ TEST(LinkedList, io){
 
 }
 
+
+TEST(LinkedList, io){
+
+    LinkedList<int, LinkedListAllocator> int_list;
+
+    for(int i = 0; i < 10; i ++){
+        int_list.push(i);
+    }
+
+    ASSERT_EQ(int_list.size(), 1);
+    ASSERT_EQ(int_list.tail(), 5);
+
+    ASSERT_EQ(listNodeObjPool.usage(), 1);
+
+
+    int data = 10;
+    int_list.push(data);
+    cout << "after push:  " << data << endl;
+
+    ASSERT_EQ(int_list.size(), 2);
+    ASSERT_EQ(int_list.tail(), 10);
+
+    ASSERT_EQ(listNodeObjPool.usage(), 2);
+
+
+
+    for(auto& i : int_list){
+        cout << "data:  " << i << endl;
+    }
+
+    int_list.pop();
+
+    for(auto& i : int_list){
+        cout << "data:  " << i << endl;
+    }
+
+    ASSERT_EQ(listNodeObjPool.usage(), 1);
+
+}

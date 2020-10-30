@@ -28,7 +28,7 @@ namespace evloop_test{
         void evUpdate() override {
             cout << name <<" -- evUpdate!! " << getCurrentTimeUs() << endl;
 
-            if (cnt < 100) {
+            if (cnt < 3) {
                 cnt++;
                 cout << name <<" ::: call evWaitNotify. " << endl;
                 evWaitNotify(timeout_ms);
@@ -73,7 +73,8 @@ namespace evloop_test{
 
 
         ~TestTask() {
-            cout << name <<" -- task delete!! " << getCurrentTimeUs() << endl;
+            cout << name <<" -- task delete!!  ~TestTask() " <<
+            getCurrentTimeUs() << endl;
         }
 
         int cnt;

@@ -46,7 +46,7 @@ namespace utils {
 #define EVENTLOOP_LOCKGURAD(m_)
 #endif
 
-    template <typename Msg_T, typename TaskAllocator=DefaultAllocator>
+    template <typename Msg_T, typename ListNodeAlloc=DefaultAllocator>
     class EventLoop{
     public:
 
@@ -234,10 +234,8 @@ namespace utils {
         }
 
     protected:
-//        SharedMQ<EventBase> task_pool;
-//        SharedMQ<DataLinkFrame> notify_queue;
 
-        LinkedList<Task*, TaskAllocator> task_list;
+        LinkedList<Task*, ListNodeAlloc> task_list;
 
     private:
         void notify(){
@@ -324,7 +322,7 @@ namespace utils {
         }
 
         void checkDelete(){
-            task_list.removeIf(isWaitingDelete);
+            task_list.remove_if(isWaitingDelete);
         }
 
         void checkTimeout(){

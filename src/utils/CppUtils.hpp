@@ -90,6 +90,12 @@ namespace utils{
         }
     }
 
+    template<typename T>
+    struct is_pointer { static const bool value = false; };
+
+    template<typename T>
+    struct is_pointer<T*> { static const bool value = true; };
+
 #ifdef SYSTYPE_FULL_OS
     #define USER_ASSERT(t) assert(t)
 
