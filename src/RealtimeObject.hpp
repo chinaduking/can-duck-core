@@ -10,7 +10,6 @@
 #include "DataLinkLayer.hpp"
 #include "DataObjects.hpp"
 #include "OperationCode.hpp"
-#include "SharedObjManager.hpp"
 #include "DefaultAllocate.h"
 
 /* ---------------------------------------------------------
@@ -39,9 +38,6 @@ namespace libfcn_v2 {
                               uint8_t *data, obj_size_t len);
 
     class NetworkLayer;
-
-    /* 共享字典管理器 */
-    typedef SharedObjManager<ObjectDictMM> RtoDictManager;
 
     class PubSubChannel{
     public:

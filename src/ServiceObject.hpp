@@ -9,7 +9,6 @@
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "DataObjects.hpp"
-#include "SharedObjManager.hpp"
 #include "DefaultAllocate.h"
 #include "OperationCode.hpp"
 #include "utils/BitLUT8.hpp"
@@ -158,6 +157,18 @@ namespace libfcn_v2 {
             USER_ASSERT(buffer!= nullptr);
             return obj_dict_prototype->read(msg, buffer);
         }
+
+        template<typename Prototype>
+        void setWrAccess(Prototype&& msg){
+            wr_access_table.add(msg.index);
+        }
+
+        template<typename Prototype>
+        void resetWrAccess(Prototype&& msg){
+            wr_access_table.remove(msg.index);
+        }
+
+
         /*
          * TODO:
          * 回调分配在堆上。堆为连续的，插入时会将不够的空间向后推。

@@ -35,6 +35,8 @@ namespace network_test {
         auto server = fcn_node.network_layer->svo_network_handler
                 .createServer(fcnmsg::test_ServoRTO, local_addr);
 
+        server->setWrAccess(fcnmsg::test_ServoRTO.mode);
+
         for(int __i = 0; __i < 1; ){
             auto angle_msg = fcnmsg::test_ServoRTO.angle;
             angle_msg << 0x55667788;
@@ -65,7 +67,11 @@ namespace network_test {
         for(int __i = 0; __i < 1; ){
             perciseSleep(0.1);
 
-            servo_client->readUnblocking(fcnmsg::test_ServoRTO.angle);
+//            servo_client->readUnblocking(fcnmsg::test_ServoRTO.angle);
+
+            auto mode_msg = fcnmsg::test_ServoRTO.mode;
+            mode_msg << 0x22;
+            servo_client->writeUnblocking(mode_msg);
 
 //            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
 //                                          ", current = %d \n",
