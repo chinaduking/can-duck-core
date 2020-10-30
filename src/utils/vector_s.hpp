@@ -100,6 +100,37 @@ namespace utils{
         iterator end() const { return iterator(this); }
 
 
+        void remove_if(bool(*matched)(T& data)){
+            uint32_t matched_idx = member_cnt;
+
+            for(uint32_t i = 0; i < member_cnt; i++){
+                if((*matched)(array[i])){
+                    matched_idx = i;
+                }
+            }
+
+            remove(matched_idx);
+        }
+
+        void remove(uint32_t index){
+            if(index >= member_cnt){
+                return;
+            }
+
+            /* 最后一个，直接-1 */
+            if(index == member_cnt - 1){
+                member_cnt --;
+                return;
+            }
+
+            /* 中间的，后面递推 */
+            for(uint32_t i = index; i < member_cnt; i++){
+                array[i] = array[i+1];
+            }
+            member_cnt --;
+
+        }
+
     private:
         T* array;
         uint32_t member_cnt;

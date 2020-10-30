@@ -1,10 +1,14 @@
-add_executable(testDataObjects DataObjects.cpp)
+add_executable(testDataObjects DataObjects.cpp
+        test_ServoRTO.cpp
+        )
 target_link_libraries(testDataObjects  GTest::GTest GTest::Main)
 
 
 
 add_executable(testRealtimeObject RealtimeObject.cpp
-        ${PROJECT_SOURCE_DIR}/src/RealtimeObject.cpp)
+#        ${PROJECT_SOURCE_DIR}/src/RealtimeObject.cpp
+        test_ServoRTO.cpp
+        )
 target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
         GTest::Main)
 

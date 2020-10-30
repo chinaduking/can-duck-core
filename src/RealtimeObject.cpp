@@ -3,67 +3,72 @@
 //
 
 #include "RealtimeObject.hpp"
+#include "NetworkLayer.hpp"
 #include "OperationCode.hpp"
 #include "utils/CppUtils.hpp"
-using namespace libfcn_v2;
 
+#include "TracerSingleton.hpp"
+
+using namespace libfcn_v2;
+using namespace utils;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t libfcn_v2::RtoDictContinuousWrite(RealtimeObjectDict* dict,
-                                      obj_idx_t index,
-                                      uint8_t *data, obj_size_t len){
+obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
+                              void* buffer,
+                              obj_idx_t index,
+                              uint8_t *data, obj_size_t len){
 
-    /* 不一次直接memcpy，有两个原因：
-     * 1. 每次均检查index是否已溢出
-     * 2. 支持未来的回调
-     * */
-    while (len > 0){
+//    /* 不一次直接memcpy，有两个原因：
+//     * 1. 每次均检查index是否已溢出
+//     * 2. 支持未来的回调
+//     * */
+//    while (len > 0){
 
-        if(index > dict->obj_dict.size()){
+        USER_ASSERT(buffer != nullptr);
+
+        if(index > obj_dict->dictSize()){
             /* 仅做写保护，不使程序assert failed崩溃：
              * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
              * 可记录错误log
              * */
-            return 1;
+            return 0;
         }
 
-        auto p_obj = dict->obj_dict[index];
+//        auto p_obj = dict->obj_dict[index];
+
+        auto offset = obj_dict->getBufferDataOffest(index);
+        auto data_sz = obj_dict->getBufferDataSize(index);
+
+        USER_ASSERT(data_sz != 0);
 
 
-        USER_ASSERT(p_obj != nullptr);
+        utils::memcpy((uint8_t*)buffer+offset, data, data_sz);
 
-        utils::memcpy(p_obj->getDataPtr(), data,
-                p_obj->data_size);
+//        auto callback = p_obj->getCallbackPtr();
+//
+//        if(callback != nullptr){
+//            callback->callback(p_obj->getDataPtr(), 0);
+//        }
+//
+//        data += p_obj->data_size;
+//
+//        len -= p_obj->data_size;
 
-        auto callback = p_obj->getCallbackPtr();
+//        index ++;
+//    }
 
-        if(callback != nullptr){
-            callback->callback(p_obj->getDataPtr(), 0);
-        }
-
-        data += p_obj->data_size;
-
-        len -= p_obj->data_size;
-
-        index ++;
-    }
-
-    return 0;
+    return data_sz;
 }
 
-void libfcn_v2::coutinuousWriteFrameBuilder(
+void libfcn_v2::singleWriteFrameBuilder(
         DataLinkFrame* result_frame,
-        RealtimeObjectDict* dict,
-        obj_idx_t index_start, obj_idx_t index_end,
         uint16_t src_id,
         uint16_t dest_id,
-        uint16_t op_code){
+        uint16_t op_code,
+        uint16_t msg_id,
+        uint8_t* p_data, uint16_t len){
 
     USER_ASSERT(result_frame != nullptr);
-    USER_ASSERT(dict != nullptr);
-    /* 保证起始地址不高于结束地址 */
-    USER_ASSERT((index_start <= index_end));
-
 
 
     /* 初始化 */
@@ -71,26 +76,26 @@ void libfcn_v2::coutinuousWriteFrameBuilder(
     result_frame->src_id  = src_id;
     result_frame->dest_id = dest_id;
     result_frame->op_code = op_code;
-    result_frame->msg_id  = index_start; /* 消息ID为起始ID */
+    result_frame->msg_id  = msg_id; /* 消息ID为起始ID */
 
-    result_frame->payload_len = 0;      /* 开始对数据长度进行累加 */
+    result_frame->payload_len = len;      /* 开始对数据长度进行累加 */
 
     uint8_t * payload_ptr = result_frame->payload;
 
 
     /* 填充数据 */
-    for(int index = index_start; index <= index_end; index++){
-        if(index > dict->obj_dict.size()){
-            break;
-        }
+    utils::memcpy(payload_ptr, p_data, len);
 
-        auto obj = dict->obj_dict[index];
-        USER_ASSERT(obj != nullptr);
+}
 
-        utils::memcpy(payload_ptr, obj->getDataPtr(), obj->data_size);
+void PubSubChannel::networkPublish(DataLinkFrame *frame) {
+    auto tracer = TracerSingleton::getInstance();
 
-        result_frame->payload_len += obj->data_size; /* 对数据长度进行累加 */
-        payload_ptr += obj->data_size;  /* 输出指针自增 */
+//    tracer->print(Tracer::INFO, "PubSubChannel::networkPublish.\n%s",
+//                  DataLinkFrameToString(*frame).c_str());
+
+    if(network_layer != nullptr){
+        network_layer->data_link_dev[0]->write(frame);
     }
 }
 
@@ -102,10 +107,17 @@ void libfcn_v2::coutinuousWriteFrameBuilder(
 
 
 void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
-    auto dict = dict_manager.find(frame->src_id);
+    PubSubChannel* channel = nullptr;
 
-    /* 未找到对应地址的字典不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
-    if(dict == nullptr){
+    for(auto& ch : pub_sub_channels){
+        channel = ch;
+    }
+
+    /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
+    if(channel == nullptr){
+        TracerSingleton::getInstance()->print(Tracer::WARNING,
+          "RtoNetworkHandler::handleWrtie,""channel == nullptr\n");
+
         return;
     }
 
@@ -113,11 +125,17 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
     switch (opcode) {
         case OpCode::RTO_PUB:
-            RtoDictContinuousWrite(dict, frame->msg_id, frame->payload,
-                               frame->payload_len);
+            RtoDictSingleWrite(
+                    channel->obj_dict_prototype,
+                    channel->buffer,
+                    frame->msg_id,
+                    frame->payload, frame->payload_len);
+
             break;
+
         case OpCode::RTO_REQUEST:
             break;
+
         default:
             break;
     }
@@ -140,7 +158,7 @@ void RtoNetworkHandler::update(){
             //TODO..
             if(pub_ctrl_rule.end_idx == -1){
                 /* Single Write */
-//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.src_address,
@@ -148,7 +166,7 @@ void RtoNetworkHandler::update(){
 //                                            static_cast<uint8_t>(OpCode::RTO_PUB));
             }else{
                 /* Continuous Write */
-//                coutinuousWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
+//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
 //                                            pub_ctrl_rule.start_or_single_idx,
 //                                            pub_ctrl_rule.end_idx,
 //                                            pub_ctrl_rule.src_address,

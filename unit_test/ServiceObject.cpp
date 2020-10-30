@@ -8,7 +8,7 @@
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "testServoRtoDict.hpp"
+#include "testServoSvoDict.hpp"
 #include "FrameUtils.hpp"
 #include "SimpleSerialNode.hpp"
 
@@ -31,8 +31,16 @@ namespace network_test {
 
         uint32_t cnt = 0;
 
-        for(int __i = 0; __i < 1; ){
+        auto client = fcn_node.network_layer->svo_network_handler
+        .bindDictAsClient<libfcn_v2_test::testServoSvoDict>(local_addr);
 
+        for(int __i = 0; __i < 1; ){
+            auto msg = libfcn_v2_test::testServoSvoDict::angle;
+            msg << 200;
+
+            client->writeUnblocking(msg, nullptr);
+
+//            client->
             perciseSleep(0.1);
             cnt ++;
         }

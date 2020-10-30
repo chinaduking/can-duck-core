@@ -33,6 +33,11 @@ namespace libfcn_v2{
      **/
 //#define USE_EVLOOP
 
+
+    /* 一个客户端可以同时发起的请求
+     * */
+    #define CLIENT_MAX_REQ_NUM 10
+
 }
 
 #endif //LIBFCN_V2_DEFAULTALLOCATE_H

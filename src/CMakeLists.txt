@@ -3,6 +3,7 @@ add_library(fcn_v2
         NetworkLayer.cpp
         RealtimeObject.cpp
         ServiceObject.cpp
+        TracerSingleton.cpp
 
         utils/DataVerify.cpp
         utils/Tracer.cpp

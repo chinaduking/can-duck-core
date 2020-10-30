@@ -36,7 +36,7 @@ namespace libfcn_v2{
 
             SharedObj item = {
                 .id = id,
-                .p_obj   = new Inherit(),
+                .p_obj  = static_cast<Base*>(new Inherit()),
                 .mem_id = shared_objects.size()
             };
 
