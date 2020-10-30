@@ -322,7 +322,20 @@ namespace utils {
         }
 
         void checkDelete(){
-            task_list.remove_if(isWaitingDelete);
+            while(1){
+                auto node = task_list.find(isWaitingDelete);
+
+                if(node == nullptr){
+                    break;
+                }
+
+                delete node->val;
+                node->val = nullptr;
+
+                task_list.remove(node);
+            }
+            //TODO: use unique ptr to search once!
+//            task_list.remove_if(isWaitingDelete);
         }
 
         void checkTimeout(){

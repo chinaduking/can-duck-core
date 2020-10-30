@@ -164,6 +164,48 @@ namespace utils{
             return nullptr;
         }
 
+        void remove(Node* node){
+            if(head_node == nullptr){
+                return;
+            }
+
+            Node* node_iter_prev = nullptr;
+            Node* node_iter = head_node;
+
+            while (node_iter != nullptr){
+                if(node == node_iter){
+                    size_ --;
+
+                    if(node_iter_prev != nullptr){
+                        /* 如果不是头部，上个节点链接下一个节点 */
+                        node_iter_prev->p_next = node_iter->p_next;
+
+                        Node* deleting_node = node_iter;
+
+                        /* 旧指针不动，新指针从下一个节点开始 */
+                        node_iter = node_iter_prev->p_next;
+
+                        /* 删除当前节点 */
+                        delete deleting_node;
+                    }else{
+                        /* 如果是头部，头节点后移 */
+                        head_node = node_iter->p_next;
+
+                        /* 头节点后移之后为空，说明链表已空 */
+                        if(head_node == nullptr){
+                            tail_node = nullptr;
+                        }
+
+                        delete node_iter;
+                        node_iter = head_node;
+                    }
+                }else{
+                    node_iter_prev = node_iter;
+                    node_iter = node_iter->p_next;
+                }
+            }
+        }
+
         void remove_if(bool (*matched)(val_T& val)){
             if(head_node == nullptr){
                 return;
