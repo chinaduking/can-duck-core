@@ -11,13 +11,32 @@
 #include "DataObjects.hpp"
 #include "SharedObjManager.hpp"
 #include "DefaultAllocate.h"
+#include "utils/BitLUT8.hpp"
 
 namespace libfcn_v2 {
+    /*参数表任务状态：包括读、写*/
+    enum class SvoClientStat : uint8_t {
+        Idle = 0,   /*初始状态/无任务状态*/
+        Pendding,   /*正在进行读写*/
+        Ok,         /*读写成功*/
+        Rejected,   /*访问被拒绝（可能原因：服务器上的元信息和数据包不匹配、没有权限）*/
+        Timeout,    /*访问超时（可能原因：网络层通信失败）*/
+        Unknown     /*未知错误*/
+    };
+
+    class SvoNetworkHandler;
+    class NetworkLayer;
 
 
     class SvoClient{
     public:
-        SvoClient() = default;
+        SvoClient(NetworkLayer* network_layer,
+                  uint16_t server_addr) :
+                    network_layer(network_layer),
+                    server_addr(server_addr),
+                    pending_reqs(CLIENT_MAX_REQ_NUM)
+                  {}
+
         ~SvoClient() = default;
 
         /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
@@ -36,44 +55,68 @@ namespace libfcn_v2 {
         }
 
 #ifdef SYSTYPE_FULL_OS
-//        void  readBlocking(ServiceObjectBase& item);
-//        void writeBlocking(ServiceObjectBase& item);
+//        template<typename Msg>
+//        typename Msg::data readUnblocking(Msg&& item){}
+//
+//
+//        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+//        template<typename Msg>
+//        typename Msg::data writeUnblocking(Msg&& item,
+//                             FcnCallbackInterface* callback=nullptr){
+//
+//        }
 #endif
+        //TODO: const
         uint16_t server_addr { 0 };
 
-        /*
-         * TODO:
-         * 回调分配在堆上。堆为连续的，插入时会将不够的空间向后推。
-         * 该方法插入很慢，查找很快，空间利用率很高。
-         * 注意处理堆变更时指针更新问题。
-         *
-         * ObjDict所有成员均为静态成员，数据作为消息的原型（Prototype）
-         * 因此不包含回调、状态码等运行时可改变的信息。
-         *
-         * 运行时存储的回调，为回调堆上的地址偏移。
-         * */
-//        uint16_t callback_offset[dict_size];
-
     private:
-//        ServiceObjectDict* const obj_dict{nullptr};
+        NetworkLayer* const network_layer{nullptr};
+
+        friend class SvoNetworkHandler;
+
+        void onReadAck(DataLinkFrame* frame);
+
+        void onWriteAck(DataLinkFrame* frame);
+
+        struct PendingRequest{
+            uint16_t server_address;
+            uint32_t timeout_time_100ms;
+            FcnCallbackInterface* callback;
+        };
+        utils::vector_s<PendingRequest> pending_reqs;
     };
 
+    /*
+     * 以回调响应的，称为RPC模式的SVO。
+     * RPC无数据存储实例，仅有一个回调。且不同RPC回调实例可以处理不同格式的请求数据帧。
+     *
+     * 读写数据的，称为寄存器模式的SVO。
+     * 寄存器模式下，可以有回调，也可以没有。一般写入会有回调，读取没有。
+     * */
     class SvoServer{
     public:
-        SvoServer() = default;
+        SvoServer(NetworkLayer* network_layer,
+                  uint16_t address, ObjectDictMM* obj_dict_shm, void* buffer):
+                server_addr(address),
+                buffer(buffer),
+                obj_dict_prototype(obj_dict_shm),
+                network_layer(network_layer){
+        }
+
         ~SvoServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
-        void onDataChaged(FcnCallbackInterface* callback);
+        void onDataChaged(ObjectMetaInfo* msg,
+                          FcnCallbackInterface* callback);
 
 
         //TODO: 对应数据的网络写入回调
         template<typename Msg>
-        void onDataChaged(Msg&& item, FcnCallbackInterface* callback){
+        void onDataChanged(Msg&& item, FcnCallbackInterface* callback){
 
         }
 
-
+        utils::BitLUT8 wr_access_table;
 
         uint16_t server_addr { 0 };
 
@@ -90,56 +133,66 @@ namespace libfcn_v2 {
          * */
 //        uint16_t callback_offset[dict_size];
 
-        /*
-         * 服务器端除了可以用回调响应请求，还可以直接通过数据源响应请求
-         * 偏移表存储每个数据源的偏移（相当于一个小指针的数组）
-         * -通过偏移表成员本身的地址偏移可以求出index
-         * -通过偏移表前后成员做差可以求出size
-         *
-         * 以回调响应的，称为RPC模式的SVO。
-         * RPC无数据存储实例，仅有一个回调。且不同RPC回调实例可以处理不同格式的请求数据帧。
-         *
-         * 读写数据的，称为寄存器模式的SVO。
-         * 寄存器模式下，可以有回调，也可以没有。一般写入会有回调，读取没有。
-         * */
-        void* data_src{nullptr};
 
-        private:
-            ServiceObjectDict* const obj_dict{nullptr};
-        };
+        void* buffer{nullptr};
+
+    private:
+        ObjectDictMM* const obj_dict_prototype{nullptr};
 
 
+        friend class SvoNetworkHandler;
+
+        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+        obj_size_t onWriteReq(DataLinkFrame* frame, uint16_t port_id);
+
+        obj_size_t onReadReq(DataLinkFrame* frame, uint16_t port_id);
+
+        NetworkLayer* const network_layer{nullptr};
+    };
 
 
-
-        class NetworkLayer;
-
-        /* 共享字典管理器 */
-    typedef SharedObjManager<ServiceObjectDict> SvoDictManager;
-
-    /* 共享字典管理器 */
-
+    /*
+    * 网络处理。
+    * 不论本地有几个节点，节点均共享一个该实例（单例模式）
+    * 但为了降低耦合度，这里不实现单例模式，由上层实现。
+    * */
     class SvoNetworkHandler{
     public:
         SvoNetworkHandler(NetworkLayer* network):
                 network(network),
-                dict_manager(MAX_NODE_NUM)
+                created_servers(MAX_NODE_NUM)
         {}
 
 
         virtual ~SvoNetworkHandler() = default;
 
-        template<typename T_Dict>
-        ServiceObjectDict* bindDictAsServer(uint16_t address){
-            dict_manager.create<T_Dict>(address);
+        /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
+        SvoServer* createServer(ObjectDictMM& prototype, uint16_t address){
+            SvoServer* server = nullptr;
+            for(auto & srv : created_servers){
+                if(srv.address == address){
+                    server = srv.instance;
+                    USER_ASSERT(server != nullptr);
+                }
+            }
+            if(server == nullptr){
+                server = new SvoServer(network, address,
+                                       &prototype,
+                                       prototype.createBuffer());
+
+                CreatedServer srv = {
+                        .address = address,
+                        .instance = server
+                };
+
+                created_servers.push_back(srv);
+            }
+
+            return server;
         }
 
-
-        template<typename T_Dict>
-        SvoClient* bindDictAsClient(uint16_t address){
-            dict_manager.create<T_Dict>(address);
-
-            auto client = new SvoClient();
+        SvoClient* bindClienttoServer(uint16_t address){
+            auto client = new SvoClient(network, address);
             client->server_addr = address;
 
             return client;
@@ -153,19 +206,13 @@ namespace libfcn_v2 {
 
 
     protected:
-        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        static obj_size_t onWriteReq(ServiceObjectDict* dict,
-                                     obj_idx_t index,
-                                     uint8_t *data, obj_size_t len);
+        struct CreatedServer{
+            int    address {-1};
+            SvoServer*  instance {nullptr};
+        };
 
-        static void onReadAck(ServiceObjectDict* dict,
-                              obj_idx_t index,
-                              uint8_t *data, obj_size_t len);
+        utils::vector_s<CreatedServer> created_servers;
 
-        static void onWriteAck(ServiceObjectDict* dict,
-                               obj_idx_t index, uint8_t result);
-
-        SvoDictManager dict_manager;
     };
 
 

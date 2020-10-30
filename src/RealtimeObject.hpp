@@ -52,10 +52,10 @@ namespace libfcn_v2 {
 
         ~PubSubChannel() = default;
 
-        /* 是否为 "多源通道"。 */
+        /* 是否为 "多源通道"。TODO: const */
         bool is_multi_source{false};
 
-        /* 通道ID */
+        /* 通道ID TODO: const */
         int channel_addr{0};
 
         template<typename Msg>
@@ -105,7 +105,7 @@ namespace libfcn_v2 {
 
         ObjectDictMM* obj_dict_prototype{nullptr};
 
-        void* buffer {nullptr};
+        void* const buffer {nullptr};
 
         /* 将回调函数指针映射到int8整形时，基址偏移量
          * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
@@ -131,8 +131,10 @@ namespace libfcn_v2 {
     #define MAX_PUB_CTRL_RULES 10
 
     /*
-     * 网络处理( 一个协议栈只有一个实例 )
-     * */
+    * 网络处理。
+    * 不论本地有几个节点，节点均共享一个该实例（单例模式）
+    * 但为了降低耦合度，这里不实现单例模式，由上层实现。
+    * */
     class RtoNetworkHandler{
     public:
         RtoNetworkHandler(NetworkLayer* network)
@@ -228,7 +230,7 @@ namespace libfcn_v2 {
 
 
         struct SharedBuffer{
-            int id {-1};
+            int    id {-1};
             void*  buffer {nullptr};
         };
 
