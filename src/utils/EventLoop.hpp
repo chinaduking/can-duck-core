@@ -110,7 +110,8 @@ namespace utils {
 
 
     public:
-        EventLoop(){
+        EventLoop(uint64_t (*ms_timesource)()):
+            ms_timesource(ms_timesource){
 #ifdef EVENTLOOP_THREADING
             worker_thread = new std::thread([&](){
                 while(scheduleWorker());
@@ -129,10 +130,6 @@ namespace utils {
 #endif
 
 //            std::cout << "EventLoopBase deleted.\n";
-        }
-
-        void setTimeSource(uint64_t (*ms_timesource)()){
-            this->ms_timesource = ms_timesource;
         }
 
 

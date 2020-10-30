@@ -18,7 +18,9 @@ namespace evloop_test{
 
     class TestTask : public FcnEvLoop::Task {
     public:
-        TestTask(int timeout_ms=1000, string name="") : FcnEvLoop::Task() {
+        TestTask(int timeout_ms=1000, string name="", int repeat=3) :
+        FcnEvLoop::Task() ,
+        repeat(repeat){
             cnt = 0;
             this->timeout_ms = timeout_ms;
             this->name = name;
@@ -28,7 +30,7 @@ namespace evloop_test{
         void evUpdate() override {
             cout << name <<" -- evUpdate!! " << getCurrentTimeUs() << endl;
 
-            if (cnt < 3) {
+            if (cnt < repeat) {
                 cnt++;
                 cout << name <<" ::: call evWaitNotify. " << endl;
                 evWaitNotify(timeout_ms);
@@ -80,6 +82,7 @@ namespace evloop_test{
         int cnt;
         int timeout_ms;
         string name;
+        int repeat;
 
         uint64_t prev_callback_time_us;
     };
@@ -94,8 +97,8 @@ namespace evloop_test{
     }
 
     TEST(EventLoop, EmptyRun) {
-        FcnEvLoop evloop;
-        evloop.setTimeSource(evloopTimeSrouceMS);
+        FcnEvLoop evloop(evloopTimeSrouceMS);
+
         cout<< "evloop spinning.." << endl;
         sleep(3);
 
@@ -108,9 +111,7 @@ namespace evloop_test{
 
     TEST(EventLoop, TaskTimeout1){
         /* 由于智能指针作用域，会造成内存泄漏。仅供测试使用。 */
-        FcnEvLoop evloop;
-        evloop.setTimeSource(evloopTimeSrouceMS);
-
+        FcnEvLoop evloop(evloopTimeSrouceMS);
 
         cout << "-------- time out 1ms test:" << endl;
         evloop.addTask(make_unique<TestTask>(1, "1ms_task"));
@@ -129,65 +130,53 @@ namespace evloop_test{
     }
 
 
-//        TEST(EventLoop, TaskTimeoutTemplate){
-//            FcnEvLoop evloop;
-//            cout << "-------- time out 1ms test:" << endl;
-//            evloop.addTask<TestTask>(1,    "1ms_task");
-//            cout << "-------- time out 10ms test:" << endl;
-//            evloop.addTask<TestTask>(10,   "10ms_task");
-//            cout << "-------- time out 100ms test:" << endl;
-//            evloop.addTask<TestTask>(100,  "100ms_task");
-//            cout << "-------- time out 1s test:" << endl;
-//            evloop.addTask<TestTask>(1000, "1000ms_task");
-//            sleep(7);
-//
-//            evloop.stop();
-//        }
-//
-//        TEST(EventLoop, TaskTimeoutShort){
-//            FcnEvLoop evloop;
-//            evloop.addTask<TestTask>(1,  "1ms_task");
-//            evloop.addTask<TestTask>(3,  "3ms_task");
-//            evloop.addTask<TestTask>(4,  "4ms_task");
-//            evloop.addTask<TestTask>(10, "10ms_task");
-//            evloop.addTask<TestTask>(7,  "7ms_task");
-//            evloop.addTask<TestTask>(1,  "1_ms_task");
-//
-//            sleep(12);
-//            evloop.stop();
-//        }
-//
-//        TEST(EventLoop, Notify1){
-//            FcnEvLoop evloop;
-//            evloop.addTask<TestTask>(300, "500ms_task");
-//            sleep(1);
-//
-//            auto msg = makeESharedPtr<DataLinkFrame>();
-//
-//            char* payload = "hello world";
-//            int payload_size = strlen(payload) + 1;
-//            msg->src_id = 1;
-//
-//            msg->payload_len = payload_size;
-//            memcpy(msg->payload, payload, payload_size);
-//
-//            for(int i = 0; i < 4; i ++){
-//                cout << "evloop.notify(0x01) 1  " << getCurrentTimeUs() << endl;
-//                evloop.notify(msg);
-//                sleep(1);
-//            }
-//
-//            cout << "evloop.notify(0x01) 2   " << getCurrentTimeUs() << endl;
-//            evloop.notify(msg);
-//
-//            sleep(3);
-//            evloop.stop();
-//        }
-//
-//
-//        TEST(EventLoop, NotifyN){
-//
-//        }
+    TEST(EventLoop, TaskTimeoutShort){
+        FcnEvLoop evloop(evloopTimeSrouceMS);
+
+        evloop.addTask(make_unique<TestTask>(1,  "1ms_task") ) ;
+        evloop.addTask(make_unique<TestTask>(3,  "3ms_task") ) ;
+        evloop.addTask(make_unique<TestTask>(4,  "4ms_task") ) ;
+        evloop.addTask(make_unique<TestTask>(10, "10ms_task")) ;
+        evloop.addTask(make_unique<TestTask>(7,  "7ms_task") ) ;
+        evloop.addTask(make_unique<TestTask>(1,  "1_ms_task")) ;
+
+        sleep(12);
+        evloop.stop();
+    }
+
+    TEST(EventLoop, Notify1){
+        FcnEvLoop evloop(evloopTimeSrouceMS);
+
+
+        evloop.addTask(make_unique<TestTask>(300, "300ms_task", 100));
+        sleep(1);
+
+        DataLinkFrame msg;
+
+        char* payload = "hello world";
+        int payload_size = strlen(payload) + 1;
+        msg.src_id = 1;
+
+        msg.payload_len = payload_size;
+        memcpy(msg.payload, payload, payload_size);
+
+        for(int i = 0; i < 4; i ++){
+            cout << "evloop.notify(0x01) 1  " << getCurrentTimeUs() << endl;
+            evloop.notify(msg);
+            sleep(1);
+        }
+
+        cout << "evloop.notify(0x01) 2   " << getCurrentTimeUs() << endl;
+        evloop.notify(msg);
+
+        sleep(3);
+        evloop.stop();
+    }
+
+
+    TEST(EventLoop, NotifyN){
+
+    }
 }
 
 
