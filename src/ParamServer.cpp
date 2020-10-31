@@ -68,9 +68,9 @@ obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-//    if(!network_layer->svo_network_handler.handleRecv(frame, port_id)){
+    if(!network_layer->svo_network_handler.handleRecv(&ack_frame, port_id)){
         network_layer->sendFrame(port_id, &ack_frame);
-//    }
+    }
 
     return ack_code;
 }
@@ -123,9 +123,9 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-//    if(!network_layer->svo_network_handler.handleRecv(frame, port_id)){
+    if(!network_layer->svo_network_handler.handleRecv(&ack_frame, port_id)){
         network_layer->sendFrame(port_id, &ack_frame);
-//    }
+    }
 
     return 0;
 }
