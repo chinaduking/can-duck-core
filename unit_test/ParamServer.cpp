@@ -9,7 +9,6 @@
 #include "utils/Tracer.hpp"
 
 #include "test_ServoRTO.hpp"
-#include "FrameUtils.hpp"
 #include "SimpleSerialNode.hpp"
 
 using namespace libfcn_v2;

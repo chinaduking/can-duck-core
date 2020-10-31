@@ -6,7 +6,7 @@
 #define LIBFCN_V2_LOG_HPP
 
 #include "utils/Tracer.hpp"
-#include "FrameUtils.hpp"
+#include "DataLinkLayer.hpp"
 
 
 namespace libfcn_v2{
@@ -20,6 +20,10 @@ namespace libfcn_v2{
 
         static utils::Tracer* tracer;
     };
+
+    std::string DataLinkFrameToString(DataLinkFrame& frame);
+
+    std::string DataLinkFrameToStringCompact(DataLinkFrame& frame);
 }
 
 

@@ -5,7 +5,7 @@ target_link_libraries(testDataObjects  GTest::GTest GTest::Main)
 
 
 
-add_executable(testRealtimeObject RealtimeObject.cpp
+add_executable(testRealtimeObject PubSub.cpp
         test_ServoRTO.cpp
         )
 target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
@@ -13,7 +13,7 @@ target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
 
 
 
-add_executable(testServiceObject ServiceObject.cpp
+add_executable(testServiceObject ParamServer.cpp
         test_ServoRTO.cpp
         )
 target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest

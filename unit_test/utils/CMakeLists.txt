@@ -42,6 +42,6 @@ target_link_libraries(testMemMap  GTest::GTest GTest::Main)
 
 
 add_executable(testEvloop EventLoopThreading.cpp
-        ${PROJECT_SOURCE_DIR}/src/FrameUtils.cpp)
+        )
 target_link_libraries(testEvloop MyCppUtils GTest::GTest GTest::Main)
 
