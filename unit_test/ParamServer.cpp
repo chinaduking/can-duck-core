@@ -27,7 +27,7 @@ namespace network_test {
         DataLinkFrame frame_tmp;
 
 
-        fcn_node.spin();
+
 
         uint32_t cnt = 0;
 
@@ -36,12 +36,15 @@ namespace network_test {
 
         server->setWrAccess(fcnmsg::test_ServoPubSubDict.mode);
 
+        fcn_node.spin();
+
         for(int __i = 0; __i < 1; ){
             auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
             angle_msg << 0x55667788;
             server->updateData(angle_msg);
 
             cnt ++;
+            cout << "server->updateData(angle_msg): " << cnt << endl;
 
             perciseSleep(0.5);
         }
@@ -66,7 +69,7 @@ namespace network_test {
         for(int __i = 0; __i < 1; ){
             perciseSleep(0.1);
 
-//            servo_client->readUnblocking(fcnmsg::test_ServoRTO.angle);
+            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle);
 
             auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
             mode_msg << 0x22;

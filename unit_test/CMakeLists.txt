@@ -23,9 +23,8 @@ target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest
 
 add_executable(testDataLinkLayer DataLinkLayer.cpp
         ${PROJECT_SOURCE_DIR}/src/DataLinkLayer.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/DataVerify.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/PosixSerial.cpp)
-target_link_libraries(testDataLinkLayer  GTest::GTest GTest::Main)
+        ${PROJECT_SOURCE_DIR}/src/Log.cpp)
+target_link_libraries(testDataLinkLayer MyCppUtils GTest::GTest GTest::Main)
 
 
 
