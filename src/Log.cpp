@@ -53,7 +53,7 @@ static char* mOpCodeStr[]={
 };
 
 
-std::string libfcn_v2::DataLinkFrameToString(DataLinkFrame& frame){
+std::string libfcn_v2::Frame2Log(DataLinkFrame& frame){
     static const int BUFFER_RESERVE = 150;
 
     char buffer[DATALINK_MTU * 4 + BUFFER_RESERVE];
@@ -99,7 +99,7 @@ std::string libfcn_v2::DataLinkFrameToString(DataLinkFrame& frame){
     return std::string(buffer);
 }
 
-std::string libfcn_v2::DataLinkFrameToStringCompact(DataLinkFrame&
+std::string libfcn_v2::Frame2LogCompact(DataLinkFrame&
 frame){
     static const int BUFFER_RESERVE = 120;
 
@@ -113,13 +113,10 @@ frame){
         opcode_str = mOpCodeStr[frame.op_code];
     }
 
-    sprintf(buffer, "Frame "
-                    "[0x%.2X] ---> "
-                    "[0x%.2X]\n"
-                    "\tOp[0x%.2X]:%s"
-                    "  |  Idx[0x%.2X] \n"
-                    "\tData[%.3d] = "
-                    "",
+    sprintf(buffer, "Frame [0x%.2X]--->[0x%.2X]\n"
+                    "    Op[0x%.2X]:%s  |  Idx[0x%.2X]\n"
+                    "  Data[%.3d] = ",
+
             frame.src_id   & 0xff,
             frame.dest_id  & 0xff,
             frame.op_code  & 0xff, opcode_str,

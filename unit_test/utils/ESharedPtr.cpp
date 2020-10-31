@@ -187,7 +187,7 @@ namespace esharedptr_test{
         test2.doWork(1);
 
 //        frame_0->msg_id = 10;
-//        cout << DataLinkFrameToString(*frame_0) << endl;
+//        cout << Frame2Log(*frame_0) << endl;
 
         test1.working_thread->join();
         test2.working_thread->join();

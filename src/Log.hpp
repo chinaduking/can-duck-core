@@ -29,9 +29,9 @@ namespace libfcn_v2{
         static utils::Tracer* tracer;
     };
 
-    std::string DataLinkFrameToString(DataLinkFrame& frame);
+    std::string Frame2Log(DataLinkFrame& frame);
 
-    std::string DataLinkFrameToStringCompact(DataLinkFrame& frame);
+    std::string Frame2LogCompact(DataLinkFrame& frame);
 
     #define LOGI(...) Log::printf(utils::Tracer::Level::INFO,    __VA_ARGS__)
     #define LOGV(...) Log::printf(utils::Tracer::Level::VERBOSE, __VA_ARGS__)

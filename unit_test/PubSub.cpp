@@ -167,7 +167,7 @@ namespace network_test {
             frame_tmp.src_id = local_addr;
             frame_tmp.dest_id = 0x00; /*ANY*/
 
-//            cout << DataLinkFrameToString(frame_tmp) << endl;
+//            cout << Frame2Log(frame_tmp) << endl;
 //
 //            fcn_node.frame_dev->write(&frame_tmp);
 
