@@ -7,10 +7,10 @@
 
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
-#include "RealtimeObject.hpp"
-#include "ServiceObject.hpp"
+#include "PubSub.hpp"
+#include "ParamServer.hpp"
 #include "DefaultAllocate.h"
-#include "TracerSingleton.hpp"
+#include "Log.hpp"
 
 namespace libfcn_v2{
     class NetworkLayer {
@@ -20,7 +20,7 @@ namespace libfcn_v2{
             rto_network_handler(this),
             svo_network_handler(this),
             data_link_dev(MAX_COM_PORT_NUM) {
-                tracer = TracerSingleton::getInstance();
+                tracer = Log::getInstance();
            }
 
         ~NetworkLayer() = default;

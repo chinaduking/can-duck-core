@@ -33,7 +33,7 @@ namespace rto_io_test{
         cout << "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
                 (fcnmsg::test_ServoRTO) << endl;
 
-        ASSERT_EQ(sizeof(SerDesMetaInfo), 4);
+        ASSERT_EQ(sizeof(SerDesPrototypeHandle), 4);
 
         auto angle_msg = fcnmsg::test_ServoRTO.angle;
         angle_msg << 100;

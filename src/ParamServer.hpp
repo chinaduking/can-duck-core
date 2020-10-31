@@ -2,15 +2,15 @@
 // Created by sdong on 2020/10/15.
 //
 
-#ifndef LIBFCN_V2_SERVICEOBJECT_HPP
-#define LIBFCN_V2_SERVICEOBJECT_HPP
+#ifndef LIBFCN_V2_PARAMSERVER_HPP
+#define LIBFCN_V2_PARAMSERVER_HPP
 
 #include <cstdint>
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "DefaultAllocate.h"
-#include "OperationCode.hpp"
+#include "OpCode.hpp"
 #include "utils/BitLUT8.hpp"
 
 namespace libfcn_v2 {
@@ -133,7 +133,7 @@ namespace libfcn_v2 {
         ~SvoServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
-        void onDataChaged(SerDesMetaInfo* msg,
+        void onDataChaged(SerDesPrototypeHandle* msg,
                           FcnCallbackInterface* callback);
 
 
@@ -285,4 +285,4 @@ namespace libfcn_v2 {
 
 }
 
-#endif //LIBFCN_V2_SERVICEOBJECT_HPP
+#endif //LIBFCN_V2_PARAMSERVER_HPP

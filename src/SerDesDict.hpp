@@ -20,8 +20,8 @@ namespace libfcn_v2 {
     typedef uint16_t mapped_ptr_t;
 
 #pragma pack(2)
-    struct SerDesMetaInfo{
-        SerDesMetaInfo(obj_idx_t index, obj_size_t data_size)
+    struct SerDesPrototypeHandle{
+        SerDesPrototypeHandle(obj_idx_t index, obj_size_t data_size)
             : index(index), data_size(data_size){ }
 
         /* 消息索引 */
@@ -33,7 +33,7 @@ namespace libfcn_v2 {
         mapped_ptr_t buffer_offset{0};
 
         inline void* getDataPtr(){
-            return ((uint8_t*)this) + sizeof(SerDesMetaInfo);
+            return ((uint8_t*)this) + sizeof(SerDesPrototypeHandle);
         }
     };
 #pragma pack(0)
@@ -41,9 +41,9 @@ namespace libfcn_v2 {
 
 #pragma pack(2)
     template <typename T>
-    struct SerDesPrototype : public SerDesMetaInfo{
+    struct SerDesPrototype : public SerDesPrototypeHandle{
         explicit SerDesPrototype(obj_idx_t index):
-                SerDesMetaInfo(index, sizeof(T)){
+                SerDesPrototypeHandle(index, sizeof(T)){
             utils::memset(&data, 0, sizeof(T));
         }
 
@@ -58,7 +58,7 @@ namespace libfcn_v2 {
     struct SerDesDict{
 
         SerDesDict(obj_idx_t dict_size,
-                   SerDesMetaInfo* p_first_obj,
+                   SerDesPrototypeHandle* p_first_obj,
                    void* p_buffer = nullptr):
                p_first_obj(p_first_obj),
                obj_base_offset(dict_size) {
@@ -66,10 +66,10 @@ namespace libfcn_v2 {
         }
 
 
-        inline SerDesMetaInfo* getObjBaseByIndex(uint16_t index){
+        inline SerDesPrototypeHandle* getObjBaseByIndex(uint16_t index){
             USER_ASSERT(index < obj_base_offset.size());
 
-            return(SerDesMetaInfo*)(
+            return(SerDesPrototypeHandle*)(
                     (uint8_t*)p_first_obj + obj_base_offset[index]);
         }
 
@@ -111,7 +111,7 @@ namespace libfcn_v2 {
         virtual void* createBuffer() = 0;
 
 
-        SerDesMetaInfo* const p_first_obj;
+        SerDesPrototypeHandle* const p_first_obj;
         utils::vector_s<mapped_ptr_t> obj_base_offset;
     };
 

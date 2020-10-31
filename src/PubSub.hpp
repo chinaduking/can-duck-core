@@ -2,14 +2,14 @@
 // Created by sdong on 2020/10/15.
 //
 
-#ifndef LIBFCN_V2_REALTIMEOBJECT_HPP
-#define LIBFCN_V2_REALTIMEOBJECT_HPP
+#ifndef LIBFCN_V2_PUBSUB_HPP
+#define LIBFCN_V2_PUBSUB_HPP
 
 #include <cstdint>
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
-#include "OperationCode.hpp"
+#include "OpCode.hpp"
 #include "DefaultAllocate.h"
 
 /* ---------------------------------------------------------
@@ -229,4 +229,4 @@ namespace libfcn_v2 {
 
 
 
-#endif //LIBFCN_V2_REALTIMEOBJECT_HPP
+#endif //LIBFCN_V2_PUBSUB_HPP

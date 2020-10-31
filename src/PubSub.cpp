@@ -2,12 +2,12 @@
 // Created by sdong on 2020/10/15.
 //
 
-#include "RealtimeObject.hpp"
+#include "PubSub.hpp"
 #include "NetworkLayer.hpp"
-#include "OperationCode.hpp"
+#include "OpCode.hpp"
 #include "utils/CppUtils.hpp"
 
-#include "TracerSingleton.hpp"
+#include "Log.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;
@@ -89,7 +89,7 @@ void libfcn_v2::singleWriteFrameBuilder(
 }
 
 void PubSubChannel::networkPublish(DataLinkFrame *frame) {
-    auto tracer = TracerSingleton::getInstance();
+    auto tracer = Log::getInstance();
 
 //    tracer->print(Tracer::INFO, "PubSubChannel::networkPublish.\n%s",
 //                  DataLinkFrameToString(*frame).c_str());
@@ -116,7 +116,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
     if(channel == nullptr){
-        TracerSingleton::getInstance()->print(Tracer::WARNING,
+        Log::getInstance()->print(Tracer::WARNING,
           "RtoNetworkHandler::handleWrtie,""channel == nullptr\n");
 
         return;

@@ -3,8 +3,8 @@
 //
 
 #include "NetworkLayer.hpp"
-#include "OperationCode.hpp"
-#include "TracerSingleton.hpp"
+#include "OpCode.hpp"
+#include "Log.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;

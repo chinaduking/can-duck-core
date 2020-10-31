@@ -1,9 +1,9 @@
 add_library(fcn_v2
         DataLinkLayer.cpp
         NetworkLayer.cpp
-        RealtimeObject.cpp
-        ServiceObject.cpp
-        TracerSingleton.cpp
+        PubSub.cpp
+        ParamServer.cpp
+        Log.cpp
         FrameUtils.cpp
 
         utils/DataVerify.cpp

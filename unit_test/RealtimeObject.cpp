@@ -3,7 +3,7 @@
 //
 
 #include "TestUtils.hpp"
-#include "RealtimeObject.hpp"
+#include "PubSub.hpp"
 #include "test_ServoRTO.hpp"
 using namespace libfcn_v2;
 #if 0
