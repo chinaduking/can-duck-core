@@ -142,7 +142,7 @@ namespace libfcn_v2 {
         ~SvoServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
-        void onDataChaged(SerDesPrototypeHandle* msg,
+        void onDataChaged(SerDesDictValHandle* msg,
                           FcnCallbackInterface* callback);
 
 

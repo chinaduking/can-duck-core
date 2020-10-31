@@ -1,12 +1,12 @@
 add_executable(testDataObjects SerDesDict.cpp
-        test_ServoRTO.cpp
+        test_ServoDict.cpp
         )
 target_link_libraries(testDataObjects  GTest::GTest GTest::Main)
 
 
 
 add_executable(testRealtimeObject PubSub.cpp
-        test_ServoRTO.cpp
+        test_ServoDict.cpp
         )
 target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
         GTest::Main)
@@ -14,7 +14,7 @@ target_link_libraries(testRealtimeObject fcn_v2 MyCppUtils GTest::GTest
 
 
 add_executable(testServiceObject ParamServer.cpp
-        test_ServoRTO.cpp
+        test_ServoDict.cpp
         )
 target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest
         GTest::Main)

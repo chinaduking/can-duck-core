@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 #include "PubSub.hpp"
-#include "test_ServoRTO.hpp"
+#include "test_ServoDict.hpp"
 using namespace libfcn_v2;
 #if 0
 namespace rto_test{
@@ -22,17 +22,17 @@ namespace rto_test{
                RtoDictSingleWrite(&testRoDict_dest, index, data, len);      \
                                                                             \
                printf("testRoDict_dest.%s = %X\n", #item,                   \
-               testRoDict_dest.read(fcnmsg::test_ServoRTO.item).data);      \
-               ASSERT_EQ(testRoDict_dest.read(fcnmsg::test_ServoRTO.item).data,\
+               testRoDict_dest.read(fcnmsg::test_ServoPubSubDict.item).data);      \
+               ASSERT_EQ(testRoDict_dest.read(fcnmsg::test_ServoPubSubDict.item).data,\
                data_) ; \
         } while(0)
 
     TEST(RtoDict, localWrite){
-        decltype(fcnmsg::test_ServoRTO)::Buffer buf_src;
-        decltype(fcnmsg::test_ServoRTO) testRoDict_src(&buf_src);
+        decltype(fcnmsg::test_ServoPubSubDict)::Buffer buf_src;
+        decltype(fcnmsg::test_ServoPubSubDict) testRoDict_src(&buf_src);
 
-        decltype(fcnmsg::test_ServoRTO)::Buffer buf_dest;
-        decltype(fcnmsg::test_ServoRTO) testRoDict_dest(&buf_dest);
+        decltype(fcnmsg::test_ServoPubSubDict)::Buffer buf_dest;
+        decltype(fcnmsg::test_ServoPubSubDict) testRoDict_dest(&buf_dest);
 
         SingleWriteTest(speed,          0x5566);
         SingleWriteTest(angle,          0x55667788);
@@ -53,11 +53,11 @@ namespace rto_test{
     public:
         Node(){
             rto_dict = rtoDictManager
-                    .create<fcnmsg::test_ServoRTO_C>
+                    .create<fcnmsg::test_ServoPubSubDict_C>
                     (OWNER_ADDR);
 
             if(rto_dict->p_buffer == nullptr) {
-                rto_dict->p_buffer = new decltype(fcnmsg::test_ServoRTO)
+                rto_dict->p_buffer = new decltype(fcnmsg::test_ServoPubSubDict)
                         ::Buffer;
                 cout << "---> create a buffer!" << endl;
             }
@@ -65,7 +65,7 @@ namespace rto_test{
         virtual void spin(){ }
 
     protected:
-        decltype(fcnmsg::test_ServoRTO)* rto_dict;
+        decltype(fcnmsg::test_ServoPubSubDict)* rto_dict;
     };
 
 
@@ -75,7 +75,7 @@ namespace rto_test{
         Node07():Node(){}
 
         void spin() override {
-            auto msg = fcnmsg::test_ServoRTO.angle;
+            auto msg = fcnmsg::test_ServoPubSubDict.angle;
             msg << servo_angle;
             servo_angle += 30;
             rto_dict->write(msg);
@@ -88,7 +88,7 @@ namespace rto_test{
     public:
         Node02():Node(){}
         void spin() override {
-            auto angle = rto_dict->read(fcnmsg::test_ServoRTO.angle).data;
+            auto angle = rto_dict->read(fcnmsg::test_ServoPubSubDict.angle).data;
 
             //ASSERT_EQ(angle.data, 200);
             cout << "angle.data = " << angle << endl;
@@ -119,7 +119,7 @@ namespace rto_test{
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "test_ServoRTO.hpp"
+#include "test_ServoDict.hpp"
 #include "SimpleSerialNode.hpp"
 
 using namespace libfcn_v2;
@@ -141,26 +141,26 @@ namespace network_test {
 
         auto rto_channel = fcn_node
                 .network_layer->rto_network_handler.
-                createChannel(fcnmsg::test_ServoRTO, local_addr);
+                createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
 
         auto rto_channel_2 = fcn_node
                 .network_layer->rto_network_handler.
-                createChannel(fcnmsg::test_ServoRTO, local_addr);
+                createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
 
         fcn_node.spin();
 
         uint32_t cnt = 0;
 
         for(int __i = 0; __i < 1; ){
-            auto speed_msg = fcnmsg::test_ServoRTO.speed;
+            auto speed_msg = fcnmsg::test_ServoPubSubDict.speed;
             speed_msg << cnt;
             rto_channel->publish(speed_msg);
 
-            auto angle_msg = fcnmsg::test_ServoRTO.angle;
+            auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
             angle_msg << cnt;
             rto_channel->publish(angle_msg);
 
-            auto current_msg = fcnmsg::test_ServoRTO.current;
+            auto current_msg = fcnmsg::test_ServoPubSubDict.current;
             current_msg << cnt;
             rto_channel->publish(current_msg);
 
@@ -176,12 +176,12 @@ namespace network_test {
 
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
-                         rto_channel_2->readBuffer(fcnmsg::test_ServoRTO.speed).data,
+                         rto_channel_2->readBuffer(fcnmsg::test_ServoPubSubDict.speed).data,
 
-                         rto_channel_2->readBuffer(fcnmsg::test_ServoRTO.angle).data,
+                         rto_channel_2->readBuffer(fcnmsg::test_ServoPubSubDict.angle).data,
 
                          rto_channel_2->readBuffer(
-                                 fcnmsg::test_ServoRTO.current).data);
+                                 fcnmsg::test_ServoPubSubDict.current).data);
 
             cnt ++;
         }
@@ -197,7 +197,7 @@ namespace network_test {
 
         auto servo_rto_channel = fcn_node
                 .network_layer->rto_network_handler.
-                createChannel (fcnmsg::test_ServoRTO, servo_addr);
+                createChannel (fcnmsg::test_ServoPubSubDict, servo_addr);
 
         fcn_node.spin();
 
@@ -208,13 +208,13 @@ namespace network_test {
             tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
                                           ", current = %d \n",
                          servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoRTO.speed).data,
+                                 fcnmsg::test_ServoPubSubDict.speed).data,
 
                          servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoRTO.angle).data,
+                                 fcnmsg::test_ServoPubSubDict.angle).data,
 
                          servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoRTO.current).data);
+                                 fcnmsg::test_ServoPubSubDict.current).data);
         }
 
         fcn_node.join();

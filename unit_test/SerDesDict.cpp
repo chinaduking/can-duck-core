@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 
-#include "test_ServoRTO.hpp"
+#include "test_ServoDict.hpp"
 
 using namespace libfcn_v2;
 
@@ -13,7 +13,7 @@ namespace rto_io_test{
     TEST(RealtimeObject, setget){
         int angle_idx = 10;
 
-        SerDesPrototype<uint32_t> Angle(angle_idx);
+        SerDesDictVal<uint32_t> Angle(angle_idx);
 
         auto rto = Angle;
 
@@ -31,23 +31,23 @@ namespace rto_io_test{
 
     TEST(RealtimeObject, Dict){
         cout << "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
-                (fcnmsg::test_ServoRTO) << endl;
+                (fcnmsg::test_ServoPubSubDict) << endl;
 
-        ASSERT_EQ(sizeof(SerDesPrototypeHandle), 4);
+        ASSERT_EQ(sizeof(SerDesDictValHandle), 4);
 
-        auto angle_msg = fcnmsg::test_ServoRTO.angle;
+        auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
         angle_msg << 100;
         int32_t angle = 0;
         angle_msg >> angle;
         ASSERT_EQ(angle, 100);
 
-        decltype(fcnmsg::test_ServoRTO)::Buffer buffer;
-        decltype(fcnmsg::test_ServoRTO) dict(&buffer);
+        decltype(fcnmsg::test_ServoPubSubDict)::Buffer buffer;
+        decltype(fcnmsg::test_ServoPubSubDict) dict;
 
-        dict.write(angle_msg);
+        dict.write(angle_msg, &buffer);
 
         ASSERT_EQ(buffer.angle, 100);
-        ASSERT_EQ(dict.read(angle_msg).data, 100);
+        ASSERT_EQ(dict.read(angle_msg, &buffer).data, 100);
 
         cout << "pass!" << endl;
     }

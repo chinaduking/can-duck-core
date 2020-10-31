@@ -20,8 +20,8 @@ namespace libfcn_v2 {
     typedef uint16_t mapped_ptr_t;
 
 #pragma pack(2)
-    struct SerDesPrototypeHandle{
-        SerDesPrototypeHandle(obj_idx_t index, obj_size_t data_size)
+    struct SerDesDictValHandle{
+        SerDesDictValHandle(obj_idx_t index, obj_size_t data_size)
             : index(index), data_size(data_size){ }
 
         /* 消息索引 */
@@ -33,7 +33,7 @@ namespace libfcn_v2 {
         mapped_ptr_t buffer_offset{0};
 
         inline void* getDataPtr(){
-            return ((uint8_t*)this) + sizeof(SerDesPrototypeHandle);
+            return ((uint8_t*)this) + sizeof(SerDesDictValHandle);
         }
     };
 #pragma pack(0)
@@ -41,9 +41,9 @@ namespace libfcn_v2 {
 
 #pragma pack(2)
     template <typename T>
-    struct SerDesPrototype : public SerDesPrototypeHandle{
-        explicit SerDesPrototype(obj_idx_t index):
-                SerDesPrototypeHandle(index, sizeof(T)){
+    struct SerDesDictVal : public SerDesDictValHandle{
+        explicit SerDesDictVal(obj_idx_t index):
+                SerDesDictValHandle(index, sizeof(T)){
             utils::memset(&data, 0, sizeof(T));
         }
 
@@ -58,19 +58,18 @@ namespace libfcn_v2 {
     struct SerDesDict{
 
         SerDesDict(obj_idx_t dict_size,
-                   SerDesPrototypeHandle* p_first_obj,
-                   void* p_buffer = nullptr):
-               p_first_obj(p_first_obj),
-               obj_base_offset(dict_size) {
-            obj_base_offset.resize(dict_size);
+                   SerDesDictValHandle* p_first_obj):
+                p_first_val(p_first_obj),
+                val_offset_key_table(dict_size) {
+            val_offset_key_table.resize(dict_size);
         }
 
 
-        inline SerDesPrototypeHandle* getObjBaseByIndex(uint16_t index){
-            USER_ASSERT(index < obj_base_offset.size());
+        inline SerDesDictValHandle* getObjBaseByIndex(uint16_t index){
+            USER_ASSERT(index < val_offset_key_table.size());
 
-            return(SerDesPrototypeHandle*)(
-                    (uint8_t*)p_first_obj + obj_base_offset[index]);
+            return(SerDesDictValHandle*)(
+                    (uint8_t*)p_first_val + val_offset_key_table[index]);
         }
 
         inline uint32_t getBufferDataOffest(uint16_t index){
@@ -83,7 +82,7 @@ namespace libfcn_v2 {
         }
 
         inline uint8_t dictSize(){
-            return obj_base_offset.size();
+            return val_offset_key_table.size();
         }
 
         template<typename Prototype>
@@ -111,8 +110,8 @@ namespace libfcn_v2 {
         virtual void* createBuffer() = 0;
 
 
-        SerDesPrototypeHandle* const p_first_obj;
-        utils::vector_s<mapped_ptr_t> obj_base_offset;
+        SerDesDictValHandle* const p_first_val;
+        utils::vector_s<mapped_ptr_t> val_offset_key_table;
     };
 
     /*非阻塞式任务的回调函数

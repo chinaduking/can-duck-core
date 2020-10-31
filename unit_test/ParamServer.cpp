@@ -8,7 +8,7 @@
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "test_ServoRTO.hpp"
+#include "test_ServoDict.hpp"
 #include "SimpleSerialNode.hpp"
 
 using namespace libfcn_v2;
@@ -32,12 +32,12 @@ namespace network_test {
         uint32_t cnt = 0;
 
         auto server = fcn_node.network_layer->svo_network_handler
-                .createServer(fcnmsg::test_ServoRTO, local_addr);
+                .createServer(fcnmsg::test_ServoPubSubDict, local_addr);
 
-        server->setWrAccess(fcnmsg::test_ServoRTO.mode);
+        server->setWrAccess(fcnmsg::test_ServoPubSubDict.mode);
 
         for(int __i = 0; __i < 1; ){
-            auto angle_msg = fcnmsg::test_ServoRTO.angle;
+            auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
             angle_msg << 0x55667788;
             server->updateData(angle_msg);
 
@@ -68,7 +68,7 @@ namespace network_test {
 
 //            servo_client->readUnblocking(fcnmsg::test_ServoRTO.angle);
 
-            auto mode_msg = fcnmsg::test_ServoRTO.mode;
+            auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
             mode_msg << 0x22;
             servo_client->writeUnblocking(mode_msg);
 
