@@ -240,6 +240,7 @@ namespace utils {
 #ifdef EVENTLOOP_THREADING
             std::unique_lock<std::mutex> updating_lk(update_mutex);
             sched_ctrl_cv.notify_all();
+            //waitComplete();
 #endif //EVENTLOOP_THREADING
 
             is_notify_pending = true;
@@ -257,7 +258,7 @@ namespace utils {
              */
             int min_time_out = MAX_SLEEP_GAP;
 
-            auto current_time_us = getCurrentTimeUs();
+            auto current_time_ms = getCurrentTimeMs();
             for(auto& task : task_list){
                 /* 如果有正在等待运行的任务，则返回0直接进入下一个循环。
                  * 一般是因调用了Restart */
@@ -272,7 +273,7 @@ namespace utils {
                    && task->timeout_time_ms != 0) {
 
                     uint64_t sleep_time = task->timeout_time_ms -
-                            current_time_us;
+                                          current_time_ms;
 
                     if (min_time_out > (int) sleep_time) {
                         min_time_out = (int) sleep_time;
