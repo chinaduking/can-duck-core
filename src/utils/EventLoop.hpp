@@ -22,18 +22,6 @@
 
 namespace utils {
 
-    enum EventStatus{
-        /* just created, or restart() called,
-         * waiting for main scheduler first call scheduleWorker()*/
-        EVSTAT_WaitingRun,
-
-        /* waiting for notify or timeoutCallback()*/
-        EVSTAT_WaitingNofity,
-
-        /* waiting for delete, because of called exit
-         * or do not wait notify in scheduleWorker()*/
-        EVSTAT_WaitingDelete,
-    };
 
 
 #ifdef EVENTLOOP_THREADING
@@ -50,21 +38,35 @@ namespace utils {
     class EventLoop{
     public:
 
+        enum class TaskState : uint8_t {
+            /* just created, or restart() called,
+             * waiting for main scheduler first call scheduleWorker()*/
+            WaitingRun,
+
+            /* waiting for notify or timeoutCallback()*/
+            WaitingNofity,
+
+            /* waiting for delete, because of called exit
+             * or do not wait notify in scheduleWorker()*/
+            WaitingDelete,
+        };
+
+
         class Task{
             friend class EventLoop;
         public:
             Task()
                 : timeout_time_ms(0),
-                  status(EVSTAT_WaitingRun),
+                  status(TaskState::WaitingRun),
                   context_evloop(){}
 
             virtual ~Task() = default;
 
-            enum EventStatus status{EVSTAT_WaitingRun};
+            TaskState status{TaskState::WaitingRun};
 
             virtual bool matchNotifyMsg(Msg_T& msg) = 0;
 
-            void setStatus(EventStatus status){
+            void setStatus(TaskState status){
                 this->status = status;
             }
 
@@ -81,7 +83,7 @@ namespace utils {
                     timeout_time_ms = context_evloop->getCurrentTimeMs() + timeout_ms;
                 }
 
-                setStatus(EVSTAT_WaitingNofity);
+                setStatus(TaskState::WaitingNofity);
             }
 
 
@@ -90,11 +92,11 @@ namespace utils {
 
                 this->timeout_time_ms = 0;
 
-                setStatus(EVSTAT_WaitingRun);
+                setStatus(TaskState::WaitingRun);
             }
 
             void evExit(){
-                setStatus(EVSTAT_WaitingDelete);
+                setStatus(TaskState::WaitingDelete);
             }
 
 
@@ -262,14 +264,14 @@ namespace utils {
             for(auto& task : task_list){
                 /* 如果有正在等待运行的任务，则返回0直接进入下一个循环。
                  * 一般是因调用了Restart */
-                if(task->status == EVSTAT_WaitingRun){
+                if(task->status == TaskState::WaitingRun){
                     min_time_out = 0;
                     break;
                 }
 
                 /* 如果没有需要立即重启的任务，
                  * 则在正在等待通知且设置了超时的任务中，搜索下一个最小超时*/
-                if(task->status == EVSTAT_WaitingNofity
+                if(task->status == TaskState::WaitingNofity
                    && task->timeout_time_ms != 0) {
 
                     uint64_t sleep_time = task->timeout_time_ms -
@@ -294,8 +296,8 @@ namespace utils {
             if(is_notify_pending){
                 for (auto& task : task_list) {
                     if (task->matchNotifyMsg(pending_notify)
-                        && task->status == EVSTAT_WaitingNofity) {
-                        task->setStatus(EVSTAT_WaitingDelete);
+                        && task->status == TaskState::WaitingNofity) {
+                        task->setStatus(TaskState::WaitingDelete);
                         task->evNotifyCallback(pending_notify);
                     }
                 }
@@ -308,12 +310,12 @@ namespace utils {
 
         void checkRun(){
             for(auto& task : task_list) {
-                if(task->status == EVSTAT_WaitingRun){
+                if(task->status == TaskState::WaitingRun){
                     /*set task status to delete at first,
                      *if restart() or waitNofify() is called,
                      * task->status will be changed. if neither is
                      * called, task will be deleted*/
-                    task->setStatus(EVSTAT_WaitingDelete);
+                    task->setStatus(TaskState::WaitingDelete);
                     task->evUpdate();
                 }
             }
@@ -338,14 +340,14 @@ namespace utils {
 
         void checkTimeout(){
             for(auto& task : task_list){
-                if(task->status != EVSTAT_WaitingNofity){
+                if(task->status != TaskState::WaitingNofity){
                     continue;
                 }
 
                 if(task->timeout_time_ms != 0 && getCurrentTimeMs() >
                 task->timeout_time_ms){
                     /*same reason as above. set to delete first.*/
-                    task->setStatus(EVSTAT_WaitingDelete);
+                    task->setStatus(TaskState::WaitingDelete);
                     task->evTimeoutCallback();
                 }
             }
@@ -355,7 +357,7 @@ namespace utils {
         bool is_nested_in_evloop{false};
 
         static bool isWaitingDelete(std::unique_ptr<Task>& task){
-            return task->status == EVSTAT_WaitingDelete;
+            return task->status == TaskState::WaitingDelete;
         }
 
         uint64_t getCurrentTimeMs(){
