@@ -1,7 +1,7 @@
 //
 // Created by sdong on 2019/11/14.
 //
-#include "DataObjects.hpp"
+#include "SerDesDict.hpp"
 
 #ifndef TESTSERVOSVODICT_HPP
 #define TESTSERVOSVODICT_HPP

@@ -8,7 +8,7 @@
 #include <cstdint>
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
-#include "DataObjects.hpp"
+#include "SerDesDict.hpp"
 #include "DefaultAllocate.h"
 #include "OperationCode.hpp"
 #include "utils/BitLUT8.hpp"
@@ -123,7 +123,7 @@ namespace libfcn_v2 {
     class SvoServer{
     public:
         SvoServer(NetworkLayer* network_layer,
-                  uint16_t address, ObjectDictMM* obj_dict_shm, void* buffer):
+                  uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 server_addr(address),
                 buffer(buffer),
                 obj_dict_prototype(obj_dict_shm),
@@ -133,7 +133,7 @@ namespace libfcn_v2 {
         ~SvoServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
-        void onDataChaged(ObjectMetaInfo* msg,
+        void onDataChaged(SerDesMetaInfo* msg,
                           FcnCallbackInterface* callback);
 
 
@@ -186,7 +186,7 @@ namespace libfcn_v2 {
         void* buffer{nullptr};
 
     private:
-        ObjectDictMM* const obj_dict_prototype{nullptr};
+        SerDesDict* const obj_dict_prototype{nullptr};
 
 
         friend class SvoNetworkHandler;
@@ -217,7 +217,7 @@ namespace libfcn_v2 {
         virtual ~SvoNetworkHandler() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        SvoServer* createServer(ObjectDictMM& prototype, uint16_t address){
+        SvoServer* createServer(SerDesDict& prototype, uint16_t address){
             SvoServer* server = nullptr;
             for(auto & srv : created_servers){
                 if(srv.address == address){

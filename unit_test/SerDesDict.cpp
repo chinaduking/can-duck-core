@@ -13,7 +13,7 @@ namespace rto_io_test{
     TEST(RealtimeObject, setget){
         int angle_idx = 10;
 
-        ObjectPrototype<uint32_t> Angle(angle_idx);
+        SerDesPrototype<uint32_t> Angle(angle_idx);
 
         auto rto = Angle;
 
@@ -33,7 +33,7 @@ namespace rto_io_test{
         cout << "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
                 (fcnmsg::test_ServoRTO) << endl;
 
-        ASSERT_EQ(sizeof(ObjectMetaInfo), 4);
+        ASSERT_EQ(sizeof(SerDesMetaInfo), 4);
 
         auto angle_msg = fcnmsg::test_ServoRTO.angle;
         angle_msg << 100;

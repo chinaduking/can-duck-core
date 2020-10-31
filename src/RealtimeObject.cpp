@@ -13,10 +13,10 @@ using namespace libfcn_v2;
 using namespace utils;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t libfcn_v2::RtoDictSingleWrite(ObjectDictMM* obj_dict,
-                              void* buffer,
-                              obj_idx_t index,
-                              uint8_t *data, obj_size_t len){
+obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
+                                         void* buffer,
+                                         obj_idx_t index,
+                                         uint8_t *data, obj_size_t len){
 
 //    /* 不一次直接memcpy，有两个原因：
 //     * 1. 每次均检查index是否已溢出

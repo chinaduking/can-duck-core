@@ -8,7 +8,7 @@
 #include <cstdint>
 #include "utils/vector_s.hpp"
 #include "DataLinkLayer.hpp"
-#include "DataObjects.hpp"
+#include "SerDesDict.hpp"
 #include "OperationCode.hpp"
 #include "DefaultAllocate.h"
 
@@ -28,10 +28,10 @@ namespace libfcn_v2 {
 
 
     /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-    obj_size_t RtoDictSingleWrite(ObjectDictMM* dict,
+    obj_size_t RtoDictSingleWrite(SerDesDict* dict,
                                   void* buffer,
-                                      obj_idx_t index,
-                                      uint8_t *data, obj_size_t len);
+                                  obj_idx_t index,
+                                  uint8_t *data, obj_size_t len);
 
     obj_size_t RtoBufferWrite(void* buffer,
                               obj_idx_t index,
@@ -41,7 +41,7 @@ namespace libfcn_v2 {
 
     class PubSubChannel{
     public:
-        PubSubChannel(ObjectDictMM* obj_dict_shm, void* buffer,
+        PubSubChannel(SerDesDict* obj_dict_shm, void* buffer,
                       bool is_source= true)
             : obj_dict_prototype(obj_dict_shm), buffer(buffer){
             USER_ASSERT(buffer != nullptr);
@@ -91,7 +91,7 @@ namespace libfcn_v2 {
             return obj_dict_prototype->read(msg, buffer);
         }
 
-        ObjectDictMM* obj_dict_prototype{nullptr};
+        SerDesDict* obj_dict_prototype{nullptr};
 
         void* const buffer {nullptr};
 
@@ -132,7 +132,7 @@ namespace libfcn_v2 {
 
         virtual ~RtoNetworkHandler() = default;
 
-        PubSubChannel* createChannel(ObjectDictMM& prototype, uint16_t address){
+        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address){
             void* buffer = nullptr;
             for(auto & sh_b : shared_buffers){
                 if(sh_b.id == address){
@@ -160,8 +160,8 @@ namespace libfcn_v2 {
             return channel;
         }
 
-        PubSubChannel* createChannel(ObjectDictMM& prototype, uint16_t address,
-                                    void* static_buffer){
+        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
+                                     void* static_buffer){
             auto channel = new PubSubChannel(&prototype, static_buffer);
             channel->network_layer = network;
             channel->channel_addr = address;

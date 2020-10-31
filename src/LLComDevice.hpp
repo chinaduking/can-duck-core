@@ -45,7 +45,7 @@ public:
     virtual int32_t write(const uint8_t *data, uint32_t len) = 0;
 
     /* 标志是否是阻塞式LL读取。 */
-    bool is_blocking_recv;
+    bool is_blocking_recv{};
 
     uint8_t* write_buf;
     uint32_t write_buf_size;

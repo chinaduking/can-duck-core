@@ -1,7 +1,7 @@
 //
 // Created by sdong on 2019/11/14.
 //
-#include "DataObjects.hpp"
+#include "SerDesDict.hpp"
 
 #ifndef TESTSERVORTODICT_HPP
 #define TESTSERVORTODICT_HPP
@@ -10,25 +10,25 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct test_ServoRTO_C : public libfcn_v2::ObjectDictMM{
+    struct test_ServoRTO_C : public libfcn_v2::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::ObjectPrototype<int16_t> speed;
-        libfcn_v2::ObjectPrototype<int32_t> angle;
-        libfcn_v2::ObjectPrototype<int8_t>  current;
-        libfcn_v2::ObjectPrototype<int32_t> target_angle;
-        libfcn_v2::ObjectPrototype<int16_t> mode;
+        libfcn_v2::SerDesPrototype<int16_t> speed;
+        libfcn_v2::SerDesPrototype<int32_t> angle;
+        libfcn_v2::SerDesPrototype<int8_t>  current;
+        libfcn_v2::SerDesPrototype<int32_t> target_angle;
+        libfcn_v2::SerDesPrototype<int16_t> mode;
 
-        test_ServoRTO_C(void* p_buffer = nullptr) : ObjectDictMM(
+        test_ServoRTO_C(void* p_buffer = nullptr) : SerDesDict(
             5,
             &speed,
             p_buffer)
         ,
-        speed   (0),
-        angle   (1),
-        current (2),
-        target_angle(3),
-        mode    (4)
+                                                    speed   (0),
+                                                    angle   (1),
+                                                    current (2),
+                                                    target_angle(3),
+                                                    mode    (4)
         {
             obj_base_offset[speed.index] = (uint8_t *)&speed
                                            - (uint8_t*)p_first_obj;
