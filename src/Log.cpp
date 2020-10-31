@@ -68,14 +68,14 @@ std::string libfcn_v2::DataLinkFrameToString(DataLinkFrame& frame){
     }
 
     sprintf(buffer, "::: DataLinkFrame \n"
-                    "\tdest  id = 0x%.2X\n"
                     "\tsrc   id = 0x%.2X\n"
+                    "\tdest  id = 0x%.2X\n"
                     "\top code  = 0x%.2X (%s)\n"
                     "\tmsg   id = 0x%.2X\n"
                     "\tpayload[%.3d] = \n"
                     "\t\t(hex) ",
-            frame.dest_id  & 0xff,
             frame.src_id   & 0xff,
+            frame.dest_id  & 0xff,
             frame.op_code  & 0xff, opcode_str,
             frame.msg_id   & 0xff,
             frame.payload_len);
@@ -108,17 +108,21 @@ frame){
     if(frame.payload_len > DATALINK_MTU){
         return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
     }
+    char * opcode_str = "";
+    if(frame.op_code < sizeof(opcode_str) / sizeof(opcode_str[0])) {
+        opcode_str = mOpCodeStr[frame.op_code];
+    }
 
-    sprintf(buffer, "\n\t::: DataLinkFrame "
-                    "D[0x%.2X] "
-                    "S[0x%.2X] "
-                    "O[0x%.2X] "
-                    "I[0x%.2X] "
-                    " \n\t\t D[%.3d] = "
+    sprintf(buffer, "Frame "
+                    "[0x%.2X] ---> "
+                    "[0x%.2X]\n"
+                    "\tOp[0x%.2X]:%s"
+                    "  |  Idx[0x%.2X] \n"
+                    "\tData[%.3d] = "
                     "",
-            frame.dest_id  & 0xff,
             frame.src_id   & 0xff,
-            frame.op_code  & 0xff,
+            frame.dest_id  & 0xff,
+            frame.op_code  & 0xff, opcode_str,
             frame.msg_id   & 0xff,
             frame.payload_len);
 

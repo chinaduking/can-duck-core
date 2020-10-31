@@ -123,7 +123,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     }
 
     /* Header */
-    str_tmp = (char*) "-->[";
+    str_tmp = (char*) "==[";
     batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
 

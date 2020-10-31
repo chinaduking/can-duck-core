@@ -20,7 +20,7 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
 
     LOGV("NetworkLayer::sendFrame:\n\r%s",
-         DataLinkFrameToString(*frame).c_str());
+         DataLinkFrameToStringCompact(*frame).c_str());
 
     if(port_id >= data_link_dev.size()){
         return -1;
@@ -34,7 +34,7 @@ int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
 void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
 
     LOGV("NetworkLayer::recvProtocolDispatcher:\n\r%s",
-         DataLinkFrameToString(*frame).c_str());
+         DataLinkFrameToStringCompact(*frame).c_str());
 
     auto op_code = frame->op_code;
 
