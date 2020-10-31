@@ -12,6 +12,7 @@
 #include "DefaultAllocate.h"
 #include "OpCode.hpp"
 #include "utils/BitLUT8.hpp"
+#include "DefaultAllocate.h"
 
 namespace libfcn_v2 {
     /*参数表任务状态：包括读、写*/
@@ -55,14 +56,18 @@ namespace libfcn_v2 {
             frame.payload_len = 1;
             frame.payload[0] =  msg.data_size;
 
-            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+#ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
+#else //USE_REQUEST_EVLOOP
+            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+#endif //USE_REQUEST_EVLOOP
         }
 
 
         template<typename Msg>
         void writeUnblocking(Msg&& msg,
                              FcnCallbackInterface* callback=nullptr){
+
             DataLinkFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
@@ -71,9 +76,13 @@ namespace libfcn_v2 {
             frame.payload_len = msg.data_size;
             utils::memcpy(frame.payload, &msg.data, msg.data_size);
 
-            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+#ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
+#else //USE_REQUEST_EVLOOP
+            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+#endif //USE_REQUEST_EVLOOP
         }
+
 
 #ifdef SYSTYPE_FULL_OS
 //        template<typename Msg>

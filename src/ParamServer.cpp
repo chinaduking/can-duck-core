@@ -4,7 +4,6 @@
 
 #include "ParamServer.hpp"
 #include "OpCode.hpp"
-
 #include "NetworkLayer.hpp"
 
 using namespace libfcn_v2;
@@ -210,6 +209,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
         case OpCode::SVO_SINGLE_READ_REQ: {
             for(auto& server : created_servers){
                 if(server.address == frame->dest_id){
+                    USER_ASSERT(server.instance != nullptr);
                     server.instance->onReadReq(frame, recv_port_id);
                     matched = 1;
                 }
@@ -221,7 +221,8 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
         case OpCode::SVO_SINGLE_WRITE_REQ: {
             for(auto& server : created_servers){
                 if(server.address == frame->dest_id){
-                    server.instance->onWriteReq(frame, recv_port_id);\
+                    USER_ASSERT(server.instance != nullptr);
+                    server.instance->onWriteReq(frame, recv_port_id);
                     matched = 1;
                 }
             }
@@ -232,6 +233,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
         case OpCode::SVO_SINGLE_READ_ACK: {
             for(auto& client : created_clients){
                 if(client.address == frame->dest_id){
+                    USER_ASSERT(client.instance != nullptr);
                     client.instance->onReadAck(frame);
                     matched = 1;
                 }
@@ -243,6 +245,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
         case OpCode::SVO_SINGLE_WRITE_ACK: {
             for(auto& client : created_clients){
                 if(client.address == frame->dest_id){
+                    USER_ASSERT(client.instance != nullptr);
                     client.instance->onWriteAck(frame);
                     matched = 1;
                 }
