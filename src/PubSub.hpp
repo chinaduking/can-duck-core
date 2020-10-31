@@ -43,7 +43,7 @@ namespace libfcn_v2 {
     public:
         PubSubChannel(SerDesDict* obj_dict_shm, void* buffer,
                       bool is_source= true)
-            : obj_dict_prototype(obj_dict_shm), buffer(buffer){
+            : serdes_dict(obj_dict_shm), buffer(buffer){
             USER_ASSERT(buffer != nullptr);
         }
 
@@ -68,7 +68,7 @@ namespace libfcn_v2 {
             }
 
             /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
-            obj_dict_prototype->write(msg, buffer);
+            serdes_dict->serialize(msg, buffer);
 
             /* TODO: 进行本地发布的回调 */
 
@@ -88,10 +88,10 @@ namespace libfcn_v2 {
         template<typename Prototype>
         Prototype readBuffer(Prototype&& msg){
             USER_ASSERT(buffer!= nullptr);
-            return obj_dict_prototype->read(msg, buffer);
+            return serdes_dict->deserialize(msg, buffer);
         }
 
-        SerDesDict* obj_dict_prototype{nullptr};
+        SerDesDict* serdes_dict{nullptr};
 
         void* const buffer {nullptr};
 

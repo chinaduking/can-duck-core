@@ -135,7 +135,7 @@ namespace libfcn_v2 {
                   uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 server_addr(address),
                 buffer(buffer),
-                obj_dict_prototype(obj_dict_shm),
+                serdes_dict(obj_dict_shm),
                 network_layer(network_layer){
         }
 
@@ -158,13 +158,13 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void updateData(Msg&& msg){
-            obj_dict_prototype->write(msg, buffer);
+            serdes_dict->serialize(msg, buffer);
         }
 
         template<typename Prototype>
         Prototype getData(Prototype&& msg){
             USER_ASSERT(buffer!= nullptr);
-            return obj_dict_prototype->read(msg, buffer);
+            return serdes_dict->deserialize(msg, buffer);
         }
 
         template<typename Prototype>
@@ -195,7 +195,7 @@ namespace libfcn_v2 {
         void* buffer{nullptr};
 
 //    private:
-        SerDesDict* const obj_dict_prototype{nullptr};
+        SerDesDict* const serdes_dict{nullptr};
 
 
         friend class SvoNetworkHandler;

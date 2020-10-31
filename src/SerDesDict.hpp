@@ -86,7 +86,7 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        Prototype read(Prototype&& msg, void* p_buffer){
+        Prototype deserialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             Prototype res = msg;
@@ -99,7 +99,7 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        void write(Prototype&& msg, void* p_buffer){
+        void serialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             utils::memcpy((uint8_t*)p_buffer + msg.buffer_offset,

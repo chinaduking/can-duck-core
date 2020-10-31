@@ -22,13 +22,13 @@ obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
      * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
      * 可记录错误log
      * */
-    if(index > obj_dict_prototype->dictSize()){
+    if(index > serdes_dict->dictSize()){
         ack_code = 4;
     }
 
     if(ack_code == 1){
-        auto offset = obj_dict_prototype->getBufferDataOffest(index);
-        auto size   = obj_dict_prototype->getBufferDataSize(index);
+        auto offset = serdes_dict->getBufferDataOffest(index);
+        auto size   = serdes_dict->getBufferDataSize(index);
 
         USER_ASSERT(size != 0);
 
@@ -83,7 +83,7 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
 
     auto index = frame->msg_id;
 
-    if(index > obj_dict_prototype->dictSize()){
+    if(index > serdes_dict->dictSize()){
         /* 仅做写保护，不使程序assert failed崩溃：
          * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
          * 可记录错误log
@@ -91,8 +91,8 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
         return 2;
     }
 
-    auto offset = obj_dict_prototype->getBufferDataOffest(index);
-    auto size   = obj_dict_prototype->getBufferDataSize(index);
+    auto offset = serdes_dict->getBufferDataOffest(index);
+    auto size   = serdes_dict->getBufferDataSize(index);
 
     USER_ASSERT(size != 0);
 

@@ -44,10 +44,10 @@ namespace rto_io_test{
         decltype(fcnmsg::test_ServoPubSubDict)::Buffer buffer;
         decltype(fcnmsg::test_ServoPubSubDict) dict;
 
-        dict.write(angle_msg, &buffer);
+        dict.serialize(angle_msg, &buffer);
 
         ASSERT_EQ(buffer.angle, 100);
-        ASSERT_EQ(dict.read(angle_msg, &buffer).data, 100);
+        ASSERT_EQ(dict.deserialize(angle_msg, &buffer).data, 100);
 
         cout << "pass!" << endl;
     }
