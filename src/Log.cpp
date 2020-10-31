@@ -96,6 +96,8 @@ std::string libfcn_v2::Frame2Log(DataLinkFrame& frame){
 
     sprintf(&buffer[info_offset + frame.payload_len * 3], "\n\t\t(str) %s\n", frame.payload);
 
+    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
+
     return std::string(buffer);
 }
 
@@ -136,6 +138,11 @@ frame){
     for(int i = 0; i < frame.payload_len; i ++){
         sprintf(&buffer[info_offset + i * 3], "%.2X ", frame.payload[i] & 0xff);
     }
+
+    sprintf(&buffer[info_offset + frame.payload_len * 3], "\n\"%s\"\n", frame
+    .payload);
+
+    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
 
     return std::string(buffer);
 }
