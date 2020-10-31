@@ -6,7 +6,7 @@
 #define LIBFCN_V2_LARGEDATA_HPP
 
 
-class LargeDataTrans {
+class MultiFrame {
 
 };
 

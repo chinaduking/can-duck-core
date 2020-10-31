@@ -185,7 +185,7 @@ namespace libfcn_v2 {
 
         void* buffer{nullptr};
 
-    private:
+//    private:
         SerDesDict* const obj_dict_prototype{nullptr};
 
 
@@ -257,14 +257,13 @@ namespace libfcn_v2 {
             return client;
         }
 
-        void handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
+        int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
         NetworkLayer* network{nullptr};
 
         uint8_t is_server{0};
 
 
-    protected:
         struct CreatedServer{
             int         address {-1};
             SvoServer*  instance {nullptr};

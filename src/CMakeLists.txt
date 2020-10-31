@@ -3,7 +3,7 @@ add_library(fcn_v2
         NetworkLayer.cpp
         PubSub.cpp
         ParamServer.cpp
-        LargeDataTrans.cpp
+        MultiFrame.cpp
 
         Log.cpp
         Node.cpp
