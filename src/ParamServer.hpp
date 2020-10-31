@@ -217,45 +217,11 @@ namespace libfcn_v2 {
         virtual ~SvoNetworkHandler() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        SvoServer* createServer(SerDesDict& prototype, uint16_t address){
-            SvoServer* server = nullptr;
-            for(auto & srv : created_servers){
-                if(srv.address == address){
-                    server = srv.instance;
-                    USER_ASSERT(server != nullptr);
-                }
-            }
-            if(server == nullptr){
-                server = new SvoServer(network, address,
-                                       &prototype,
-                                       prototype.createBuffer());
-
-                CreatedServer srv = {
-                        .address = address,
-                        .instance = server
-                };
-
-                created_servers.push_back(srv);
-            }
-
-            return server;
-        }
+        SvoServer* createServer(SerDesDict& prototype, uint16_t address);
 
         SvoClient* bindClientToServer(uint16_t server_addr,
                                       uint16_t client_addr,
-                                      uint16_t port_id){
-            auto client = new SvoClient(network, server_addr, client_addr,
-                                        port_id);
-
-            CreatedClient cli = {
-                    .address = client_addr,
-                    .instance = client
-            };
-
-            created_clients.push_back(cli);
-
-            return client;
-        }
+                                      uint16_t port_id);
 
         int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
