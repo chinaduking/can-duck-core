@@ -124,7 +124,7 @@ namespace libfcn_v2 {
     class RtoNetworkHandler{
     public:
         RtoNetworkHandler(NetworkLayer* network)
-            : network(network),
+            : ctx_network_layer(network),
               shared_buffers(MAX_LOCAL_NODE_NUM),
               pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
               pub_ctrl_rules(MAX_PUB_CTRL_RULES)
@@ -151,7 +151,7 @@ namespace libfcn_v2 {
             }
 
             auto channel = new PubSubChannel(&prototype, buffer);
-            channel->network_layer = network;
+            channel->network_layer = ctx_network_layer;
             channel->channel_addr = address;
 
 
@@ -163,7 +163,7 @@ namespace libfcn_v2 {
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
                                      void* static_buffer){
             auto channel = new PubSubChannel(&prototype, static_buffer);
-            channel->network_layer = network;
+            channel->network_layer = ctx_network_layer;
             channel->channel_addr = address;
             return channel;
         }
@@ -208,7 +208,7 @@ namespace libfcn_v2 {
 
 
     protected:
-        NetworkLayer* const network{nullptr};
+        NetworkLayer* const ctx_network_layer{nullptr};
 
         uint16_t poll_freq_hz{1000};
 

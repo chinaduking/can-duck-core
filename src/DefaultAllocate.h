@@ -31,7 +31,7 @@ namespace libfcn_v2{
     /*
      * 是否使用事件循环管理请求
      **/
-//    #define USE_REQUEST_EVLOOP
+    #define USE_REQUEST_EVLOOP
 
 
     /* 一个客户端可以同时发起的请求

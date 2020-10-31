@@ -115,7 +115,7 @@ namespace esharedptr_test{
                 ASSERT_EQ(framObjPool.usage(), 2 - i + 1);
             }
 
-            frame_0->dest_id = 1;
+            frame_0->server_addr = 1;
             cout << DataLinkFrameToString(*frame_0) << endl;
         }
         ASSERT_EQ(framObjPool.usage(), 0);

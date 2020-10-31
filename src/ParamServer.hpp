@@ -14,7 +14,14 @@
 #include "utils/BitLUT8.hpp"
 #include "DefaultAllocate.h"
 
+#ifdef USE_REQUEST_EVLOOP
+#include "RequestTask.hpp"
+#endif
+
 namespace libfcn_v2 {
+
+
+
     /*参数表任务状态：包括读、写*/
     enum class SvoClientStat : uint8_t {
         Idle = 0,   /*初始状态/无任务状态*/
@@ -28,7 +35,6 @@ namespace libfcn_v2 {
     class SvoNetworkHandler;
     class NetworkLayer;
 
-
     class SvoClient{
     public:
         SvoClient(NetworkLayer* network_layer,
@@ -36,11 +42,15 @@ namespace libfcn_v2 {
                   uint16_t client_addr,
                   uint16_t port_id) :
 
-                    server_addr(server_addr),
-                    client_addr(client_addr),
-                    network_layer(network_layer),
-                    pending_reqs(CLIENT_MAX_REQ_NUM),
-                    port_id(port_id)
+                server_addr(server_addr),
+                client_addr(client_addr),
+                ctx_network_layer(network_layer),
+                pending_reqs(CLIENT_MAX_REQ_NUM),
+                port_id(port_id)
+
+#ifdef USE_REQUEST_EVLOOP
+                    ,ev_loop(utils::evloopTimeSrouceMS)
+#endif
                   {}
 
         ~SvoClient() = default;
@@ -59,7 +69,12 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+            ev_loop.addTask(std::make_unique<RequestTask>(
+                    this,
+                    frame,
+                    (uint8_t)OpCode::SVO_SINGLE_READ_ACK,
+                    300, 3)
+                );
 #endif //USE_REQUEST_EVLOOP
         }
 
@@ -79,7 +94,12 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+            ev_loop.addTask(std::make_unique<RequestTask>(
+                    this,
+                    frame,
+                    (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK,
+                    300, 3)
+            );
 #endif //USE_REQUEST_EVLOOP
         }
 
@@ -99,12 +119,13 @@ namespace libfcn_v2 {
         //TODO: const
         uint16_t server_addr { 0 };
         uint16_t client_addr { 0 };
+        uint16_t port_id{0};
 
-    private:
+//    private:
         int networkSendFrame(uint16_t port_id, DataLinkFrame* frame);
 
 
-        NetworkLayer* const network_layer{nullptr};
+        NetworkLayer* const ctx_network_layer{nullptr};
 
         friend class SvoNetworkHandler;
 
@@ -119,7 +140,10 @@ namespace libfcn_v2 {
         };
         utils::vector_s<PendingRequest> pending_reqs;
 
-        uint16_t port_id{0};
+#ifdef USE_REQUEST_EVLOOP
+       FcnEvLoop ev_loop;
+#endif
+
     };
 
     /*
@@ -136,7 +160,7 @@ namespace libfcn_v2 {
                 server_addr(address),
                 buffer(buffer),
                 serdes_dict(obj_dict_shm),
-                network_layer(network_layer){
+                ctx_network_layer(network_layer){
         }
 
         ~SvoServer() = default;
@@ -205,7 +229,7 @@ namespace libfcn_v2 {
 
         obj_size_t onReadReq(DataLinkFrame* frame, uint16_t port_id);
 
-        NetworkLayer* const network_layer{nullptr};
+        NetworkLayer* const ctx_network_layer{nullptr};
     };
 
 
