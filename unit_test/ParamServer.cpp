@@ -52,7 +52,7 @@ namespace network_test {
     TEST(NetworkLayer, SvoHostNode) {
         Node fcn_node(1);
         Tracer tracer(true);
-        tracer.setFilter(Tracer::INFO);
+        tracer.setFilter(Tracer::Level::INFO);
 
         int servo_addr = SERVO_ADDR;
         int local_addr = HOST_ADDR;

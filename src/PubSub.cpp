@@ -89,11 +89,6 @@ void libfcn_v2::singleWriteFrameBuilder(
 }
 
 void PubSubChannel::networkPublish(DataLinkFrame *frame) {
-    auto tracer = Log::getInstance();
-
-//    tracer->print(Tracer::INFO, "PubSubChannel::networkPublish.\n%s",
-//                  DataLinkFrameToString(*frame).c_str());
-
     if(network_layer != nullptr){
         //TODO: by publish ctrl rules!!
         network_layer->sendFrame(0, frame);
@@ -116,8 +111,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
     if(channel == nullptr){
-        Log::getInstance()->print(Tracer::WARNING,
-          "RtoNetworkHandler::handleWrtie,""channel == nullptr\n");
+        LOGW("RtoNetworkHandler::handleWrtie,channel == nullptr\n");
 
         return;
     }

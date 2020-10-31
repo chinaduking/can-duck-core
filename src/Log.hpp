@@ -10,9 +10,17 @@
 
 
 namespace libfcn_v2{
+    using LogLevel = utils::Tracer::Level;
+
     class Log {
     public:
         static utils::Tracer* getInstance();
+
+        static int printf(utils::Tracer::Level level,
+                           char *format,
+                           ... );
+
+        static void setLevel(LogLevel level);
 
     private:
         Log() = default;
@@ -24,6 +32,12 @@ namespace libfcn_v2{
     std::string DataLinkFrameToString(DataLinkFrame& frame);
 
     std::string DataLinkFrameToStringCompact(DataLinkFrame& frame);
+
+    #define LOGI(...) Log::printf(utils::Tracer::Level::INFO,    __VA_ARGS__)
+    #define LOGV(...) Log::printf(utils::Tracer::Level::VERBOSE, __VA_ARGS__)
+    #define LOGW(...) Log::printf(utils::Tracer::Level::WARNING, __VA_ARGS__)
+    #define LOGE(...) Log::printf(utils::Tracer::Level::ERROR,   __VA_ARGS__)
+    #define LOGF(...) Log::printf(utils::Tracer::Level::FATAL,   __VA_ARGS__)
 }
 
 

@@ -19,9 +19,7 @@ namespace libfcn_v2{
             :
             rto_network_handler(this),
             svo_network_handler(this),
-            data_link_dev(MAX_COM_PORT_NUM) {
-                tracer = Log::getInstance();
-           }
+            data_link_dev(MAX_COM_PORT_NUM) {}
 
         ~NetworkLayer() = default;
 
@@ -41,10 +39,6 @@ namespace libfcn_v2{
     private:
         utils::vector_s<FrameIODevice*> data_link_dev;
         void recvProtocolDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
-
-
-        utils::Tracer* tracer={nullptr};
-
     };
 }
 

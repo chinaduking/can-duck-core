@@ -58,7 +58,7 @@ void Tracer::setFilter(Level level){
     std::lock_guard<std::mutex> lk(update_mutex);
 #endif //SYSTYPE_FULL_OS
 
-    if(level > FATAL){
+    if(level > Level::FATAL){
         return;
     }
 
@@ -98,26 +98,26 @@ void Tracer::batchWrite(const uint8_t *data, uint32_t len) {
 
 char trace_buffer[TRACE_BUFFER_SIZE];
 
-void Tracer::print(Level level, char *format, ...) {
+int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
 #ifdef SYSTYPE_FULL_OS
     std::lock_guard<std::mutex> lk(update_mutex);
 #endif //SYSTYPE_FULL_OS
 
 
-    if(filter_level == NONE || device.size() == 0){
-        return;
+    if(filter_level == Level::NONE || device.size() == 0){
+        return 0;
     }
 
-    if(level < filter_level || level > FATAL){
-        return;
+    if(level < filter_level || level > Level::FATAL){
+        return 0;
     }
 
     char* str_tmp;
 
     /* Color */
     if(enable_color){
-        str_tmp = level_color[level];
+        str_tmp = level_color[(uint8_t)level];
         batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
         //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     }
@@ -128,7 +128,7 @@ void Tracer::print(Level level, char *format, ...) {
     //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
 
     /* Level */
-    str_tmp = level_name[level];
+    str_tmp = level_name[(uint8_t)level];
     batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
 
@@ -146,12 +146,12 @@ void Tracer::print(Level level, char *format, ...) {
     //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
 
     /* Content */
-    va_list arg_ptr;
+//    va_list arg_ptr;
     int ret;
 
-    va_start(arg_ptr, format);
+//    va_start(arg_ptr, format);
     ret = vsprintf(trace_buffer, format, arg_ptr);
-    va_end(arg_ptr);
+//    va_end(arg_ptr);
 
     if(ret >= 0){
         trace_buffer[ret] = 0;
@@ -172,6 +172,16 @@ void Tracer::print(Level level, char *format, ...) {
     //device->write(reinterpret_cast<const uint8_t *>("\n"), 2);
 
     std::cout << std::endl;
+
+    return ret;
 }
 
+int Tracer::print(Level level, char *format, ...) {
+    va_list arg_ptr;
+    va_start(arg_ptr, format);
+    int ret = this->vprintf(level, format, arg_ptr);
+    va_end(arg_ptr);
+
+    return ret;
+}
 

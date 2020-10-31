@@ -17,7 +17,7 @@
 namespace utils{
     class Tracer{
     public:
-        enum Level{
+        enum class Level{
             NONE = 0,
             INFO,
             VERBOSE,
@@ -34,13 +34,14 @@ namespace utils{
         void setTag(char* tag);
 
         /**/
-        void print(Level level, char* fmt, ...);
+        int vprintf(Level level, char *format, va_list arg_ptr);
+        int print(Level level, char* fmt, ...);
 
     private:
         void batchWrite(const uint8_t *data, uint32_t len);
 
         bool enable_color;
-        Level filter_level {WARNING};
+        Level filter_level {Level::WARNING};
         vector_s<LLByteDevice*> device;
 
         char tag[64];

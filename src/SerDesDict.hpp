@@ -30,6 +30,7 @@ namespace libfcn_v2 {
         /* 消息数据大小，最长128字节。不支持变长 */
         const obj_size_t data_size{0};
 
+        /* 缓冲区中数据的偏移量 */
         mapped_ptr_t buffer_offset{0};
 
         inline void* getDataPtr(){

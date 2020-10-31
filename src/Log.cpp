@@ -9,18 +9,30 @@ using namespace libfcn_v2;
 
 utils::Tracer* Log::tracer = nullptr;
 
-
-
 utils::Tracer* Log::getInstance(){
     if(tracer == nullptr){
         tracer = new utils::Tracer(true);
 
-        tracer->setFilter(utils::Tracer::INFO);
+        tracer->setFilter(utils::Tracer::Level::INFO);
     }
 
     return tracer;
 }
 
+void Log::setLevel(LogLevel level){
+    getInstance()->setFilter(level);
+}
+
+int Log::printf(utils::Tracer::Level level,
+                 char *format, ...) {
+
+    va_list arg_ptr;
+    va_start(arg_ptr, format);
+    int ret = getInstance()->vprintf(level, format, arg_ptr);
+    va_end(arg_ptr);
+
+    return ret;
+}
 
 static char* mOpCodeStr[]={
         (char*)"FORCE_STOP",
