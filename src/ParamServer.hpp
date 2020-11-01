@@ -21,8 +21,6 @@
 
 namespace libfcn_v2 {
 
-
-
     /*参数表任务状态：包括读、写*/
     enum class SvoClientStat : uint8_t {
         Idle = 0,   /*初始状态/无任务状态*/
@@ -38,15 +36,14 @@ namespace libfcn_v2 {
 
     class SvoClient{
     public:
-        SvoClient(NetworkLayer* network_layer,
+        SvoClient(NetworkLayer* ctx_network_layer,
                   uint16_t server_addr,
                   uint16_t client_addr,
                   uint16_t port_id) :
 
                 server_addr(server_addr),
                 client_addr(client_addr),
-                ctx_network_layer(network_layer),
-//                pending_reqs(CLIENT_MAX_REQ_NUM),
+                ctx_network_layer(ctx_network_layer),
                 port_id(port_id)              //TODO: noport, broadcast!
 
 
@@ -77,7 +74,7 @@ namespace libfcn_v2 {
                     this,
                     frame,
                     (uint8_t)OpCode::SVO_SINGLE_READ_ACK,
-                    300, 3)
+                    200, 3)
                 );
             if(res == -1){
                 LOGW("evloop can't add more task!");
@@ -144,13 +141,6 @@ namespace libfcn_v2 {
 
         void onWriteAck(DataLinkFrame* frame);
 
-        struct PendingRequest{
-            uint16_t server_address;
-            uint32_t timeout_time_100ms;
-            FcnCallbackInterface* callback;
-        };
-//        utils::vector_s<PendingRequest> pending_reqs;
-
 #ifdef USE_REQUEST_EVLOOP
        FcnEvLoop ev_loop;
 #endif
@@ -166,12 +156,12 @@ namespace libfcn_v2 {
      * */
     class SvoServer{
     public:
-        SvoServer(NetworkLayer* network_layer,
+        SvoServer(NetworkLayer* ctx_network_layer,
                   uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 server_addr(address),
                 buffer(buffer),
                 serdes_dict(obj_dict_shm),
-                ctx_network_layer(network_layer){
+                ctx_network_layer(ctx_network_layer){
         }
 
         ~SvoServer() = default;
@@ -251,8 +241,8 @@ namespace libfcn_v2 {
     * */
     class SvoNetworkHandler{
     public:
-        SvoNetworkHandler(NetworkLayer* network):
-                network(network),
+        SvoNetworkHandler(NetworkLayer* ctx_network_layer):
+                ctx_network_layer(ctx_network_layer),
                 created_servers(MAX_LOCAL_NODE_NUM),
                 created_clients(MAX_LOCAL_NODE_NUM)
         {}
@@ -269,7 +259,7 @@ namespace libfcn_v2 {
 
         int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
-        NetworkLayer* network{nullptr};
+        NetworkLayer* ctx_network_layer{nullptr};
 
         uint8_t is_server{0};
 

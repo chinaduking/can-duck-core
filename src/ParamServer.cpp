@@ -169,7 +169,7 @@ address){
     }
 
     if(server == nullptr){
-        server = new SvoServer(network, address,
+        server = new SvoServer(ctx_network_layer, address,
                                &prototype,
                                prototype.createBuffer());
 
@@ -188,7 +188,7 @@ address){
 SvoClient* SvoNetworkHandler::bindClientToServer(uint16_t server_addr,
                                                  uint16_t client_addr,
                                                  uint16_t port_id){
-    auto client = new SvoClient(network, server_addr, client_addr,
+    auto client = new SvoClient(ctx_network_layer, server_addr, client_addr,
                                 port_id);
 
     CreatedClient cli = {

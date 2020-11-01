@@ -106,7 +106,11 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
     PubSubChannel* channel = nullptr;
 
     for(auto& ch : pub_sub_channels){
-        channel = ch;
+        if((ch->channel_addr == frame->src_id)
+            || (ch->is_multi_source && ch->channel_addr == frame->dest_id)){
+            //TODO: is_multi_source && handle dest_id!!
+            channel = ch;
+        }
     }
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */

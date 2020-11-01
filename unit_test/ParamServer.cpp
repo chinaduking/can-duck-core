@@ -30,9 +30,6 @@ namespace network_test {
 
         DataLinkFrame frame_tmp;
 
-
-
-
         uint32_t cnt = 0;
 
         auto server = fcn_node.network_layer->svo_network_handler
@@ -73,7 +70,7 @@ namespace network_test {
 
 
         for(int __i = 0; __i < 1; ){
-            perciseSleep(0.1);
+            perciseSleep(1);
 
             cout << "request.. "  << endl;
 
