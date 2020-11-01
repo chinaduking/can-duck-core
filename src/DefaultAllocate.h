@@ -12,6 +12,11 @@ namespace libfcn_v2{
     #define FCN_ALLOCATE_FRAME_NUM 4
 
     /*
+     *
+     **/
+    #define DATALINK_MAX_TRANS_UNIT  64
+
+    /*
      * 最多支持的通信端口数目
      * */
     #define MAX_COM_PORT_NUM 4
