@@ -18,15 +18,8 @@ namespace libfcn_v2{
 
     /*
      * 最多支持的本地节点数目
-     * */
+     **/
     #define MAX_LOCAL_NODE_NUM 6
-
-
-    /*
-     * 最多支持的请求任务数
-     * */
-    #define MAX_REQ_TASK_NUM 16
-
 
     /*
      * 是否使用事件循环管理请求
@@ -34,10 +27,16 @@ namespace libfcn_v2{
     #define USE_REQUEST_EVLOOP
 
 
-    /* 一个客户端可以同时发起的请求
-     * */
-    #define CLIENT_MAX_REQ_NUM 10
+    /*
+     * 一个客户端可以同时发起的请求
+     **/
+    #define CLIENT_MAX_REQ_NUM 5
 
+
+    /*
+     *
+     **/
+    #define ENABLE_LOG
 }
 
 #endif //LIBFCN_V2_DEFAULTALLOCATE_H

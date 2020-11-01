@@ -7,7 +7,7 @@
 
 #include "utils/Tracer.hpp"
 #include "DataLinkLayer.hpp"
-
+#include "DefaultAllocate.h"
 
 namespace libfcn_v2{
     using LogLevel = utils::Tracer::Level;
@@ -33,11 +33,21 @@ namespace libfcn_v2{
 
     std::string Frame2LogCompact(DataLinkFrame& frame);
 
+#ifdef ENABLE_LOG
     #define LOGI(...) Log::printf(utils::Tracer::Level::INFO,    __VA_ARGS__)
     #define LOGV(...) Log::printf(utils::Tracer::Level::VERBOSE, __VA_ARGS__)
+    #define LOGD(...)   //TODO
     #define LOGW(...) Log::printf(utils::Tracer::Level::WARNING, __VA_ARGS__)
     #define LOGE(...) Log::printf(utils::Tracer::Level::ERROR,   __VA_ARGS__)
     #define LOGF(...) Log::printf(utils::Tracer::Level::FATAL,   __VA_ARGS__)
+#else
+    #define LOGI(...) do{}while(0)
+    #define LOGV(...) do{}while(0)
+    #define LOGD(...) do{}while(0)
+    #define LOGW(...) do{}while(0)
+    #define LOGE(...) do{}while(0)
+    #define LOGF(...) do{}while(0)
+#endif
 }
 
 

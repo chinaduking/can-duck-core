@@ -102,9 +102,6 @@ namespace utils {
 
             EventLoop* context_evloop{nullptr};
 
-
-
-
             //TODO: override new /delete using TaskAllocator
         private:
             uint64_t timeout_time_ms{0};
@@ -112,8 +109,9 @@ namespace utils {
 
 
     public:
-        EventLoop(uint64_t (*ms_timesource)()):
-            ms_timesource(ms_timesource){
+        EventLoop(uint64_t (*ms_timesource)(), uint16_t task_limit = 0):
+            ms_timesource(ms_timesource),
+            task_limit(task_limit){
 #ifdef EVENTLOOP_THREADING
             worker_thread = new std::thread([&](){
                 while(scheduleWorker());
@@ -152,7 +150,6 @@ namespace utils {
         }
 
 
-
         void notify(Msg_T& message){
             //TODO: 只实现深度为1的通知队列：填入一个消息，并阻塞至所有接收处理完成！
             pending_notify = message;
@@ -160,31 +157,12 @@ namespace utils {
         }
 
 
-//        /* 更安全的智能指针构造器，构造实例+构造指针+推入数据，
-//         * 一个API完成。避免先new实例再传参可能造成人为错误。
-//         * 举例：
-//         *  evloop.addTask<EventBase>(some_param);
-//         *
-//         *  //[ 手动构造的旧方式 ]
-//         *  // {
-//         *  //     // 手动构造实例和指向实例的智能指针
-//         *  //     auto event = ESharedPtr<EventBase>(new EventBase(some_param))
-//         *  //     // 手动传参
-//         *  //     evloop.addTask(event);
-//         *  //     // 智能指针出作用域
-//         *  // }
-//         * */
-//        template< class T, class... Args >
-//        void addTask( Args&&... args ){
-//            ESharedPtr<EventBase> sp(new T(args...));
-//            addTask(sp);
-//        }
-
-
-        /* 旧的添加任务方式 */
+        /* 添加任务 */
         void addTask(std::unique_ptr<Task> task){
-            task->context_evloop = this;
-            task_list.push(task);
+            if(task_list.size() < task_limit){
+                task->context_evloop = this;
+                task_list.push(task);
+            }
         }
 
         bool scheduleWorker(){
@@ -235,7 +213,7 @@ namespace utils {
     protected:
 
         LinkedList<std::unique_ptr<Task>, ListNodeAlloc> task_list;
-
+        uint16_t task_limit{0};
     private:
         void notify(){
             //TODO: 只实现深度为1的通知队列：填入一个消息，并阻塞至所有接收处理完成！

@@ -11,8 +11,13 @@
 
 namespace libfcn_v2{
 
-    //TODO: LinkedList Allocator !
-    using FcnEvLoop = utils::EventLoop<DataLinkFrame, utils::DefaultAllocator>;
+    struct LinkedListNodeAllocator{
+        static void* allocate(size_t size);
+        static void deallocate(void* p);
+    };
+
+    //TODO: LinkedList Allocator (A general allocator of Node<uniqur_ptr<ANY>>)!
+    using FcnEvLoop = utils::EventLoop<DataLinkFrame, LinkedListNodeAllocator>;
 
     class SvoClient;
     /*
@@ -22,6 +27,8 @@ namespace libfcn_v2{
      * */
     class RequestTask : public FcnEvLoop::Task{
     public:
+        RequestTask() : FcnEvLoop::Task(){}
+
         RequestTask(
                 SvoClient* context_client,
                 DataLinkFrame& frame,
@@ -42,41 +49,28 @@ namespace libfcn_v2{
 
         DataLinkFrame cached_request_frame;
 
-
+        void* operator new(size_t size) noexcept;
+        void operator delete(void * p);
 
     protected:
 
-        void timeoutCallback();
+        void onTimeout();
 
         /* 解析目标节点的应答数据 */
-        void handleReceive(DataLinkFrame& frame){}
+        void onRecv(DataLinkFrame& frame);
 
-        void* operator new(size_t size) noexcept{
-            //TODO: Request Allocator !
-            return utils::DefaultAllocator::allocate(size);
-//            return framObjPool.allocate();
-        }
-
-        void operator delete(void * p){
-            //TODO: Request Allocator !
-            utils::DefaultAllocator::deallocate(p);
-
-//            framObjPool.deallocate(p);
-        }
 
         //TODO: callback!!!
         void (*callback)(void* context_obj, void* data, int ev_code) {nullptr};
         void* context_obj{nullptr};
     private:
-//        uint16_t server_addr;
-        uint16_t ack_op_code;
-//        uint16_t msg_id;
+        uint16_t ack_op_code{0};
 
-        uint16_t timeout_ms;
-        int retry_max;
+        uint16_t timeout_ms{2000};
+        int retry_max{2};
         uint16_t retry_cnt{0};
 
-        SvoClient* const context_client;
+        SvoClient* const context_client{nullptr};
 
         bool matchNotifyMsg(DataLinkFrame& frame) override;
         void evUpdate() override;

@@ -45,8 +45,9 @@ namespace libfcn_v2 {
                 server_addr(server_addr),
                 client_addr(client_addr),
                 ctx_network_layer(network_layer),
-                pending_reqs(CLIENT_MAX_REQ_NUM),
-                port_id(port_id)
+//                pending_reqs(CLIENT_MAX_REQ_NUM),
+                port_id(port_id)              //TODO: noport, broadcast!
+
 
 #ifdef USE_REQUEST_EVLOOP
                     ,ev_loop(utils::evloopTimeSrouceMS)
@@ -58,6 +59,8 @@ namespace libfcn_v2 {
         template<typename Msg>
         void readUnblocking(Msg&& msg,
                             FcnCallbackInterface* callback=nullptr){
+            //TODO: local first
+
             DataLinkFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
@@ -82,6 +85,7 @@ namespace libfcn_v2 {
         template<typename Msg>
         void writeUnblocking(Msg&& msg,
                              FcnCallbackInterface* callback=nullptr){
+            //TODO: local first
 
             DataLinkFrame frame;
             frame.dest_id = server_addr;
@@ -106,12 +110,12 @@ namespace libfcn_v2 {
 
 #ifdef SYSTYPE_FULL_OS
 //        template<typename Msg>
-//        typename Msg::data readUnblocking(Msg&& item){}
+//        typename Msg::data readBlocking(Msg&& item){}
 //
 //
-//        /* TODO: 将数据和回调指针推入任务列表（事件循环），等待响应回调 */
+//
 //        template<typename Msg>
-//        typename Msg::data writeUnblocking(Msg&& item,
+//        typename Msg::data writeBlocking(Msg&& item,
 //                             FcnCallbackInterface* callback=nullptr){
 //
 //        }
@@ -138,7 +142,7 @@ namespace libfcn_v2 {
             uint32_t timeout_time_100ms;
             FcnCallbackInterface* callback;
         };
-        utils::vector_s<PendingRequest> pending_reqs;
+//        utils::vector_s<PendingRequest> pending_reqs;
 
 #ifdef USE_REQUEST_EVLOOP
        FcnEvLoop ev_loop;
