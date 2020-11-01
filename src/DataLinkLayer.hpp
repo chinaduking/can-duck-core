@@ -64,10 +64,10 @@ namespace libfcn_v2{
         }
 
 
-
+    private:
         /* 重载New 和 Delete，以无碎片的方式进行内存分配 */
-        void * operator new(size_t size) noexcept;
-        void operator delete(void * p) noexcept;
+        void * operator new(size_t size) noexcept{  return nullptr; }
+        void operator delete(void * p) noexcept{}
 
     };
 #pragma pack(0)

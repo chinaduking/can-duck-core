@@ -12,17 +12,17 @@
 using namespace utils;
 using namespace libfcn_v2;
 
-ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
-
-
-/* 重载New 和 Delete，以无碎片的方式进行内存分配 */
-void* DataLinkFrame::operator new(size_t size) noexcept{
-    return framObjPool.allocate();
-}
-
-void DataLinkFrame::operator delete(void * p){
-    framObjPool.deallocate(p);
-}
+//ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
+//
+//
+///* 重载New 和 Delete，以无碎片的方式进行内存分配 */
+//void* DataLinkFrame::operator new(size_t size) noexcept{
+//    return framObjPool.allocate();
+//}
+//
+//void DataLinkFrame::operator delete(void * p){
+//    framObjPool.deallocate(p);
+//}
 
 void libfcn_v2::buffer2Frame(DataLinkFrame* frame, uint8_t *buf, uint16_t len) {
     if(nullptr == buf)
