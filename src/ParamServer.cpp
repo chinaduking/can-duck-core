@@ -135,11 +135,13 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
 void SvoClient::onReadAck(DataLinkFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
+     ev_loop.notify(*frame);
 }
 
 void SvoClient::onWriteAck(DataLinkFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
+    ev_loop.notify(*frame);
 }
 
 int SvoClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {

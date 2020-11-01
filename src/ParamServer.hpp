@@ -13,6 +13,7 @@
 #include "OpCode.hpp"
 #include "utils/BitLUT8.hpp"
 #include "DefaultAllocate.h"
+#include "Log.hpp"
 
 #ifdef USE_REQUEST_EVLOOP
 #include "RequestTask.hpp"
@@ -72,12 +73,15 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            ev_loop.addTask(std::make_unique<RequestTask>(
+            int res = ev_loop.addTask(std::make_unique<RequestTask>(
                     this,
                     frame,
                     (uint8_t)OpCode::SVO_SINGLE_READ_ACK,
                     300, 3)
                 );
+            if(res == -1){
+                LOGW("evloop can't add more task!");
+            }
 #endif //USE_REQUEST_EVLOOP
         }
 
@@ -98,12 +102,15 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            ev_loop.addTask(std::make_unique<RequestTask>(
+            int res = ev_loop.addTask(std::make_unique<RequestTask>(
                     this,
                     frame,
                     (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK,
                     300, 3)
             );
+            if(res == -1){
+                LOGW("evloop can't add more task!");
+            }
 #endif //USE_REQUEST_EVLOOP
         }
 

@@ -158,11 +158,14 @@ namespace utils {
 
 
         /* 添加任务 */
-        void addTask(std::unique_ptr<Task> task){
-            if(task_list.size() < task_limit){
+        int addTask(std::unique_ptr<Task> task){
+            if((task_limit != 0 && task_list.size() < task_limit)
+                || task_limit == 0){
                 task->context_evloop = this;
                 task_list.push(task);
+                return task_list.size() - 1;
             }
+            return -1;
         }
 
         bool scheduleWorker(){
