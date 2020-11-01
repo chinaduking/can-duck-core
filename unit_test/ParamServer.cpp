@@ -19,6 +19,10 @@ namespace network_test {
     #define SERVO_ADDR 0x02
     #define HOST_ADDR  0x05
 
+    TEST(nullptr, test){
+        ASSERT_EQ(std::unique_ptr<int>(nullptr), nullptr);
+    }
+
     TEST(NetworkLayer, SvoServoNode) {
         int local_addr = SERVO_ADDR;
 

@@ -51,7 +51,7 @@ namespace libfcn_v2 {
 
 
 #ifdef USE_REQUEST_EVLOOP
-                    ,ev_loop(utils::evloopTimeSrouceMS, CLIENT_MAX_REQ_NUM)
+                    ,ev_loop(utils::evloopTimeSrouceMS, 0)
 #endif
                   {}
 

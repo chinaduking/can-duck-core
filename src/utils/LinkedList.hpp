@@ -102,29 +102,40 @@ namespace utils{
 #endif //0
 #endif //SYSTYPE_FULL_OS
 
-        void push(val_T&& val){
+        int push(val_T&& val){
             Node* p_node;
             size_ ++;
 
             if(head_node == nullptr){
                 head_node = new Node();
+                if(head_node == nullptr){
+                    //run out of memory
+                    return -1;
+                }
+
                 p_node = head_node;
                 p_node->val = std::move(val);
                 p_node->p_next = nullptr;
 
                 tail_node = head_node;
-                return;
+                return size();
             }
 
             p_node = new Node();
+            if(p_node == nullptr){
+                //run out of memory
+                return -1;
+            }
+
             tail_node->p_next = p_node;
             p_node->val = std::move(val);
             p_node->p_next = nullptr;
             tail_node = p_node;
+            return size();
         }
 
-        void push(val_T& val){
-            push(std::move(val));
+        int push(val_T& val){
+            return push(std::move(val));
         }
 
         void pop(){

@@ -159,10 +159,19 @@ namespace utils {
 
         /* 添加任务 */
         int addTask(std::unique_ptr<Task> task){
+            if(task == nullptr){
+                return -1;
+            }
+
             if((task_limit != 0 && task_list.size() < task_limit)
                 || task_limit == 0){
                 task->context_evloop = this;
-                task_list.push(task);
+                int res = task_list.push(task);
+
+                if(res == -1){
+                    return -1;
+                }
+
                 return task_list.size() - 1;
             }
             return -1;
