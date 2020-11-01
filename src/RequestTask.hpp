@@ -42,12 +42,12 @@ namespace libfcn_v2{
                 retry_max(retry_max),
 
                 context_client(context_client){
-            cached_request_frame = frame;
+            cached_req = frame;
         }
 
         ~RequestTask() override = default;
 
-        DataLinkFrame cached_request_frame;
+        DataLinkFrame cached_req;
 
         void* operator new(size_t size) noexcept;
         void operator delete(void * p);

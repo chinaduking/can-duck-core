@@ -66,14 +66,14 @@ namespace network_test {
         auto servo_client = fcn_node.network_layer->svo_network_handler
                 .bindClientToServer(servo_addr, local_addr, 0);
 
-        cout << "request.. "  << endl;
 
-        servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle);
 
         for(int __i = 0; __i < 1; ){
-            perciseSleep(0.5);
+            perciseSleep(0.1);
 
+            cout << "request.. "  << endl;
 
+            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle);
 
 //            auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
 //            mode_msg << 0x22;

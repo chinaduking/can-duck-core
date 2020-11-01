@@ -35,15 +35,15 @@ void RequestTask::operator delete(void *p) noexcept {
 
 void RequestTask::evUpdate(){
     context_client->ctx_network_layer->sendFrame(context_client->port_id,
-                                                 &cached_request_frame);
+                                                 &cached_req);
     evWaitNotify(timeout_ms);
 }
 
 
 bool RequestTask::matchNotifyMsg(DataLinkFrame& frame){
-    return frame.src_id == cached_request_frame.dest_id
+    return frame.src_id == cached_req.dest_id
            && frame.op_code == ack_op_code
-           && frame.msg_id == cached_request_frame.msg_id;
+           && frame.msg_id == cached_req.msg_id;
 }
 
 
@@ -66,6 +66,8 @@ void RequestTask::evTimeoutCallback() {
 
 
 void RequestTask::onTimeout() {
+    LOGW("request timeout: server = 0x%X, msg_id=0x%X",
+         cached_req.dest_id, cached_req.msg_id);
 }
 
 void RequestTask::onRecv(DataLinkFrame &frame) {
