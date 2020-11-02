@@ -57,6 +57,10 @@ void RequestTask::evTimeoutCallback() {
     if(retry_cnt < retry_max){
         retry_cnt ++;
         evRestart();
+
+        LOGD("request timeout retry:: server = 0x%X, msg_id=0x%X (%d/%d)",
+             cached_req.dest_id, cached_req.msg_id, retry_cnt, retry_max );
+
         return;
     }
 

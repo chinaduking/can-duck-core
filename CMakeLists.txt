@@ -19,8 +19,8 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops -fpic -pthread -
 
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3")

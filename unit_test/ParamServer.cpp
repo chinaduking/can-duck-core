@@ -86,7 +86,6 @@ namespace network_test {
                 .bindClientToServer(servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
-            perciseSleep(1);
             LOGD("request.. " );
 
 
@@ -112,6 +111,8 @@ namespace network_test {
 //                         servo_rto_dict->speed.data,
 //                         servo_rto_dict->angle.data,
 //                         servo_rto_dict->current.data);
+
+            perciseSleep(2);
         }
 
         fcn_node.join();

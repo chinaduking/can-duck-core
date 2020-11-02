@@ -173,7 +173,7 @@ namespace utils {
         }
 
         void notify(Msg_T& message){
-            std::cout << "evloop::notify!!!" <<std::endl;
+//            std::cout << "evloop::notify!!!" <<std::endl;
 
             //目前只实现深度为1的通知队列：填入一个消息，并阻塞至所有接收处理完成！
 #ifdef EVENTLOOP_THREADING
@@ -181,23 +181,14 @@ namespace utils {
             //waitComplete();
 #endif //EVENTLOOP_THREADING
 
-            if(is_nested_in_evloop){
-                std::cout << "is_nested_in_evloop!!!" <<std::endl;
-            }
 
             USER_ASSERT(!is_notify_pending);
-            if(is_notify_pending){
-                //在OS中，接收任务（recvDispatcher）和消息循环（scheduleWorker）运行在
-                //两个线程中。如果在处理消息时直接通知，则造成内存被篡改。
-                std::cout << "is_notify_pending!!!" <<std::endl;
-                return;
-            }
 
             is_notify_pending = true;
             pending_notify = message;
             sched_ctrl_cv.notify_all();
             notify_ctrl_cv.wait(updating_lk);
-            std::cout << "notify_ctrl_cv done!!!" <<std::endl;
+//            std::cout << "notify_ctrl_cv done!!!" <<std::endl;
         }
 
 
@@ -206,7 +197,7 @@ namespace utils {
 #ifdef EVENTLOOP_THREADING
             std::unique_lock<std::mutex> updating_lk(update_mutex);
 #endif
-            std::cout << "evloop::scheduleWorker!!!" <<std::endl;
+//            std::cout << "evloop::scheduleWorker!!!" <<std::endl;
 
             /*is_nested_in_evloop flag is use for adding task inside scheduleWorker().
              * without it, adding task will cause deadlock!*/
@@ -234,7 +225,7 @@ namespace utils {
              * or task pool is empty, the scheduler will weak up every 1s.
              */
             int min_time_out = getMinSleepTime();
-            std::cout << "sleep ms = " << min_time_out << std::endl;
+//            std::cout << "sleep ms = " << min_time_out << std::endl;
             if(min_time_out > 1){
                 /* release updating_lk to avoid deadlock when notify
                  * at main scheduler sleeping.*/
@@ -294,8 +285,8 @@ namespace utils {
                 /* 如果有正在等待运行的任务，则返回0直接进入下一个调度循环。
                  * 一般是因调用了Restart */
                 if(task->status == TaskState::WaitingRun){
-                    std::cout << "task->status == TaskState::WaitingRun, min_time_out = 0;"
-                    << std::endl;
+//                    std::cout << "task->status == TaskState::WaitingRun, min_time_out = 0;"
+//                    << std::endl;
                     min_time_out = 0;
                     break;
                 }
@@ -311,8 +302,8 @@ namespace utils {
                         /* 超时时间点已过
                          * 返回0直接进入下一个调度循环。下面的checkTimeout任务会处理
                          * 已经超时的任务*/
-                        std::cout << "task->timeout_time_ms >= current_time_ms), min_time_out = 0;"
-                                  << std::endl;
+//                        std::cout << "task->timeout_time_ms >= current_time_ms), min_time_out = 0;"
+//                                  << std::endl;
                         min_time_out = 0;
                         break;
                     }
@@ -320,9 +311,9 @@ namespace utils {
                         /* 超时时间点尚未到达 */
                         uint64_t sleep_time = task->timeout_time_ms -
                                 current_time_ms;
-                        std::cout << "task->timeout_time_ms < "
-                                     "current_time_ms), sleep_time = "
-                                     <<sleep_time<< std::endl;
+//                        std::cout << "task->timeout_time_ms < "
+//                                     "current_time_ms), sleep_time = "
+//                                     <<sleep_time<< std::endl;
                         /* 进行限幅，避免下一步强制转换时溢出 */
                         if(sleep_time > MAX_SLEEP_GAP_MS){
                             sleep_time = MAX_SLEEP_GAP_MS;
@@ -392,15 +383,15 @@ namespace utils {
         void checkTimeout(){
             for(auto& task : task_list){
                 if(task->status != TaskState::WaitingNotify){
-                    std::cout << "task->status != TaskState::WaitingNofity" << std::endl;
+//                    std::cout << "task->status != TaskState::WaitingNofity" << std::endl;
                     continue;
                 }
 
                 if(task->timeout_time_ms != 0 &&
                     getCurrentTimeMs() >= task->timeout_time_ms){
 
-                    std::cout << "checkTimeout: timeout task here!" <<
-                    std::endl;
+//                    std::cout << "checkTimeout: timeout task here!" <<
+//                    std::endl;
 
                     /*same reason as above. set to delete first.*/
                     task->setStatus(TaskState::WaitingDelete);
@@ -414,9 +405,9 @@ namespace utils {
 
         static bool isWaitingDelete(std::unique_ptr<Task>& task){
             bool matched = task->status == TaskState::WaitingDelete;
-            if(matched){
-                std::cout << "isWaitingDelete!" << std::endl;
-            }
+//            if(matched){
+//                std::cout << "isWaitingDelete!" << std::endl;
+//            }
             return matched;
         }
 
