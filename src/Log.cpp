@@ -35,14 +35,14 @@ int Log::printf(utils::Tracer::Level level,
 }
 
 static char* mOpCodeStr[]={
-        (char*)"FORCE_STOP",
-        (char*)"RTO_PUB",
-        (char*)"RTO_REQUEST ",
-        (char*)"RTO_EMERGENCY ",
-        (char*)"SVO_SINGLE_READ_REQ",
-        (char*)"SVO_SINGLE_READ_ACK",
-        (char*)"SVO_SINGLE_WRITE_REQ",
-        (char*)"SVO_SINGLE_WRITE_ACK",
+        (char*)"ForceStop",
+        (char*)"Publish",
+        (char*)"PublishReq ",
+        (char*)"Emergency ",
+        (char*)"ParamServer_ReadReq",
+        (char*)"ParamServer_ReadAck",
+        (char*)"ParamServer_WriteReq",
+        (char*)"ParamServer_WriteAck",
         (char*)"SVO_MULTI_WRITE_START_REQ",
         (char*)"SVO_MULTI_WRITE_START_ACK",
         (char*)"SVO_MULTI_WRITE_TRANS_REQ",
@@ -114,13 +114,15 @@ std::string libfcn_v2::Frame2LogCompact(DataLinkFrame& frame){
         opcode_str = mOpCodeStr[frame.op_code];
     }
 
-    sprintf(buffer, "Frame [0x%.2X]--->[0x%.2X]\n"
-                    "    Op[0x%.2X]:%s  |  Idx[0x%.2X]\n"
-                    "  Data[%.3d] = ",
+    sprintf(buffer, "-----FRAME----\n"
+                    " %s (0x%.2X) :  [0x%.2X]->[0x%.2X] \n"
+                    " Message ID = 0x%.2X\n"
+                    " Payload [%.2d] = ",
 
+            opcode_str, frame.op_code  & 0xff,
             frame.src_id   & 0xff,
             frame.dest_id  & 0xff,
-            frame.op_code  & 0xff, opcode_str,
+
             frame.msg_id   & 0xff,
             frame.payload_len);
 

@@ -78,7 +78,7 @@ namespace libfcn_v2 {
                     &frame_tmp,
                     src_id,
                     dest_id,
-                    static_cast<uint8_t>(OpCode::RTO_PUB),
+                    static_cast<uint8_t>(OpCode::Publish),
                     msg.index,
                     (uint8_t *)msg.getDataPtr(), msg.data_size);
 
@@ -121,16 +121,16 @@ namespace libfcn_v2 {
     * 不论本地有几个节点，节点均共享一个该实例（单例模式）
     * 但为了降低耦合度，这里不实现单例模式，由上层实现。
     * */
-    class RtoNetworkHandler{
+    class PubNetworkHandler{
     public:
-        RtoNetworkHandler(NetworkLayer* network)
+        PubNetworkHandler(NetworkLayer* network)
             : ctx_network_layer(network),
               shared_buffers(MAX_LOCAL_NODE_NUM),
               pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
               pub_ctrl_rules(MAX_PUB_CTRL_RULES)
               { }
 
-        virtual ~RtoNetworkHandler() = default;
+        virtual ~PubNetworkHandler() = default;
 
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address){
             void* buffer = nullptr;
@@ -198,7 +198,7 @@ namespace libfcn_v2 {
             uint32_t freq_divier_cnt{0};
 
             uint32_t send_busy_cnt {0};
-            friend class RtoNetworkHandler;
+            friend class PubNetworkHandler;
 
         };
 

@@ -39,15 +39,15 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
     auto op_code = frame->op_code;
 
     /* 实时消息 */
-    if(op_code >= (uint8_t)OpCode::RTO_PUB
-        && op_code <= (uint8_t)OpCode::RTO_REQUEST){
+    if(op_code >= (uint8_t)OpCode::Publish
+        && op_code <= (uint8_t)OpCode::PublishReq){
 
         rto_network_handler.handleWrtie(frame, recv_port_id);
     }
 
     /* 服务消息-d */
-    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
-       && op_code <= (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK) {
+    if(op_code >= (uint8_t)OpCode::ParamServer_ReadReq
+       && op_code <= (uint8_t)OpCode::ParamServer_WriteAck) {
 
         svo_network_handler.handleRecv(frame, recv_port_id);
     }
@@ -58,7 +58,7 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
      * 模拟了CAN总线的"总线模式"，任何消息均为全网转发。
      * 收到了发给别人的数据包，直接广播到所有端口（收到该数据包的端口除外，
      * 避免数据包死循环）*/
-    if(op_code >= (uint8_t)OpCode::SVO_SINGLE_READ_REQ
+    if(op_code >= (uint8_t)OpCode::ParamServer_ReadReq
     && op_code <= (uint8_t)OpCode::SVO_MULTI_WRITE_VERIFY_ACK){
         for(auto& port : data_link_dev){
             if(port->local_device_id != recv_port_id){

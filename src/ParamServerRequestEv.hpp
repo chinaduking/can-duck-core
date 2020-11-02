@@ -19,18 +19,18 @@ namespace libfcn_v2{
 
     using FcnEvLoop = utils::EventLoop<DataLinkFrame, LinkedListNodeAllocator>;
 
-    class SvoClient;
+    class ParamServerClient;
     /*
      * 抽象的数据请求过程。用于用户自定义请求的形式。
      * 由于Ninebot协议没有传输层独立的重传机制，而是将可靠传输的义务放在
      * 了协议层，因此传输层的意义是对协议层的重传机制进行抽象。
      * */
-    class RequestTask : public FcnEvLoop::Task{
+    class ParamServerRequestEv : public FcnEvLoop::Task{
     public:
-        RequestTask() : FcnEvLoop::Task(){}
+        ParamServerRequestEv() : FcnEvLoop::Task(){}
 
-        RequestTask(
-                SvoClient* context_client,
+        ParamServerRequestEv(
+                ParamServerClient* context_client,
                 DataLinkFrame& frame,
                 uint16_t ack_op_code,
                 uint16_t timeout_ms, int retry_max=-1,
@@ -49,7 +49,7 @@ namespace libfcn_v2{
             this->callback = std::move(callback);
         }
 
-        ~RequestTask() override = default;
+        ~ParamServerRequestEv() override = default;
 
         DataLinkFrame cached_req;
 
@@ -72,7 +72,7 @@ namespace libfcn_v2{
         int retry_max{2};
         uint16_t retry_cnt{0};
 
-        SvoClient* const context_client{nullptr};
+        ParamServerClient* const context_client{nullptr};
 
         bool matchNotifyMsg(DataLinkFrame& frame) override;
         void evUpdate() override;

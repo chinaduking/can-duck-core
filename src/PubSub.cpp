@@ -102,13 +102,13 @@ void PubSubChannel::networkPublish(DataLinkFrame *frame) {
  */
 
 
-void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
+void PubNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
     PubSubChannel* channel = nullptr;
 
     for(auto& ch : pub_sub_channels){
         if((ch->channel_addr == frame->src_id)
             || (ch->is_multi_source && ch->channel_addr == frame->dest_id)){
-            //TODO: is_multi_source && handle dest_id!!
+            //TODO: is_multi_source && handle dest id!!
             channel = ch;
         }
     }
@@ -123,7 +123,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     switch (opcode) {
-        case OpCode::RTO_PUB:
+        case OpCode::Publish:
             RtoDictSingleWrite(
                     channel->serdes_dict,
                     channel->buffer,
@@ -132,7 +132,7 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
             break;
 
-        case OpCode::RTO_REQUEST:
+        case OpCode::PublishReq:
             break;
 
         default:
@@ -141,13 +141,13 @@ void RtoNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
 }
 
-void RtoNetworkHandler::addPubCtrlRule(PubCtrlRule& rule){
+void PubNetworkHandler::addPubCtrlRule(PubCtrlRule& rule){
     pub_ctrl_rules.push_back(rule);
 }
 
 DataLinkFrame frame_tmp;
 
-void RtoNetworkHandler::update(){
+void PubNetworkHandler::update(){
 
     for(auto & pub_ctrl_rule : pub_ctrl_rules){
         pub_ctrl_rule.freq_divier_cnt ++;

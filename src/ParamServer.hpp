@@ -16,7 +16,7 @@
 #include "Log.hpp"
 
 #ifdef USE_REQUEST_EVLOOP
-#include "RequestTask.hpp"
+#include "ParamServerRequestEv.hpp"
 #endif
 
 namespace libfcn_v2 {
@@ -31,15 +31,15 @@ namespace libfcn_v2 {
         Unknown     /*未知错误*/
     };
 
-    class SvoNetworkHandler;
+    class ParamServerNetHandle;
     class NetworkLayer;
 
-    class SvoClient{
+    class ParamServerClient{
     public:
-        SvoClient(NetworkLayer* ctx_network_layer,
-                  uint16_t server_addr,
-                  uint16_t client_addr,
-                  uint16_t port_id) :
+        ParamServerClient(NetworkLayer* ctx_network_layer,
+                          uint16_t server_addr,
+                          uint16_t client_addr,
+                          uint16_t port_id) :
 
                 server_addr(server_addr),
                 client_addr(client_addr),
@@ -52,7 +52,7 @@ namespace libfcn_v2 {
 #endif
                   {}
 
-        ~SvoClient() = default;
+        ~ParamServerClient() = default;
 
         template<typename Msg>
         void readUnblocking(Msg&& msg,
@@ -62,7 +62,7 @@ namespace libfcn_v2 {
             DataLinkFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
-            frame.op_code = (uint8_t)OpCode::SVO_SINGLE_READ_REQ;
+            frame.op_code = (uint8_t)OpCode::ParamServer_ReadReq;
             frame.msg_id = msg.index;
             frame.payload_len = 1;
             frame.payload[0] =  msg.data_size;
@@ -70,10 +70,10 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(std::make_unique<RequestTask>(
+            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
                     this,
                     frame,
-                    (uint8_t)OpCode::SVO_SINGLE_READ_ACK,
+                    (uint8_t)OpCode::ParamServer_ReadAck,
                     300, 3,
                     std::move(callback))
                 );
@@ -92,7 +92,7 @@ namespace libfcn_v2 {
             DataLinkFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
-            frame.op_code = (uint8_t)OpCode::SVO_SINGLE_WRITE_REQ;
+            frame.op_code = (uint8_t)OpCode::ParamServer_WriteReq;
             frame.msg_id = msg.index;
             frame.payload_len = msg.data_size;
             utils::memcpy(frame.payload, &msg.data, msg.data_size);
@@ -100,10 +100,10 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(std::make_unique<RequestTask>(
+            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
                     this,
                     frame,
-                    (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK,
+                    (uint8_t)OpCode::ParamServer_WriteAck,
                     300, 3,
                     std::move(callback))
             );
@@ -139,7 +139,7 @@ namespace libfcn_v2 {
 
         NetworkLayer* const ctx_network_layer{nullptr};
 
-        friend class SvoNetworkHandler;
+        friend class ParamServerNetHandle;
 
         void onReadAck(DataLinkFrame* frame);
 
@@ -158,17 +158,17 @@ namespace libfcn_v2 {
      * 读写数据的，称为寄存器模式的SVO。
      * 寄存器模式下，可以有回调，也可以没有。一般写入会有回调，读取没有。
      * */
-    class SvoServer{
+    class ParamServer{
     public:
-        SvoServer(NetworkLayer* ctx_network_layer,
-                  uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
+        ParamServer(NetworkLayer* ctx_network_layer,
+                    uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 server_addr(address),
                 buffer(buffer),
                 serdes_dict(obj_dict_shm),
                 ctx_network_layer(ctx_network_layer){
         }
 
-        ~SvoServer() = default;
+        ~ParamServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
         void onDataChaged(SerDesDictValHandle* msg,
@@ -227,7 +227,7 @@ namespace libfcn_v2 {
         SerDesDict* const serdes_dict{nullptr};
 
 
-        friend class SvoNetworkHandler;
+        friend class ParamServerNetHandle;
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
         obj_size_t onWriteReq(DataLinkFrame* frame, uint16_t port_id);
@@ -243,23 +243,23 @@ namespace libfcn_v2 {
     * 不论本地有几个节点，节点均共享一个该实例（单例模式）
     * 但为了降低耦合度，这里不实现单例模式，由上层实现。
     * */
-    class SvoNetworkHandler{
+    class ParamServerNetHandle{
     public:
-        SvoNetworkHandler(NetworkLayer* ctx_network_layer):
+        ParamServerNetHandle(NetworkLayer* ctx_network_layer):
                 ctx_network_layer(ctx_network_layer),
                 created_servers(MAX_LOCAL_NODE_NUM),
                 created_clients(MAX_LOCAL_NODE_NUM)
         {}
 
 
-        virtual ~SvoNetworkHandler() = default;
+        virtual ~ParamServerNetHandle() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        SvoServer* createServer(SerDesDict& prototype, uint16_t address);
+        ParamServer* createServer(SerDesDict& prototype, uint16_t address);
 
-        SvoClient* bindClientToServer(uint16_t server_addr,
-                                      uint16_t client_addr,
-                                      uint16_t port_id);
+        ParamServerClient* bindClientToServer(uint16_t server_addr,
+                                              uint16_t client_addr,
+                                              uint16_t port_id);
 
         int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
@@ -270,7 +270,7 @@ namespace libfcn_v2 {
 
         struct CreatedServer{
             int         address {-1};
-            SvoServer*  instance {nullptr};
+            ParamServer*  instance {nullptr};
         };
 
         utils::vector_s<CreatedServer> created_servers;
@@ -278,7 +278,7 @@ namespace libfcn_v2 {
 
         struct CreatedClient{
             int         address {-1};
-            SvoClient*  instance {nullptr};
+            ParamServerClient*  instance {nullptr};
         };
 
         utils::vector_s<CreatedClient> created_clients;

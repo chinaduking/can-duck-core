@@ -11,7 +11,7 @@ namespace libfcn_v2{
 
     enum class OpCode : uint8_t {
         /* 紧急停止 */
-        FORCE_STOP           = 0x00,
+        ForceStop           = 0x00,
 
 
         /* -------------------------------------------------
@@ -19,13 +19,13 @@ namespace libfcn_v2{
          * -------------------------------------------------
          */
         /* 实时对象发布，在未配置转发规则时，仅限本地广播 */
-        RTO_PUB              = 0x01,
+        Publish             = 0x01,
 
         /* 请求一次实时对象发布 */
-        RTO_REQUEST          = 0x02,
+        PublishReq          = 0x02,
 
         /* 紧急事件发布，不进行频率控制，不论转发规则，都进行全网广播 */
-        RTO_EMERGENCY        = 0x03,
+        Emergency             = 0x03,
 
 
         /* -------------------------------------------------
@@ -33,16 +33,16 @@ namespace libfcn_v2{
          * -------------------------------------------------
          */
         /* 服务对象单帧读请求 */
-        SVO_SINGLE_READ_REQ  = 0x04,
+        ParamServer_ReadReq  = 0x04,
 
         /* 服务对象单帧读应答 */
-        SVO_SINGLE_READ_ACK  = 0x05,
+        ParamServer_ReadAck  = 0x05,
 
         /* 服务对象单帧写请求 */
-        SVO_SINGLE_WRITE_REQ = 0x06,
+        ParamServer_WriteReq = 0x06,
 
         /* 服务对象单帧写应答 */
-        SVO_SINGLE_WRITE_ACK = 0x07,
+        ParamServer_WriteAck = 0x07,
 
 
 

@@ -31,8 +31,8 @@ namespace libfcn_v2{
         void sendPolling();
 
 
-        RtoNetworkHandler rto_network_handler;
-        SvoNetworkHandler svo_network_handler;
+        PubNetworkHandler rto_network_handler;
+        ParamServerNetHandle svo_network_handler;
         //LargeDataHandler large_data_handler;
 
 

@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/10.
 //
 
-#include "RequestTask.hpp"
+#include "ParamServerRequestEv.hpp"
 #include "ParamServer.hpp"
 #include "NetworkLayer.hpp"
 
@@ -20,40 +20,40 @@ void LinkedListNodeAllocator::deallocate(void *p) {
     unique_ptr_node_objpool.deallocate(p);
 }
 
-ObjPool<RequestTask, CLIENT_MAX_REQ_NUM*2> req_task_obj_pool;
+ObjPool<ParamServerRequestEv, CLIENT_MAX_REQ_NUM * 2> req_task_obj_pool;
 
-void * RequestTask::operator new(size_t size) noexcept {
+void * ParamServerRequestEv::operator new(size_t size) noexcept {
     //TODO: Request Allocator !
 //    return utils::DefaultAllocator::allocate(size);
     return req_task_obj_pool.allocate();
 }
 
-void RequestTask::operator delete(void *p) noexcept {
+void ParamServerRequestEv::operator delete(void *p) noexcept {
 //    utils::DefaultAllocator::deallocate(p);
     req_task_obj_pool.deallocate(p);
 }
 
-void RequestTask::evUpdate(){
+void ParamServerRequestEv::evUpdate(){
     context_client->ctx_network_layer->sendFrame(context_client->port_id,
                                                  &cached_req);
     evWaitNotify(timeout_ms);
 }
 
 
-bool RequestTask::matchNotifyMsg(DataLinkFrame& frame){
+bool ParamServerRequestEv::matchNotifyMsg(DataLinkFrame& frame){
     return frame.src_id == cached_req.dest_id
            && frame.op_code == ack_op_code
            && frame.msg_id == cached_req.msg_id;
 }
 
 
-void RequestTask::evNotifyCallback(DataLinkFrame& frame){
+void ParamServerRequestEv::evNotifyCallback(DataLinkFrame& frame){
     onRecv(frame);
     evExit();
 }
 
 
-void RequestTask::evTimeoutCallback() {
+void ParamServerRequestEv::evTimeoutCallback() {
     if(retry_cnt < retry_max){
         retry_cnt ++;
         evRestart();
@@ -69,7 +69,7 @@ void RequestTask::evTimeoutCallback() {
 }
 
 
-void RequestTask::onTimeout() {
+void ParamServerRequestEv::onTimeout() {
     LOGW("request timeout: server = 0x%X, msg_id=0x%X",
          cached_req.dest_id, cached_req.msg_id);
     if(callback.callback_func != nullptr){
@@ -78,7 +78,7 @@ void RequestTask::onTimeout() {
     }
 }
 
-void RequestTask::onRecv(DataLinkFrame &frame) {
+void ParamServerRequestEv::onRecv(DataLinkFrame &frame) {
 //    if(context_client->serdes_dict == nullptr){
 //        return;
 //    }
@@ -95,13 +95,13 @@ void RequestTask::onRecv(DataLinkFrame &frame) {
     }
 
 
-    if(frame.op_code == (uint8_t)OpCode::SVO_SINGLE_READ_ACK){
+    if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
         if(callback.callback_func != nullptr){
             (*callback.callback_func)(callback.obj_ptr, 0, frame.payload);
         }
 //        return; //TODO??
     }
-    if(frame.op_code == (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK){
+    if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
 
         if(callback.callback_func != nullptr){
             (*callback.callback_func)(callback.obj_ptr, frame.payload[0],

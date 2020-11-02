@@ -11,8 +11,8 @@ using namespace libfcn_v2;
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回1为成功，否则为失败
  * */
-obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
-                                 uint16_t port_id){
+obj_size_t ParamServer::onWriteReq(DataLinkFrame* frame,
+                                   uint16_t port_id){
 
     auto index = frame->msg_id;
 
@@ -63,7 +63,7 @@ obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
     ack_frame.payload_len = 1;
 
     ack_frame.msg_id  = frame->msg_id;
-    ack_frame.op_code = (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK;
+    ack_frame.op_code = (uint8_t)OpCode::ParamServer_WriteAck;
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;
 
@@ -78,8 +78,8 @@ obj_size_t SvoServer::onWriteReq(DataLinkFrame* frame,
 
 /* 响应读取请求
  * */
-obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
-                                 uint16_t port_id){
+obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
+                                  uint16_t port_id){
 
     auto index = frame->msg_id;
 
@@ -118,7 +118,7 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
     ack_frame.payload_len = size;
 
     ack_frame.msg_id  = frame->msg_id;
-    ack_frame.op_code = (uint8_t)OpCode::SVO_SINGLE_READ_ACK;
+    ack_frame.op_code = (uint8_t)OpCode::ParamServer_ReadAck;
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;
 
@@ -132,19 +132,19 @@ obj_size_t SvoServer::onReadReq(DataLinkFrame* frame,
 
 
 
-void SvoClient::onReadAck(DataLinkFrame* frame){
+void ParamServerClient::onReadAck(DataLinkFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
      ev_loop.notify(*frame);
 }
 
-void SvoClient::onWriteAck(DataLinkFrame* frame){
+void ParamServerClient::onWriteAck(DataLinkFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
     ev_loop.notify(*frame);
 }
 
-int SvoClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {
+int ParamServerClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {
     if(ctx_network_layer == nullptr){
         return -1;
     }
@@ -158,9 +158,9 @@ int SvoClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {
 }
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-SvoServer* SvoNetworkHandler::createServer(SerDesDict& prototype, uint16_t
+ParamServer* ParamServerNetHandle::createServer(SerDesDict& prototype, uint16_t
 address){
-    SvoServer* server = nullptr;
+    ParamServer* server = nullptr;
     for(auto & srv : created_servers){
         if(srv.address == address){
             server = srv.instance;
@@ -169,9 +169,9 @@ address){
     }
 
     if(server == nullptr){
-        server = new SvoServer(ctx_network_layer, address,
-                               &prototype,
-                               prototype.createBuffer());
+        server = new ParamServer(ctx_network_layer, address,
+                                 &prototype,
+                                 prototype.createBuffer());
 
         CreatedServer srv = {
                 .address = address,
@@ -185,11 +185,11 @@ address){
 }
 
 
-SvoClient* SvoNetworkHandler::bindClientToServer(uint16_t server_addr,
-                                                 uint16_t client_addr,
-                                                 uint16_t port_id){
-    auto client = new SvoClient(ctx_network_layer, server_addr, client_addr,
-                                port_id);
+ParamServerClient* ParamServerNetHandle::bindClientToServer(uint16_t server_addr,
+                                                            uint16_t client_addr,
+                                                            uint16_t port_id){
+    auto client = new ParamServerClient(ctx_network_layer, server_addr, client_addr,
+                                        port_id);
 
     CreatedClient cli = {
             .address = client_addr,
@@ -201,14 +201,14 @@ SvoClient* SvoNetworkHandler::bindClientToServer(uint16_t server_addr,
     return client;
 }
 
-int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
+int ParamServerNetHandle::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;
 
     switch (opcode) {
 
-        case OpCode::SVO_SINGLE_READ_REQ: {
+        case OpCode::ParamServer_ReadReq: {
             for(auto& server : created_servers){
                 if(server.address == frame->dest_id){
                     USER_ASSERT(server.instance != nullptr);
@@ -220,7 +220,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             break;
 
 
-        case OpCode::SVO_SINGLE_WRITE_REQ: {
+        case OpCode::ParamServer_WriteReq: {
             for(auto& server : created_servers){
                 if(server.address == frame->dest_id){
                     USER_ASSERT(server.instance != nullptr);
@@ -232,7 +232,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             break;
 
 
-        case OpCode::SVO_SINGLE_READ_ACK: {
+        case OpCode::ParamServer_ReadAck: {
             for(auto& client : created_clients){
                 if(client.address == frame->dest_id){
                     USER_ASSERT(client.instance != nullptr);
@@ -244,7 +244,7 @@ int SvoNetworkHandler::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
             break;
 
 
-        case OpCode::SVO_SINGLE_WRITE_ACK: {
+        case OpCode::ParamServer_WriteAck: {
             for(auto& client : created_clients){
                 if(client.address == frame->dest_id){
                     USER_ASSERT(client.instance != nullptr);
