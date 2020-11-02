@@ -112,7 +112,7 @@ namespace network_test {
 //                         servo_rto_dict->angle.data,
 //                         servo_rto_dict->current.data);
 
-            perciseSleep(2);
+            perciseSleep(0.1);
         }
 
         fcn_node.join();

@@ -109,7 +109,7 @@ std::string libfcn_v2::Frame2LogCompact(DataLinkFrame& frame){
     if(frame.payload_len > DATALINK_MTU){
         return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
     }
-    char * opcode_str = "";
+    char * opcode_str = "unknown";
     if(frame.op_code < sizeof(opcode_str) / sizeof(opcode_str[0])) {
         opcode_str = mOpCodeStr[frame.op_code];
     }
