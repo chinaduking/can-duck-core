@@ -17,10 +17,11 @@ TEST(Tracer, basic){
 //    tracer.addByteIODeviece(&stdio_wrapper);
     tracer.addByteIODeviece(&file_wrapper);
 
-    tracer.setFilter(Tracer::INFO);
-    tracer.print(Tracer::INFO, "hello world!!");
-    tracer.print(Tracer::VERBOSE, "hello world!!");
-    tracer.print(Tracer::WARNING, "hello world!!");
-    tracer.print(Tracer::ERROR, "hello world!!");
-    tracer.print(Tracer::FATAL, "hello world!!");
+    tracer.setFilter(Tracer::Level::VERBOSE);
+    tracer.print(Tracer::Level::VERBOSE, "hello world!!  %d", 2020);
+    tracer.print(Tracer::Level::INFO, "hello world!!  %d", 2020);
+    tracer.print(Tracer::Level::DEBUG, "hello world!!");
+    tracer.print(Tracer::Level::WARNING, "hello world!! %d", 2020);
+    tracer.print(Tracer::Level::ERROR, "hello world!!");
+    tracer.print(Tracer::Level::FATAL, "hello world!!");
 }

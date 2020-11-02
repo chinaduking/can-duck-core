@@ -51,29 +51,4 @@ namespace rto_io_test{
 
         cout << "pass!" << endl;
     }
-
-    struct testCallbackObj : public FcnCallbackInterface {
-        void callback(void *data, uint8_t ev_code) override {
-            cout << "testCallbackObj! data = " << *(uint32_t*)data << endl;
-        }
-    };
-
-    TEST(RealtimeObject, callback) {
-
-    }
-}
-
-
-#include "testServoSvoDict.hpp"
-
-
-using namespace libfcn_v2;
-
-namespace svo_io_test{
-    TEST(Svo, io){
-        libfcn_v2_test::testServoSvoDict dict;
-
-        ASSERT_EQ(dict.angle.wr_access, 0);
-        ASSERT_EQ(dict.target_angle.wr_access, 1);
-    }
 }

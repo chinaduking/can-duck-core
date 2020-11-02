@@ -6,6 +6,7 @@
 #define LIBFCN_REQUESTERTASK_HPP
 
 #include "DataLinkLayer.hpp"
+#include "SerDesDict.hpp"
 #include "utils/EventLoop.hpp"
 #include "utils/ObjPool.hpp"
 
@@ -16,7 +17,6 @@ namespace libfcn_v2{
         static void deallocate(void* p);
     };
 
-    //TODO: LinkedList Allocator (A general allocator of Node<uniqur_ptr<ANY>>)!
     using FcnEvLoop = utils::EventLoop<DataLinkFrame, LinkedListNodeAllocator>;
 
     class SvoClient;
@@ -33,7 +33,8 @@ namespace libfcn_v2{
                 SvoClient* context_client,
                 DataLinkFrame& frame,
                 uint16_t ack_op_code,
-                uint16_t timeout_ms, int retry_max=-1):
+                uint16_t timeout_ms, int retry_max=-1,
+                TransferCallback_t&& callback=TransferCallback_t()):
 
                 FcnEvLoop::Task(),
 
@@ -42,7 +43,10 @@ namespace libfcn_v2{
                 retry_max(retry_max),
 
                 context_client(context_client){
+
             cached_req = frame;
+
+            this->callback = std::move(callback);
         }
 
         ~RequestTask() override = default;
@@ -59,10 +63,8 @@ namespace libfcn_v2{
         /* 解析目标节点的应答数据 */
         void onRecv(DataLinkFrame& frame);
 
+        TransferCallback_t callback;
 
-        //TODO: callback!!!
-        void (*callback)(void* context_obj, void* data, int ev_code) {nullptr};
-        void* context_obj{nullptr};
     private:
         uint16_t ack_op_code{0};
 

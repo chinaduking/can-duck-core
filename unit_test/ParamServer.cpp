@@ -53,10 +53,28 @@ namespace network_test {
     }
 
 
+    void angle_rd_callback(void* obj_ptr, uint8_t ev_code, void* msg){
+        if(ev_code == 5){
+            LOGW("Read angle timeout");
+            return;
+        }
+
+        int32_t angle = *(int32_t*)msg;
+
+        LOGW("Read angle: %X", angle);
+    }
+
+    void mode_wr_callback(void* obj_ptr, uint8_t ev_code, void* msg){
+        if(ev_code == 1){
+            LOGW("Write mode done!");
+        }
+        else{
+            LOGW("Write mode failed!");
+        }
+    }
+
     TEST(NetworkLayer, SvoHostNode) {
         Node fcn_node(1);
-        Tracer tracer(true);
-        tracer.setFilter(Tracer::Level::INFO);
 
         int servo_addr = SERVO_ADDR;
         int local_addr = HOST_ADDR;
@@ -67,18 +85,27 @@ namespace network_test {
         auto servo_client = fcn_node.network_layer->svo_network_handler
                 .bindClientToServer(servo_addr, local_addr, 0);
 
-
-
         for(int __i = 0; __i < 1; ){
             perciseSleep(1);
+            LOGD("request.. " );
 
-            cout << "request.. "  << endl;
 
-            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle);
+            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
+                                         TransferCallback_t(
+                                                 nullptr,
+                                                 angle_rd_callback));
 
+//            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
+//                                         TransferCallback_t(
+//                                                 nullptr,
+//                                                 angle_rd_callback));
+//
 //            auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
 //            mode_msg << 0x22;
-//            servo_client->writeUnblocking(mode_msg);
+//            servo_client->writeUnblocking(mode_msg,
+//                                          TransferCallback_t(
+//                                                  nullptr,
+//                                                  mode_wr_callback));
 
 //            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
 //                                          ", current = %d \n",

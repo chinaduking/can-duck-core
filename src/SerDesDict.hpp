@@ -117,8 +117,16 @@ namespace libfcn_v2 {
 
     /*非阻塞式任务的回调函数
      * TODO: custom allocator*/
-    struct FcnCallbackInterface {
-        virtual void callback(void *data, uint8_t ev_code) = 0;
+    typedef void  (*TransferCallbackFunc)(void* obj_ptr, uint8_t ev_code, void*
+    msg);
+
+    struct TransferCallback_t {
+        TransferCallback_t() = default;
+        TransferCallback_t(void* obj_ptr, TransferCallbackFunc callback_func):
+                obj_ptr(obj_ptr), callback_func(callback_func){}
+
+        void* obj_ptr {nullptr};
+        TransferCallbackFunc callback_func {nullptr};
     };
 
 

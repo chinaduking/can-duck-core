@@ -56,7 +56,7 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void readUnblocking(Msg&& msg,
-                            FcnCallbackInterface* callback=nullptr){
+                            TransferCallback_t&& callback=TransferCallback_t()){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -74,7 +74,8 @@ namespace libfcn_v2 {
                     this,
                     frame,
                     (uint8_t)OpCode::SVO_SINGLE_READ_ACK,
-                    200, 3)
+                    300, 3,
+                    std::move(callback))
                 );
             if(res == -1){
                 LOGW("evloop can't add more task!");
@@ -85,7 +86,7 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void writeUnblocking(Msg&& msg,
-                             FcnCallbackInterface* callback=nullptr){
+                             TransferCallback_t&& callback=TransferCallback_t()){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -103,7 +104,8 @@ namespace libfcn_v2 {
                     this,
                     frame,
                     (uint8_t)OpCode::SVO_SINGLE_WRITE_ACK,
-                    300, 3)
+                    300, 3,
+                    std::move(callback))
             );
             if(res == -1){
                 LOGW("evloop can't add more task!");
@@ -130,6 +132,8 @@ namespace libfcn_v2 {
         uint16_t port_id{0};
 
 //    private:
+        SerDesDict* const serdes_dict{nullptr};
+
         int networkSendFrame(uint16_t port_id, DataLinkFrame* frame);
 
 
@@ -168,12 +172,12 @@ namespace libfcn_v2 {
 
         //TODO: 任何表项目被从网络写入，均回调
         void onDataChaged(SerDesDictValHandle* msg,
-                          FcnCallbackInterface* callback);
+                          TransferCallback_t* callback);
 
 
         //TODO: 对应数据的网络写入回调
         template<typename Msg>
-        void onDataChanged(Msg&& item, FcnCallbackInterface* callback){
+        void onDataChanged(Msg&& item, TransferCallback_t* callback){
 
         }
 

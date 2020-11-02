@@ -19,8 +19,9 @@ namespace utils{
     public:
         enum class Level{
             NONE = 0,
-            INFO,
             VERBOSE,
+            INFO,
+            DEBUG,
             WARNING,
             ERROR,
             FATAL
@@ -41,7 +42,7 @@ namespace utils{
         void batchWrite(const uint8_t *data, uint32_t len);
 
         bool enable_color;
-        Level filter_level {Level::WARNING};
+        Level filter_level {Level::VERBOSE};
         vector_s<LLByteDevice*> device;
 
         char tag[64];
@@ -51,7 +52,7 @@ namespace utils{
         StdoutIODviceWrapper stdio_wrapper;
 #endif //SYSTYPE_FULL_OS
 
-
+        uint64_t timestamp_last{0};
     };
 
 }

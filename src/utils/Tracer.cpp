@@ -18,8 +18,9 @@ using namespace utils;
 
 static char* level_name[] = {
         (char*) "N",
-        (char*) "I",
         (char*) "V",
+        (char*) "I",
+        (char*) "D",
         (char*) "!W",
         (char*) "!!E",
         (char*) "!!!F"
@@ -34,12 +35,13 @@ static char* level_name[] = {
 #define ANSI_COLOR_RESET   (char*) "\x1b[0m"
 
 static char* level_color[] = {
-        (char*) "",
-        ANSI_COLOR_GREEN,
-        ANSI_COLOR_BLUE,
-        ANSI_COLOR_YELLOW,
-        ANSI_COLOR_RED,
-        ANSI_COLOR_MAGENTA
+        (char*) "",             //NONE
+        (char*) "",             //VERBOSE
+        (char*) "",             //INFO
+        ANSI_COLOR_CYAN,        //DEBUG
+        ANSI_COLOR_YELLOW,      //WARNING
+        ANSI_COLOR_RED,         //ERROR
+        ANSI_COLOR_MAGENTA      //FATAL
 };
 
 Tracer::Tracer(bool enable_color)
@@ -104,6 +106,8 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     std::lock_guard<std::mutex> lk(update_mutex);
 #endif //SYSTYPE_FULL_OS
 
+    int ret;
+
 
     if(filter_level == Level::NONE || device.size() == 0){
         return 0;
@@ -114,62 +118,48 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     }
 
     char* str_tmp;
+    uint64_t timestamp = getCurrentTimeUs();
 
     /* Color */
     if(enable_color){
         str_tmp = level_color[(uint8_t)level];
-        batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
+        batchWrite((uint8_t*)str_tmp, strlen(str_tmp) + 1);
         //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     }
 
-    /* Header */
-    str_tmp = (char*) "==[";
-    batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-    //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
+    /* Info */
+    ret = sprintf(trace_buffer,
+                          ">>> "/* Header */
+                          "%s  "  /* Level */
+                          "%lu "  /* Timestamp */
+                          "(+%lu us) "  /* Timestamp Diff */
+                          "[%s] "  /* Tag */
+                            ,level_name[(uint8_t)level]
+                             , timestamp,
+                              (uint64_t)(timestamp - timestamp_last),
+                            tag);
 
-    /* Level */
-    str_tmp = level_name[(uint8_t)level];
-    batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-    //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-
-    str_tmp = (char*) "] [";
-    batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-    //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-
-    /* Tag */
-    str_tmp = tag;
-    batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-    //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-
-    str_tmp = (char*) "]: ";
-    batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-    //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-
-    /* Content */
-//    va_list arg_ptr;
-    int ret;
-
-//    va_start(arg_ptr, format);
-    ret = vsprintf(trace_buffer, format, arg_ptr);
-//    va_end(arg_ptr);
+    timestamp_last = timestamp;
 
     if(ret >= 0){
         trace_buffer[ret] = 0;
-        batchWrite(reinterpret_cast<const uint8_t *>(trace_buffer), strlen(trace_buffer) + 1);
-        //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
+        batchWrite((uint8_t*)trace_buffer, strlen(trace_buffer) + 1);
     }
 
+    /* Content */
+    ret = vsprintf(trace_buffer, format, arg_ptr);
+
+    if(ret >= 0){
+        trace_buffer[ret] = 0;
+        batchWrite((uint8_t*)trace_buffer,  strlen(trace_buffer) + 1);
+    }
 
     /* Color */
     if(enable_color)
     {
         str_tmp = ANSI_COLOR_RESET;
-        batchWrite(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
-        //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
+        batchWrite((uint8_t*)str_tmp, strlen(str_tmp) + 1);
     }
-
-    //batchWrite(reinterpret_cast<const uint8_t *>("\n"), 2);
-    //device->write(reinterpret_cast<const uint8_t *>("\n"), 2);
 
     std::cout << std::endl;
 
