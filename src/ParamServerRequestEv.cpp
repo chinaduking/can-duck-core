@@ -100,10 +100,10 @@ void ParamServerRequestEv::onRecv(DataLinkFrame &frame) {
 
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
-        callback.call(1, nullptr);
+        callback.call(1, &frame);
     }
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
-        callback.call(1, &frame);
+        callback.call(1, nullptr);
     }
 }

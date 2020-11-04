@@ -27,7 +27,7 @@ namespace libfcn_v2{
 
         RequestCallback() = default;
 
-        RequestCallback( Callback cb, void* ctx_obj=nullptr):
+        RequestCallback(Callback cb, void* ctx_obj=nullptr):
                 cb(cb), ctx_obj(ctx_obj)
         {}
 

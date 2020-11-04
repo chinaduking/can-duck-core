@@ -64,8 +64,12 @@ namespace network_test {
             return;
         }
 
-        ParamServerClient::readBuffer(fcnmsg::test_ServoPubSubDict.angle,
-                                      frame);
+        if(ev_code == 1){
+            auto angle = ParamServerClient::readBuffer(
+                    fcnmsg::test_ServoPubSubDict.angle, frame).data;
+
+            LOGD("read angle done: %X", angle);
+        }
     }
 
     void mode_wr_callback(void* obj_ptr, int ev_code, DataLinkFrame* msg){
@@ -96,17 +100,14 @@ namespace network_test {
             servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
                                          RequestCallback(angle_rd_callback));
 
-//            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
-//                                         TransferCallback_t(
-//                                                 nullptr,
-//                                                 angle_rd_callback));
-//
-//            auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
-//            mode_msg << 0x22;
-//            servo_client->writeUnblocking(mode_msg,
-//                                          TransferCallback_t(
-//                                                  nullptr,
-//                                                  mode_wr_callback));
+            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
+                                         RequestCallback(angle_rd_callback));
+
+            auto mode_msg = fcnmsg::test_ServoPubSubDict.mode;
+            mode_msg << 0x22;
+
+            servo_client->writeUnblocking(mode_msg,
+                                          RequestCallback(mode_wr_callback));
 
 //            tracer.print(Tracer::WARNING, "servo: speed = %d, angle = %d"
 //                                          ", current = %d \n",
