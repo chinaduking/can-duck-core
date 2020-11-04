@@ -23,6 +23,11 @@ namespace network_test {
         ASSERT_EQ(std::unique_ptr<int>(nullptr), nullptr);
     }
 
+    TEST(callback, test){
+        cout << sizeof(std::function<int(int)>) << endl;
+    }
+
+
     TEST(NetworkLayer, SvoServoNode) {
         int local_addr = SERVO_ADDR;
 
@@ -53,18 +58,17 @@ namespace network_test {
     }
 
 
-    void angle_rd_callback(void* obj_ptr, uint8_t ev_code, void* msg){
-        if(ev_code == 5){
+    void angle_rd_callback(void* obj_ptr, int ev_code, DataLinkFrame* frame){
+        if(ev_code == 2){
             LOGW("Read angle timeout");
             return;
         }
 
-        int32_t angle = *(int32_t*)msg;
-
-        LOGW("Read angle: %X", angle);
+        ParamServerClient::readBuffer(fcnmsg::test_ServoPubSubDict.angle,
+                                      frame);
     }
 
-    void mode_wr_callback(void* obj_ptr, uint8_t ev_code, void* msg){
+    void mode_wr_callback(void* obj_ptr, int ev_code, DataLinkFrame* msg){
         if(ev_code == 1){
             LOGW("Write mode done!");
         }
@@ -90,9 +94,7 @@ namespace network_test {
 
 
             servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
-                                         TransferCallback_t(
-                                                 nullptr,
-                                                 angle_rd_callback));
+                                         RequestCallback(angle_rd_callback));
 
 //            servo_client->readUnblocking(fcnmsg::test_ServoPubSubDict.angle,
 //                                         TransferCallback_t(

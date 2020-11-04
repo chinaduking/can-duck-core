@@ -20,11 +20,26 @@ namespace libfcn_v2{
     using FcnEvLoop = utils::EventLoop<DataLinkFrame, LinkedListNodeAllocator>;
 
     class ParamServerClient;
+
+    struct RequestCallback{
+        typedef void (*Callback)(void* ctx_obj,
+                                 int ev_code, DataLinkFrame* frame);
+
+        RequestCallback() = default;
+
+        RequestCallback( Callback cb, void* ctx_obj=nullptr):
+                cb(cb), ctx_obj(ctx_obj)
+        {}
+
+        void call(int ev_code, DataLinkFrame* frame);
+
+        Callback cb {nullptr};
+        void* ctx_obj {nullptr};
+    };
+
     /*
      * 抽象的数据请求过程。用于用户自定义请求的形式。
-     * 由于Ninebot协议没有传输层独立的重传机制，而是将可靠传输的义务放在
-     * 了协议层，因此传输层的意义是对协议层的重传机制进行抽象。
-     * */
+     **/
     class ParamServerRequestEv : public FcnEvLoop::Task{
     public:
         ParamServerRequestEv() : FcnEvLoop::Task(){}
@@ -34,7 +49,7 @@ namespace libfcn_v2{
                 DataLinkFrame& frame,
                 uint16_t ack_op_code,
                 uint16_t timeout_ms, int retry_max=-1,
-                TransferCallback_t&& callback=TransferCallback_t()):
+                RequestCallback&& callback=RequestCallback()):
 
                 FcnEvLoop::Task(),
 
@@ -63,7 +78,7 @@ namespace libfcn_v2{
         /* 解析目标节点的应答数据 */
         void onRecv(DataLinkFrame& frame);
 
-        TransferCallback_t callback;
+        RequestCallback callback;
 
     private:
         uint16_t ack_op_code{0};

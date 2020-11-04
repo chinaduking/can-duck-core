@@ -69,13 +69,17 @@ void ParamServerRequestEv::evTimeoutCallback() {
 }
 
 
+void RequestCallback::call(int ev_code, DataLinkFrame *frame){
+    if(cb != nullptr){
+        (*cb)(ctx_obj, ev_code ,frame);
+    }
+}
+
+
 void ParamServerRequestEv::onTimeout() {
     LOGW("request timeout: server = 0x%X, msg_id=0x%X",
          cached_req.dest_id, cached_req.msg_id);
-    if(callback.callback_func != nullptr){
-        (*callback.callback_func)(callback.obj_ptr, 5,
-                                  nullptr);
-    }
+    callback.call(2, nullptr);
 }
 
 void ParamServerRequestEv::onRecv(DataLinkFrame &frame) {
@@ -96,16 +100,10 @@ void ParamServerRequestEv::onRecv(DataLinkFrame &frame) {
 
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
-        if(callback.callback_func != nullptr){
-            (*callback.callback_func)(callback.obj_ptr, 0, frame.payload);
-        }
-//        return; //TODO??
+        callback.call(1, nullptr);
     }
-    if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
 
-        if(callback.callback_func != nullptr){
-            (*callback.callback_func)(callback.obj_ptr, frame.payload[0],
-                    nullptr);
-        }
+    if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
+        callback.call(1, &frame);
     }
 }

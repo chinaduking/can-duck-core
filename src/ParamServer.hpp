@@ -36,6 +36,7 @@ namespace libfcn_v2 {
 
     class ParamServerClient{
     public:
+        //TODO: 传入SerDesDict，在回调中实现类型安全的反序列化
         ParamServerClient(NetworkLayer* ctx_network_layer,
                           uint16_t server_addr,
                           uint16_t client_addr,
@@ -54,9 +55,21 @@ namespace libfcn_v2 {
 
         ~ParamServerClient() = default;
 
+        template<typename Prototype>
+        static Prototype readBuffer(Prototype&& msg, DataLinkFrame* frame){
+            USER_ASSERT(frame!= nullptr);
+            USER_ASSERT(frame->msg_id == msg.index);
+            USER_ASSERT(frame->payload_len == sizeof(msg.data));
+
+            Prototype res = msg;
+            utils::memcpy(&res.data, frame->payload, sizeof(res.data));
+
+            return res;
+        }
+
         template<typename Msg>
         void readUnblocking(Msg&& msg,
-                            TransferCallback_t&& callback=TransferCallback_t()){
+                            RequestCallback&& callback=RequestCallback()){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -86,7 +99,7 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void writeUnblocking(Msg&& msg,
-                             TransferCallback_t&& callback=TransferCallback_t()){
+                             RequestCallback&& callback=RequestCallback()){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -150,6 +163,7 @@ namespace libfcn_v2 {
 #endif
 
     };
+
 
     /*
      * 以回调响应的，称为RPC模式的SVO。

@@ -130,8 +130,6 @@ obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
     return 0;
 }
 
-
-
 void ParamServerClient::onReadAck(DataLinkFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
