@@ -38,12 +38,19 @@ namespace libfcn_v2 {
                               uint8_t *data, obj_size_t len);
 
     class NetworkLayer;
+    struct SubscribeCallback;
 
     class PubSubChannel{
     public:
+        typedef SubscribeCallback* callbacl_ptr_t;
+
         PubSubChannel(SerDesDict* obj_dict_shm, void* buffer,
                       bool is_source= true)
-            : serdes_dict(obj_dict_shm), buffer(buffer){
+            :
+            serdes_dict(obj_dict_shm),
+            buffer(buffer),
+            callback_ptr_list(serdes_dict->dictSize())
+            {
             USER_ASSERT(buffer != nullptr);
         }
 
@@ -95,16 +102,18 @@ namespace libfcn_v2 {
 
         void* const buffer {nullptr};
 
-        /* 将回调函数指针映射到int8整形时，基址偏移量
-         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
-         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
-        uint16_t*  callback_mapped_ptr_base;
 
-        /* 将回调函数指针映射到int8整形后的指针数组 */
-        uint8_t** callback_mapped_ptr_list;
-
-        /* 上述数组长度 */
-        uint8_t* callback_mapped_ptr_num;
+        utils::vector_s<callbacl_ptr_t> callback_ptr_list;
+//        /* 将回调函数指针映射到int8整形时，基址偏移量
+//         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
+//         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
+//        uint16_t*  callback_mapped_ptr_base;
+//
+//        /* 将回调函数指针映射到int8整形后的指针数组 */
+//        uint8_t** callback_mapped_ptr_list;
+//
+//        /* 上述数组长度 */
+//        uint8_t* callback_mapped_ptr_num;
 
         DataLinkFrame frame_tmp;
 
@@ -114,7 +123,24 @@ namespace libfcn_v2 {
 
     };
 
-    #define MAX_PUB_CTRL_RULES 10
+    struct SubscribeCallback{
+        typedef void (*Callback)(void* ctx_obj,
+                                 int ev_code, DataLinkFrame* frame);
+
+        SubscribeCallback() = default;
+
+        SubscribeCallback(Callback cb, void* ctx_obj=nullptr):
+                cb(cb), ctx_obj(ctx_obj)
+        {}
+
+        void call(int index);
+
+        Callback cb {nullptr};
+        void* ctx_obj {nullptr};
+    };
+
+
+#define MAX_PUB_CTRL_RULES 10
 
     /*
     * 网络处理。
