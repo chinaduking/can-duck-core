@@ -1,4 +1,4 @@
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(../..)
 
 add_executable(logview main.cpp)
 

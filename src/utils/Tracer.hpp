@@ -5,7 +5,7 @@
 #ifndef LIBFCN_TRACER_HPP
 #define LIBFCN_TRACER_HPP
 
-#include "../LLComDevice.hpp"
+#include "libfcn/LLComDevice.hpp"
 #include "vector_s.hpp"
 
 #ifdef SYSTYPE_FULL_OS

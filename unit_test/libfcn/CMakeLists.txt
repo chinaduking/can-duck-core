@@ -22,12 +22,12 @@ target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest
 
 
 add_executable(testDataLinkLayer DataLinkLayer.cpp
-        ${PROJECT_SOURCE_DIR}/src/DataLinkLayer.cpp
-        ${PROJECT_SOURCE_DIR}/src/Log.cpp)
+        ../../src/libfcn/DataLinkLayer.cpp
+        ../../src/libfcn/Log.cpp)
 target_link_libraries(testDataLinkLayer MyCppUtils GTest::GTest GTest::Main)
 
 
 
 add_executable(testNetworkLayer NetworkLayer.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/PosixSerial.cpp)
+        ../../src/utils/PosixSerial.cpp)
 target_link_libraries(testNetworkLayer fcn_v2 GTest::GTest GTest::Main)

@@ -3,7 +3,7 @@
 //
 
 #include "TestUtils.hpp"
-#include "PubSub.hpp"
+#include "libfcn/PubSub.hpp"
 #include "test_ServoDict.hpp"
 using namespace libfcn_v2;
 #if 0
@@ -114,7 +114,7 @@ namespace rto_test{
 /*
  * 测试实时对象字典使用网络进行传输
  **/
-#include "NetworkLayer.hpp"
+#include "libfcn/NetworkLayer.hpp"
 
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"

@@ -5,7 +5,7 @@
 #ifndef LIBFCN_SERIALFT232_HPP
 #define LIBFCN_SERIALFT232_HPP
 
-#include "../LLComDevice.hpp"
+#include "libfcn/LLComDevice.hpp"
 #include <vector>
 #include <string>
 #include <termios.h>

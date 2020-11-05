@@ -20,7 +20,7 @@
 using namespace std;
 
 
-#include "DataLinkLayer.hpp"
+#include "libfcn/DataLinkLayer.hpp"
 
 namespace libfcn_v2{
     inline bool DataLinkFrameCompare(DataLinkFrame& frame1, DataLinkFrame&

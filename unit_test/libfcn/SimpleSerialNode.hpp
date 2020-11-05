@@ -5,7 +5,7 @@
 #ifndef LIBFCN_V2_SIMPLESERIALNODE_HPP
 #define LIBFCN_V2_SIMPLESERIALNODE_HPP
 
-#include "NetworkLayer.hpp"
+#include "libfcn/NetworkLayer.hpp"
 
 #include "utils/PosixSerial.hpp"
 #include "utils/Tracer.hpp"

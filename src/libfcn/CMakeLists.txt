@@ -9,6 +9,6 @@ add_library(fcn_v2
         Log.cpp
         Node.cpp
 
-        utils/DataVerify.cpp
-        utils/Tracer.cpp
-        utils/HostIODeviceWrapper.cpp)
+        ../utils/DataVerify.cpp
+        ../utils/Tracer.cpp
+        ../utils/HostIODeviceWrapper.cpp)

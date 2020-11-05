@@ -67,12 +67,12 @@ add_definitions(-DSYSTYPE_FULL_OS)
 #------------Add Submodule---------------
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/libfcn)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/example/)
-add_subdirectory(${PROJECT_SOURCE_DIR}/apps/SerialLogViewer)
+add_subdirectory(src/example/)
+add_subdirectory(src/apps/SerialLogViewer)

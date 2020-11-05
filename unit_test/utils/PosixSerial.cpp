@@ -3,7 +3,7 @@
 //
 
 #include "utils/PosixSerial.hpp"
-#include "TestUtils.hpp"
+#include "libfcn/TestUtils.hpp"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <thread>
