@@ -6,7 +6,7 @@
 #define LIBFCN_V2_PUBSUB_HPP
 
 #include <cstdint>
-#include "utils/vector_s.hpp"
+#include "vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "OpCode.hpp"

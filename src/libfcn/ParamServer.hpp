@@ -6,12 +6,12 @@
 #define LIBFCN_V2_PARAMSERVER_HPP
 
 #include <cstdint>
-#include "utils/vector_s.hpp"
+#include "vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "DefaultAllocate.h"
 #include "OpCode.hpp"
-#include "utils/BitLUT8.hpp"
+#include "BitLUT8.hpp"
 #include "DefaultAllocate.h"
 #include "Log.hpp"
 

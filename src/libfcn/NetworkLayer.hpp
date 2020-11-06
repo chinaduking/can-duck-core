@@ -5,7 +5,7 @@
 #ifndef LIBFCN_V2_NETWORKLAYER_HPP
 #define LIBFCN_V2_NETWORKLAYER_HPP
 
-#include "utils/vector_s.hpp"
+#include "vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "PubSub.hpp"
 #include "ParamServer.hpp"

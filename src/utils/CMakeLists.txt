@@ -1,4 +1,4 @@
- add_library(MyCppUtils
+add_library(MyCppUtils
          DataVerify.cpp
          HostIODeviceWrapper.cpp
          PosixSerial.cpp

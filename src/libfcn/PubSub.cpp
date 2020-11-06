@@ -5,7 +5,7 @@
 #include "PubSub.hpp"
 #include "NetworkLayer.hpp"
 #include "OpCode.hpp"
-#include "utils/CppUtils.hpp"
+#include "CppUtils.hpp"
 
 #include "Log.hpp"
 

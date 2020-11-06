@@ -1,3 +1,5 @@
+include_directories(${PROJECT_SOURCE_DIR}/src/libfcn)
+
 add_executable(testDataObjects SerDesDict.cpp
         test_ServoDict.cpp
         )

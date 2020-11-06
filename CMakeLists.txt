@@ -68,6 +68,7 @@ add_definitions(-DSYSTYPE_FULL_OS)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/libfcn)
+include_directories(${PROJECT_SOURCE_DIR}/src/utils)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)

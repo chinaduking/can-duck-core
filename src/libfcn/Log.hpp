@@ -5,7 +5,7 @@
 #ifndef LIBFCN_V2_LOG_HPP
 #define LIBFCN_V2_LOG_HPP
 
-#include "utils/Tracer.hpp"
+#include "Tracer.hpp"
 #include "DataLinkLayer.hpp"
 #include "DefaultAllocate.h"
 

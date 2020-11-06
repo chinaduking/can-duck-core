@@ -6,9 +6,9 @@
 #define LIBFCN_V2_SERDESDICT_HPP
 
 #include <cstdint>
-#include "utils/CppUtils.hpp"
-#include "utils/vector_s.hpp"
-#include "utils/BitLUT8.hpp"
+#include "CppUtils.hpp"
+#include "vector_s.hpp"
+#include "BitLUT8.hpp"
 
 
 namespace libfcn_v2 {

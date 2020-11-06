@@ -11,8 +11,8 @@
 #include "LLComDevice.hpp"
 //#include "utils/ESharedPtr.hpp"
 #include "DefaultAllocate.h"
-#include "utils/vector_s.hpp"
-#include "utils/CppUtils.hpp"
+#include "vector_s.hpp"
+#include "CppUtils.hpp"
 
 namespace libfcn_v2{
     /* IDs */
