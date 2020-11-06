@@ -13,7 +13,7 @@ utils::Tracer* Log::getInstance(){
     if(tracer == nullptr){
         tracer = new utils::Tracer(true);
 
-        tracer->setFilter(utils::Tracer::Level::INFO);
+        tracer->setFilter(utils::Tracer::Level::lInfo);
     }
 
     return tracer;

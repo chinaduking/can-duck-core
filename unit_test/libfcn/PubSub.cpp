@@ -188,7 +188,7 @@ namespace network_test {
     TEST(RTO, RtoHostNode) {
         Node fcn_node(1);
         Tracer tracer(true);
-        tracer.setFilter(Tracer::Level::INFO);
+        tracer.setFilter(Tracer::Level::lInfo);
 
         int servo_addr = SERVO_ADDR;
 

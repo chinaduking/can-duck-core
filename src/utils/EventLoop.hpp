@@ -6,7 +6,9 @@
 #define LIBFCN_EVENTLOOPBASE_HPP
 
 /* 是否使用C++多线程支持。不使用时需要用户定期调用EvLoop::scheduleWorker */
+#ifdef SYSTYPE_FULL_OS
 #define EVENTLOOP_THREADING
+#endif
 #define EVENTLOOP_ALLOCATE_DYNAMIC
 #define EVENTLOOP_ALLOCATE_STATIC
 
@@ -186,9 +188,11 @@ namespace utils {
 
             is_notify_pending = true;
             pending_notify = message;
+#ifdef EVENTLOOP_THREADING
             sched_ctrl_cv.notify_all();
             notify_ctrl_cv.wait(updating_lk);
 //            std::cout << "notify_ctrl_cv done!!!" <<std::endl;
+#endif //EVENTLOOP_THREADING
         }
 
 

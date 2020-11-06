@@ -60,7 +60,7 @@ void Tracer::setFilter(Level level){
     std::lock_guard<std::mutex> lk(update_mutex);
 #endif //SYSTYPE_FULL_OS
 
-    if(level > Level::FATAL){
+    if(level > Level::lFatal){
         return;
     }
 
@@ -109,11 +109,11 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     int ret;
 
 
-    if(filter_level == Level::NONE || device.size() == 0){
+    if(filter_level == Level::lNone || device.size() == 0){
         return 0;
     }
 
-    if(level < filter_level || level > Level::FATAL){
+    if(level < filter_level || level > Level::lFatal){
         return 0;
     }
 

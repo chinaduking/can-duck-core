@@ -34,11 +34,11 @@ namespace libfcn_v2{
     std::string Frame2LogCompact(DataLinkFrame& frame);
 
 #ifdef ENABLE_LOG
-    #define LOGI(...) Log::printf(utils::Tracer::Level::INFO,    __VA_ARGS__)
+    #define LOGI(...) Log::printf(utils::Tracer::Level::lInfo,    __VA_ARGS__)
     #define LOGV(...) Log::printf(utils::Tracer::Level::VERBOSE, __VA_ARGS__)
-    #define LOGD(...) Log::printf(utils::Tracer::Level::DEBUG,   __VA_ARGS__)
-    #define LOGW(...) Log::printf(utils::Tracer::Level::WARNING, __VA_ARGS__)
-    #define LOGE(...) Log::printf(utils::Tracer::Level::ERROR,   __VA_ARGS__)
+    #define LOGD(...) Log::printf(utils::Tracer::Level::lDebug,   __VA_ARGS__)
+    #define LOGW(...) Log::printf(utils::Tracer::Level::lWarning, __VA_ARGS__)
+    #define LOGE(...) Log::printf(utils::Tracer::Level::lError,   __VA_ARGS__)
     #define LOGF(...) Log::printf(utils::Tracer::Level::FATAL,   __VA_ARGS__)
 #else
     #define LOGI(...) do{}while(0)

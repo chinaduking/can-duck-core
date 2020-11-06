@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <utility>
 
 #include "ObjPool.hpp"
 

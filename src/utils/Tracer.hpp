@@ -5,7 +5,7 @@
 #ifndef LIBFCN_TRACER_HPP
 #define LIBFCN_TRACER_HPP
 
-#include "libfcn/LLComDevice.hpp"
+#include "LLComDevice.hpp"
 #include "vector_s.hpp"
 
 #ifdef SYSTYPE_FULL_OS
@@ -17,14 +17,14 @@
 namespace utils{
     class Tracer{
     public:
-        enum class Level{
-            NONE = 0,
-            VERBOSE,
-            INFO,
-            DEBUG,
-            WARNING,
-            ERROR,
-            FATAL
+        enum class Level : uint8_t{
+            lNone = 0,
+            lVerbose,
+            lInfo,
+            lDebug,
+            lWarning,
+            lError,
+            lFatal
         };
 
         Tracer(bool enable_color=false);
@@ -42,7 +42,7 @@ namespace utils{
         void batchWrite(const uint8_t *data, uint32_t len);
 
         bool enable_color;
-        Level filter_level {Level::VERBOSE};
+        Level filter_level {Level::lVerbose};
         vector_s<LLByteDevice*> device;
 
         char tag[64];
