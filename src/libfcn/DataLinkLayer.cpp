@@ -310,7 +310,7 @@ static char* mOpCodeStr[]={
         (char*)"",
 };
 
-std::string libfcn_v2::Frame2Log(DataLinkFrame& frame){
+std::string libfcn_v2::frame2log(DataLinkFrame& frame){
     static const int BUFFER_RESERVE = 120;
 
     char buffer[DATALINK_MTU * 4 + BUFFER_RESERVE];

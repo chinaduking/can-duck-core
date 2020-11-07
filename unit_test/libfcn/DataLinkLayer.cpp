@@ -31,7 +31,7 @@ namespace frame_device_test{
         len = frame2Buffer(&src_frame, buffer);
         buffer2Frame(&dst_frame, buffer+1, len-1);
 
-        cout << Frame2Log(dst_frame) << endl;
+        cout << frame2log(dst_frame) << endl;
 
         ASSERT_TRUE(DataLinkFrameCompare(src_frame, dst_frame));
     }
@@ -53,7 +53,7 @@ namespace frame_device_test{
 
         dst_frame = src_frame;
 
-        cout << Frame2Log(dst_frame) << endl;
+        cout << frame2log(dst_frame) << endl;
 
         DataLinkFrame f_array[1];
         cout << sizeof(f_array) << endl;
@@ -88,7 +88,7 @@ namespace frame_device_test{
         thread recv([&](){
             for(int i = 0; i < 1;){
                 if(frame_dev.read(dest_frame)){
-                    cout << Frame2Log(*dest_frame) << endl;
+                    cout << frame2log(*dest_frame) << endl;
                     ASSERT_TRUE(DataLinkFrameCompare(*src_frame, *dest_frame));
                 } else{
                     cout << "no more frame.." << endl;

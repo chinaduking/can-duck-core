@@ -41,7 +41,10 @@ add_executable(testMemMap MemMap.cpp)
 target_link_libraries(testMemMap  GTest::GTest GTest::Main)
 
 
-add_executable(testEvloop EventLoopThreading.cpp
-        )
+add_executable(testEvloop EventLoopThreading.cpp)
 target_link_libraries(testEvloop MyCppUtils GTest::GTest GTest::Main)
 
+
+add_executable(testQueue queue_s.cpp)
+
+target_link_libraries(testQueue MyCppUtils GTest::GTest GTest::Main)

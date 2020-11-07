@@ -20,7 +20,7 @@ namespace libfcn_v2{
 
     /* 注意：为了能快速计算CRC，选择数组长度时请保证Frame的内存对齐。*/
     static const int DATALINK_MTU = DATALINK_MAX_TRANS_UNIT;
-    static const int MAX_NODE_NUM = 64;
+    static const int MAX_NODE_NUM = 8;
     static const int MAX_NODE_ID = MAX_NODE_NUM - 1;
 
 #pragma pack(4)
@@ -72,7 +72,7 @@ namespace libfcn_v2{
     };
 #pragma pack(0)
 
-    std::string Frame2Log(DataLinkFrame& frame);
+    std::string frame2log(DataLinkFrame& frame);
 }
 
 namespace libfcn_v2{
