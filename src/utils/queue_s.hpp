@@ -126,6 +126,10 @@ namespace utils{
             return buffer[index];
         }
 
+        bool full(){
+            return size_cnt == capicity;
+        }
+
     private:
         T_Val* buffer {nullptr};
         const uint32_t capicity{0};

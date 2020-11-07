@@ -19,7 +19,7 @@ using namespace utils;
 using namespace std;
 
 PosixSerial::PosixSerial(int id, uint32_t baud,
-                         uint16_t read_timeout_ms ): LLByteDevice(1024),
+                         uint16_t read_timeout_ms ): LLByteDevice(),
                                                      baud(baud){
     /*TODO: use FTDI device ID to open serial (FTDI-D2XX Driver)
      * AR: @jin.wang*/
@@ -117,7 +117,10 @@ PosixSerial::~PosixSerial()
 
 int32_t PosixSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
-    return (int32_t)::read(serial_fd, data, len);
+
+    int res = (int32_t)::read(serial_fd, data, len);
+
+    return res;
 }
 
 int32_t PosixSerial::write(const uint8_t *data, uint32_t len) {

@@ -11,12 +11,11 @@
  * 通用字节设备接口，需要实现读和写API */
 class LLByteDevice{
 public:
-    LLByteDevice(uint32_t write_buf_size=128) :
-        write_buf_size(write_buf_size){
-        write_buf = new uint8_t[write_buf_size];
-    }
-    virtual ~LLByteDevice() {
-        delete [] write_buf;
+    LLByteDevice()  = default;
+    virtual ~LLByteDevice() = default;
+
+    bool isWriteBusy(){
+        return busy_flag;
     }
 
     /* 读取
@@ -45,10 +44,9 @@ public:
     virtual int32_t write(const uint8_t *data, uint32_t len) = 0;
 
     /* 标志是否是阻塞式LL读取。 */
-    bool is_blocking_recv{};
-
-    uint8_t* write_buf;
-    uint32_t write_buf_size;
+    bool is_blocking_recv {false};
+protected:
+    bool busy_flag{false};
 };
 
 

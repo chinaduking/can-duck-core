@@ -63,48 +63,56 @@ namespace frame_device_test{
 
 
 
-#if 1
+
     TEST(ByteStreamParserTest, io) {
 
-        PosixSerial serial;
+        PosixSerial serial(1);
         ByteFrameIODevice frame_dev(&serial);
 
-        char* src_test_buffer = (char*)"12345 12345";
+        char* src_test_buffer = (char*)"12345";
 
         uint16_t src_buffer_len = strlen(src_test_buffer) + 1;
 
-        auto src_frame = new DataLinkFrame();
+        DataLinkFrame src_frame;
 //        ESharedPtr<DataLinkFrame> src_frame(new DataLinkFrame());
 
-        src_frame->src_id  = 0x03;
-        src_frame->dest_id = 0x05;
-        src_frame->op_code = 0x01;
-        src_frame->msg_id  = 0x07;
-        src_frame->payload_len = src_buffer_len;
-        memcpy(src_frame->payload, src_test_buffer, src_buffer_len);
+        src_frame.src_id  = 0x03;
+        src_frame.dest_id = 0x05;
+        src_frame.op_code = 0x01;
+        src_frame.msg_id  = 0x07;
+        src_frame.payload_len = src_buffer_len;
+        memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
 
-        auto dest_frame = new DataLinkFrame();
+        DataLinkFrame dest_frame;
 
         thread recv([&](){
             for(int i = 0; i < 1;){
-                if(frame_dev.read(dest_frame)){
-                    cout << frame2log(*dest_frame) << endl;
-                    ASSERT_TRUE(DataLinkFrameCompare(*src_frame, *dest_frame));
+                if(frame_dev.read(&dest_frame)){
+                    cout << frame2log(dest_frame) << endl;
+                    ASSERT_TRUE(DataLinkFrameCompare(src_frame, dest_frame));
                 } else{
                     cout << "no more frame.." << endl;
                 }
             }
         });
 
-        for(int i = 0; i < 100; i ++){
+        thread sendpoll([&](){
+            for(int i = 0; i < 1;){
+                frame_dev.writePoll();
+                perciseSleep(0.1);
+            }
+        });
+
+        for(int i = 0; i < 100; ){
             if(!serial.isOpen()){
                 break;
             }
-            frame_dev.write(src_frame);
-            cout << "send..." << endl;
+            frame_dev.write(&src_frame);
+            frame_dev.write(&src_frame);
+            cout << "send x2..." << endl;
             sleep(1);
         }
         recv.join();
+        sendpoll.join();
     }
-#endif
 }

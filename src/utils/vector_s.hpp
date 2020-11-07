@@ -134,6 +134,10 @@ namespace utils{
 
         }
 
+        T* data(){
+            return array;
+        }
+
     private:
         T* array;
         uint32_t member_cnt;

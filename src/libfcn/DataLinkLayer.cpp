@@ -225,25 +225,115 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
     return res;
 }
 
+#ifdef SYSTYPE_FULL_OS
+/* 互斥锁 */
+#include <mutex>
+#define WR_MUTEX_LOCKGUARD std::lock_guard<std::mutex> lk(wr_mutex)
+#else
+#define MUTEX_LOCKGUARD
+#endif
 
 bool ByteFrameIODevice::write(DataLinkFrame* frame){
-    uint8_t* p_buf = ll_byte_dev->write_buf;
+    WR_MUTEX_LOCKGUARD;
 
-    USER_ASSERT(ll_byte_dev->write_buf_size >= header.size() + DATALINK_MTU + 2);
+    if(frame_buffer.full()){
+        LOGE("frame buffer is full!!");
 
-    *p_buf = header[0];  p_buf ++;
-    *p_buf = header[1];  p_buf ++;
+        return false;
+    }
 
-    uint16_t len = frame2Buffer(&*frame, p_buf);
+    frame_buffer.push(*frame);
 
-    /*p_buf + 1, 跳过第一个长度信息不计算。*/
-    uint16_t crc = Crc16(p_buf + 1, len - 1);
+    LOGD("push to frame buffer, b_cnt = %d", frame_buffer.size());
 
-    p_buf += len;
-    *p_buf = (uint8_t)(crc >> 8); p_buf ++;
-    *p_buf = (uint8_t) crc;       p_buf ++;
+    return true;
 
-    return ll_byte_dev->write(ll_byte_dev->write_buf, len + 4);
+//    uint8_t* p_buf = ll_byte_dev->write_buf;
+//
+//    USER_ASSERT(ll_byte_dev->write_buf_size >= header.size() + DATALINK_MTU + 2);
+//
+//    *p_buf = header[0];  p_buf ++;
+//    *p_buf = header[1];  p_buf ++;
+//
+//    uint16_t len = frame2Buffer(&*frame, p_buf);
+//
+//    /*p_buf + 1, 跳过第一个长度信息不计算。*/
+//    uint16_t crc = Crc16(p_buf + 1, len - 1);
+//
+//    p_buf += len;
+//    *p_buf = (uint8_t)(crc >> 8); p_buf ++;
+//    *p_buf = (uint8_t) crc;       p_buf ++;
+//
+//    return ll_byte_dev->write(ll_byte_dev->write_buf, len + 4);
+}
+
+void ByteFrameIODevice::writePoll() {
+    WR_MUTEX_LOCKGUARD;
+
+    if(frame_buffer.empty()){
+        LOGD("frame_buffer is empty!!");
+        return;
+    }
+
+    switch (send_state) {
+        case SendState::Idle:
+            LOGD("get a new frame!!");
+            sending_frame = &frame_buffer.front();
+            send_state = SendState::Header;
+
+        /* 发送包头 + 长度*/
+        case SendState::Header:
+            /* 这里的数据长度是串口作为物理层的"模拟数据包"（的长度即包头-包尾CRC直接所有数据
+             * 的字节数）。等于payload_len+src_id+dest_id+msg_id+opcode*/
+            header_buf[header.size()] = sending_frame->payload_len + 4;
+
+            /* 这里的包头指串口作为物理层的"模拟数据包"*/
+            if(!ll_byte_dev->isWriteBusy()){
+                /* 物理层空闲时发送，如果忙则等待下次发送*/
+                ll_byte_dev->write(header_buf, header.size()+1);
+                send_state = SendState::Frame;
+            }
+            break;
+
+        /* 发送数据帧.这里的包头指串口作为物理层的"模拟数据包" */
+        case SendState::Frame:
+            /* */
+            if(!ll_byte_dev->isWriteBusy()){
+                /* 物理层空闲时发送，如果忙则等待下次发送
+                 * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
+                ll_byte_dev->write(&sending_frame->src_id,
+                                   sending_frame->payload_len + 4);
+                send_state = SendState::Crc;
+            }
+            break;
+
+        case SendState::Crc:
+            /* 这里的包头指串口作为物理层的"模拟数据包"*/
+            if(!ll_byte_dev->isWriteBusy()){
+                /* 因Frame成员在内存里地址连续，故可以这样操作。
+                 * 注意不要改变DataLinkFrame的内存布局
+                 * 跳过第一个长度信息不计算。*/
+                uint16_t crc_result = Crc16(&sending_frame->src_id,
+                                            sending_frame->payload_len + 4);
+
+                crc_buf[0] = crc_result >> 8;
+                crc_buf[1] = crc_result;
+
+
+                /* 物理层空闲时发送，如果忙则等待下次发送
+                 * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
+                ll_byte_dev->write(crc_buf,
+                                   2);
+
+                /* 发送成功后，弹出正在发送的数据帧 */
+                frame_buffer.pop();
+
+                LOGD("sent frame!!");
+
+                send_state = SendState::Idle;
+            }
+            break;
+    }
 }
 
 /*

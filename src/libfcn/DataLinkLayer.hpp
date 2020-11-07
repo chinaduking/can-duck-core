@@ -13,6 +13,9 @@
 #include "DefaultAllocate.h"
 #include "vector_s.hpp"
 #include "CppUtils.hpp"
+#include "queue_s.hpp"
+
+
 
 namespace libfcn_v2{
     /* IDs */
@@ -204,18 +207,24 @@ namespace libfcn_v2{
     public:
         static const int MAX_HEADER_LEN = 4;
 
-        explicit ByteFrameIODevice(LLByteDevice* ll_byte_dev):
+        explicit ByteFrameIODevice(LLByteDevice* ll_byte_dev, int frame_buffer_sz=8):
                 ll_byte_dev(ll_byte_dev),
-                header(MAX_HEADER_LEN){
+                header(MAX_HEADER_LEN),
+                frame_buffer(frame_buffer_sz){
             header.push_back(0x55);
             header.push_back(0xAA);
             parser.setHeader(header);
+
+            utils::memcpy(header_buf, header.data(), header.size());
         }
 
         ByteFrameIODevice(LLByteDevice* ll_byte_dev,
-                          utils::vector_s<uint8_t>& header):
-                ByteFrameIODevice(ll_byte_dev){
+                          utils::vector_s<uint8_t>& header,
+                          int frame_buffer_sz=8):
+                ByteFrameIODevice(ll_byte_dev, frame_buffer_sz){
             parser.setHeader(header);
+
+            utils::memcpy(header_buf, header.data(), header.size());
         }
 
         ~ByteFrameIODevice() override = default;
@@ -226,10 +235,30 @@ namespace libfcn_v2{
         /* 功能定义见FrameIODevice::write */
         bool write(DataLinkFrame* frame) override;
 
+        void writePoll();
+
     private:
         LLByteDevice* const ll_byte_dev;
         utils::vector_s<uint8_t> header;
         ByteStreamParser parser;
+        utils::queue_s<DataLinkFrame> frame_buffer;
+
+        enum class SendState{
+            Idle = 0,
+            Header,
+            Frame,
+            Crc
+        };
+
+        SendState send_state{SendState::Idle};
+
+        DataLinkFrame* sending_frame{nullptr};
+        uint8_t header_buf[MAX_HEADER_LEN+1];/*一字节长度信息*/
+        uint8_t crc_buf   [2];               /*2字节CRC*/
+
+#ifdef SYSTYPE_FULL_OS
+        std::mutex wr_mutex;
+#endif //SYSTYPE_FULL_OS
     };
 
 #if 0
