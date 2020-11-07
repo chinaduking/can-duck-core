@@ -9,6 +9,8 @@
 #include "utils/CppUtils.hpp"
 #include "utils/DataVerify.hpp"
 
+#include <cstring>
+
 using namespace utils;
 using namespace libfcn_v2;
 
@@ -244,27 +246,12 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
 
     LOGV("push to frame buffer, b_cnt = %d", frame_buffer.size());
     //TODO: con_var to trigger send!!
+
+#ifdef SYSTYPE_FULL_OS
     write_ctrl_cv.notify_all();
+#endif //SYSTYPE_FULL_OS
 
     return true;
-
-//    uint8_t* p_buf = ll_byte_dev->write_buf;
-//
-//    USER_ASSERT(ll_byte_dev->write_buf_size >= header.size() + DATALINK_MTU + 2);
-//
-//    *p_buf = header[0];  p_buf ++;
-//    *p_buf = header[1];  p_buf ++;
-//
-//    uint16_t len = frame2Buffer(&*frame, p_buf);
-//
-//    /*p_buf + 1, 跳过第一个长度信息不计算。*/
-//    uint16_t crc = Crc16(p_buf + 1, len - 1);
-//
-//    p_buf += len;
-//    *p_buf = (uint8_t)(crc >> 8); p_buf ++;
-//    *p_buf = (uint8_t) crc;       p_buf ++;
-//
-//    return ll_byte_dev->write(ll_byte_dev->write_buf, len + 4);
 }
 
 bool ByteFrameIODevice::writePoll() {
@@ -281,8 +268,6 @@ bool ByteFrameIODevice::writePoll() {
 
     if(frame_buffer.empty()){
         LOGV("frame_buffer is empty!!");
-
-        write_ctrl_cv.wait(updating_lk);
         return false;
     }
 

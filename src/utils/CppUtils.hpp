@@ -4,7 +4,7 @@
 
 #ifndef LIBFCN_CPPUTILS_HPP
 #define LIBFCN_CPPUTILS_HPP
-
+#include <cstdint>
 
 #ifdef SYSTYPE_FULL_OS
 #include <vector>
