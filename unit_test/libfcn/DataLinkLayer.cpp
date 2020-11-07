@@ -5,7 +5,7 @@
 #include "libfcn/Log.hpp"
 
 #include "TestUtils.hpp"
-#include "utils/PosixSerial.hpp"
+#include "utils/os_only/PosixSerial.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;

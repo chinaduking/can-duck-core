@@ -1,5 +1,5 @@
 add_library(MyCppUtils
          DataVerify.cpp
-         HostIODeviceWrapper.cpp
-         PosixSerial.cpp
+        os_only/HostIODeviceWrapper.cpp
+        os_only/PosixSerial.cpp
          Tracer.cpp)

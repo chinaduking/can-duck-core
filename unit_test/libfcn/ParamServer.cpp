@@ -5,7 +5,7 @@
 #include "TestUtils.hpp"
 #include "libfcn/NetworkLayer.hpp"
 
-#include "utils/PosixSerial.hpp"
+#include "utils/os_only/PosixSerial.hpp"
 #include "utils/Tracer.hpp"
 
 #include "test_ServoDict.hpp"

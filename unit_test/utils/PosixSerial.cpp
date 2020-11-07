@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/20.
 //
 
-#include "utils/PosixSerial.hpp"
+#include "utils/os_only/PosixSerial.hpp"
 #include "libfcn/TestUtils.hpp"
 #include <gtest/gtest.h>
 #include <iostream>

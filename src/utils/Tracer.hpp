@@ -8,13 +8,24 @@
 #include "LLComDevice.hpp"
 #include "vector_s.hpp"
 #include <string>
-#ifdef SYSTYPE_FULL_OS
-#include <mutex>
-#include "HostIODeviceWrapper.hpp"
-#include <iostream>
-#endif //SYSTYPE_FULL_OS
 
 namespace utils{
+
+    /* 上位机总是使能log输出功能，下位机发布模式不使能log */
+    #ifndef SYSTYPE_FULL_OS
+        #ifdef DEBUG
+            #define ENABLE_TRACE
+        #endif //DEBUG
+    #else//SYSTYPE_FULL_OS
+        #define ENABLE_TRACE
+    #endif //SYSTYPE_FULL_OS
+
+    #ifdef ENABLE_TRACE
+        #warning "----> trace is enable!"
+    #endif //ENABLE_TRACE
+
+
+#ifdef ENABLE_TRACE
     class Tracer{
     public:
         enum class Level : uint8_t{
@@ -49,12 +60,11 @@ namespace utils{
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex update_mutex;
-        StdoutIODviceWrapper stdio_wrapper;
 #endif //SYSTYPE_FULL_OS
 
         uint64_t timestamp_last{0};
     };
-
+#endif //ENABLE_TRACE
 }
 
 #endif //LIBFCN_TRACER_HPP

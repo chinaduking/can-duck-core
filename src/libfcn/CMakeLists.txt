@@ -14,4 +14,4 @@ add_library(fcn_v2
 
         ../utils/DataVerify.cpp
         ../utils/Tracer.cpp
-        ../utils/HostIODeviceWrapper.cpp)
+        ../utils/os_only/HostIODeviceWrapper.cpp)

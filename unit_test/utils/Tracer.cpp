@@ -4,7 +4,7 @@
 
 #include "libfcn/TestUtils.hpp"
 #include "utils/Tracer.hpp"
-#include "utils/HostIODeviceWrapper.hpp"
+#include "utils/os_only/HostIODeviceWrapper.hpp"
 
 using namespace utils;
 

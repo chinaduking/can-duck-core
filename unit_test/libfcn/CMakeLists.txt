@@ -31,5 +31,5 @@ target_link_libraries(testDataLinkLayer MyCppUtils GTest::GTest GTest::Main)
 
 
 add_executable(testNetworkLayer NetworkLayer.cpp
-        ../../src/utils/PosixSerial.cpp)
+        ../../src/utils/os_only/PosixSerial.cpp)
 target_link_libraries(testNetworkLayer fcn_v2 GTest::GTest GTest::Main)

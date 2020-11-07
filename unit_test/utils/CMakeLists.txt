@@ -2,7 +2,7 @@ include_directories(${PROJECT_SOURCE_DIR}/unit_test)
 
 add_executable(testTracer Tracer.cpp
         ${PROJECT_SOURCE_DIR}/src/utils/Tracer.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/HostIODeviceWrapper.cpp)
+        ../../src/utils/os_only/HostIODeviceWrapper.cpp)
 
 target_link_libraries(testTracer  GTest::GTest GTest::Main)
 
@@ -16,7 +16,7 @@ target_link_libraries(testStaticSet  GTest::GTest GTest::Main)
 
 
 add_executable(testPosixSerial PosixSerial.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/PosixSerial.cpp)
+        ../../src/utils/os_only/PosixSerial.cpp)
 
 target_link_libraries(testPosixSerial  GTest::GTest GTest::Main)
 

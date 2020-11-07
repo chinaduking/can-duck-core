@@ -7,17 +7,30 @@
 #include <cstdarg>
 #include <cstring>
 
-#ifdef SYSTYPE_FULL_OS
-#include <iostream>
-#endif
 
+#ifdef SYSTYPE_FULL_OS
+    /* 如果是OS，包含iostream，以便调用cout<<endl进行跨平台的强制终端输出。*/
+    #include <iostream>
+
+    /* 默认可通过stdout进行输出*/
+    #include "utils/os_only/HostIODeviceWrapper.hpp"
+    utils::StdoutIODviceWrapper stdio_wrapper;
+
+    /* 互斥锁 */
+    #include <mutex>
+    #define MUTEX_LOCKGUARD std::lock_guard<std::mutex> lk(update_mutex);
+#endif //SYSTYPE_FULL_OS
+
+/* 是否输出操作码的语义 */
 #define OP_CODE_DECODE
 
-using namespace utils;
 
+#ifdef ENABLE_TRACE
 
 #define TRACE_BUFFER_SIZE 1024
 #define MAX_BINDING_OUTPUT_DEVICE 3
+
+using namespace utils;
 
 
 static char* level_name[] = {
@@ -52,17 +65,14 @@ Tracer::Tracer(bool enable_color)
     : enable_color(enable_color),  device(MAX_BINDING_OUTPUT_DEVICE){
     tag[0] = 0;
 
-
+    /* 默认可通过stdout进行输出*/
 #ifdef SYSTYPE_FULL_OS
     addByteIODeviece(&stdio_wrapper);
 #endif //SYSTYPE_FULL_OS
 }
 
 void Tracer::setFilter(Level level){
-
-#ifdef SYSTYPE_FULL_OS
-    std::lock_guard<std::mutex> lk(update_mutex);
-#endif //SYSTYPE_FULL_OS
+    MUTEX_LOCKGUARD;
 
     if(level > Level::lFatal){
         return;
@@ -72,9 +82,8 @@ void Tracer::setFilter(Level level){
 }
 
 void Tracer::addByteIODeviece(LLByteDevice* device){
-#ifdef SYSTYPE_FULL_OS
-    std::lock_guard<std::mutex> lk(update_mutex);
-#endif //SYSTYPE_FULL_OS
+    MUTEX_LOCKGUARD;
+
 
     if(device == nullptr){
         return;
@@ -86,9 +95,7 @@ void Tracer::addByteIODeviece(LLByteDevice* device){
 
 void Tracer::setTag(char* tag){
 
-#ifdef SYSTYPE_FULL_OS
-    std::lock_guard<std::mutex> lk(update_mutex);
-#endif //SYSTYPE_FULL_OS
+    MUTEX_LOCKGUARD;
 
     //TODO: str handle!
     strncpy(this->tag, tag, 64);
@@ -106,13 +113,11 @@ char trace_buffer[TRACE_BUFFER_SIZE];
 
 int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
-#ifdef SYSTYPE_FULL_OS
-    std::lock_guard<std::mutex> lk(update_mutex);
-#endif //SYSTYPE_FULL_OS
+    MUTEX_LOCKGUARD;
 
-    int ret;
+    int ret = 0;
 
-#ifdef SYSTYPE_FULL_OS
+
 
 
     if(filter_level == Level::lNone || device.size() == 0){
@@ -170,8 +175,11 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
         batchWrite((uint8_t*)str_tmp, strlen(str_tmp) + 1);
     }
 
+    /* 进行跨平台的强制终端输出。*/
+#ifdef SYSTYPE_FULL_OS
     std::cout << std::endl;
 #endif
+
     return ret;
 }
 
@@ -184,3 +192,4 @@ int Tracer::print(Level level, char *format, ...) {
     return ret;
 }
 
+#endif //ENABLE_TRACE
