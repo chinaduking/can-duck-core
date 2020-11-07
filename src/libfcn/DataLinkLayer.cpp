@@ -294,7 +294,7 @@ bool ByteFrameIODevice::writePoll() {
 
         /* 发送包头 + 长度*/
         case SendState::Header:
-            /* 这里的数据长度是串口作为物理层的"模拟数据包"（的长度即包头-包尾CRC直接所有数据
+            /* 这里的数据长度是串口作为物理层的"模拟数据包"的长度（即包头-包尾CRC直接所有数据
              * 的字节数）。等于payload_len+src_id+dest_id+msg_id+opcode*/
             header_buf[header.size()] = sending_frame->payload_len + 4;
 
