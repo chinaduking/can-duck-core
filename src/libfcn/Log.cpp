@@ -3,9 +3,12 @@
 //
 
 #include "Log.hpp"
+#include <cstring>
+#include <cstdio>
+#include <cstdarg>
 
 using namespace libfcn_v2;
-
+#ifdef SYSTYPE_FULL_OS
 
 utils::Tracer* Log::tracer = nullptr;
 
@@ -148,3 +151,4 @@ std::string libfcn_v2::Frame2LogCompact(DataLinkFrame& frame){
 
     return std::string(buffer);
 }
+#endif //SYSTYPE_FULL_OS

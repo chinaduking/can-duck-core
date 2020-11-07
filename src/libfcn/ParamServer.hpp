@@ -6,6 +6,7 @@
 #define LIBFCN_V2_PARAMSERVER_HPP
 
 #include <cstdint>
+#include <memory>
 #include "vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
@@ -18,6 +19,8 @@
 #ifdef USE_REQUEST_EVLOOP
 #include "ParamServerRequestEv.hpp"
 #endif
+
+uint64_t globalTimeSourceMS();
 
 namespace libfcn_v2 {
 
@@ -49,8 +52,14 @@ namespace libfcn_v2 {
 
 
 #ifdef USE_REQUEST_EVLOOP
+
+#ifdef SYSTYPE_FULL_OS
                     ,ev_loop(utils::evloopTimeSrouceMS, 0)
-#endif
+#else //SYSTYPE_FULL_OS
+    				,ev_loop(globalTimeSourceMS, CLIENT_MAX_REQ_NUM)
+#endif //SYSTYPE_FULL_OS
+
+#endif //USE_REQUEST_EVLOOP
                   {}
 
         ~ParamServerClient() = default;

@@ -118,15 +118,16 @@ namespace utils{
                 return;
             }
 
-            //TODO!!: call destructor???
             /* 最后一个，直接-1 */
             if(index == member_cnt - 1){
                 member_cnt --;
+                ~array[index]();
                 return;
             }
 
             /* 中间的，后面递推 */
             for(uint32_t i = index; i < member_cnt; i++){
+            	~array[index]();
                 array[i] = array[i+1];
             }
             member_cnt --;

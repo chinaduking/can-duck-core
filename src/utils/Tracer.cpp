@@ -5,7 +5,11 @@
 #include "Tracer.hpp"
 #include <cstdio>
 #include <cstdarg>
+#include <cstring>
+
+#ifdef SYSTYPE_FULL_OS
 #include <iostream>
+#endif
 
 #define OP_CODE_DECODE
 
@@ -108,6 +112,8 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
     int ret;
 
+#ifdef SYSTYPE_FULL_OS
+
 
     if(filter_level == Level::lNone || device.size() == 0){
         return 0;
@@ -118,8 +124,11 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     }
 
     char* str_tmp;
+#ifdef SYSTYPE_FULL_OS
     uint64_t timestamp = getCurrentTimeUs();
-
+#else
+    uint64_t timestamp = 0;
+#endif
     /* Color */
     if(enable_color){
         str_tmp = level_color[(uint8_t)level];
@@ -162,7 +171,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     }
 
     std::cout << std::endl;
-
+#endif
     return ret;
 }
 

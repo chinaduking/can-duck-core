@@ -124,9 +124,8 @@ namespace utils {
             stop();
             /* wait until worker thread stop. force delete
              * worker_thread will cause core dump*/
-            spin();
-
 #ifdef EVENTLOOP_THREADING
+            spin();
             delete worker_thread;
 #endif
 
@@ -146,10 +145,11 @@ namespace utils {
         /* 阻塞地等待事件循环线程退出，用于在上层析构事件循环
          * 实例之前，等待线程退出。直接删除未退出的线程会引起
          * crash*/
+#ifdef EVENTLOOP_THREADING
         void spin(){
             worker_thread->join();
         }
-
+#endif //EVENTLOOP_THREADING
 
 
         /* 添加任务 */
@@ -163,8 +163,9 @@ namespace utils {
                 task->context_evloop = this;
                 int res = task_list.push(task);
                 /* 如果当前调度器正处于休眠模式，添加任务可唤醒一次循环 */
+#ifdef EVENTLOOP_THREADING
                 sched_ctrl_cv.notify_all();
-
+#endif //EVENTLOOP_THREADING
                 if(res == -1){
                     return -1;
                 }
@@ -274,6 +275,8 @@ namespace utils {
         Msg_T pending_notify;
         bool is_notify_pending{false};
 
+
+#ifdef EVENTLOOP_THREADING
         int  getMinSleepTime(){
 
             /* 最大等待时间。当没有任何唤醒/超时事件时，事件循环每1s
@@ -331,6 +334,8 @@ namespace utils {
 
             return min_time_out;
         }
+#endif //EVENTLOOP_THREADING
+
 
         void checkNotify(){
             if(is_notify_pending){
@@ -350,7 +355,9 @@ namespace utils {
                 }
 
                 is_notify_pending = false;
+#ifdef EVENTLOOP_THREADING
                 notify_ctrl_cv.notify_all();
+#endif //EVENTLOOP_THREADING
             }
         }
 

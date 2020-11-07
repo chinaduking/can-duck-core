@@ -186,7 +186,7 @@ namespace network_test {
 
 
     TEST(RTO, RtoHostNode) {
-        Node fcn_node(1);
+        Node fcn_node(0);
         Tracer tracer(true);
         tracer.setFilter(Tracer::Level::lInfo);
 

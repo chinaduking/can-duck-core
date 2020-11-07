@@ -229,7 +229,7 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
 bool ByteFrameIODevice::write(DataLinkFrame* frame){
     uint8_t* p_buf = ll_byte_dev->write_buf;
 
-    assert(ll_byte_dev->write_buf_size >= header.size() + DATALINK_MTU + 2);
+    USER_ASSERT(ll_byte_dev->write_buf_size >= header.size() + DATALINK_MTU + 2);
 
     *p_buf = header[0];  p_buf ++;
     *p_buf = header[1];  p_buf ++;

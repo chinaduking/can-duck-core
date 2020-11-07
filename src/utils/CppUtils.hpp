@@ -101,7 +101,7 @@ namespace utils{
 
 #else //SYSTYPE_FULL_OS
 //TODO: assert
-    #define USER_ASSERT(t) while(t);
+    #define USER_ASSERT(t) while(!(t));
 #endif //SYSTYPE_FULL_OS
 
 }

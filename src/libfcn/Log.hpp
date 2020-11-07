@@ -5,10 +5,12 @@
 #ifndef LIBFCN_V2_LOG_HPP
 #define LIBFCN_V2_LOG_HPP
 
+
+
 #include "Tracer.hpp"
 #include "DataLinkLayer.hpp"
 #include "DefaultAllocate.h"
-
+#ifdef SYSTYPE_FULL_OS
 namespace libfcn_v2{
     using LogLevel = utils::Tracer::Level;
 
@@ -49,6 +51,15 @@ namespace libfcn_v2{
     #define LOGF(...) do{}while(0)
 #endif
 }
+
+#else //SYSTYPE_FULL_OS
+#define LOGI(...) do{}while(0)
+#define LOGV(...) do{}while(0)
+#define LOGD(...) do{}while(0)
+#define LOGW(...) do{}while(0)
+#define LOGE(...) do{}while(0)
+#define LOGF(...) do{}while(0)
+#endif //SYSTYPE_FULL_OS
 
 
 

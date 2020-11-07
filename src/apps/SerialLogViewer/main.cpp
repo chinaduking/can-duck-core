@@ -10,7 +10,7 @@ int main(){
     uint8_t data;
     /* 0. ascii code
      * 1. hex  */
-    uint8_t mode = 0;
+    uint8_t mode = 1;
 
 
     uint8_t line_wrap = 20;

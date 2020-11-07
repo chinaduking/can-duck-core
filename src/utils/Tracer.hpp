@@ -7,11 +7,11 @@
 
 #include "LLComDevice.hpp"
 #include "vector_s.hpp"
-
+#include <string>
 #ifdef SYSTYPE_FULL_OS
 #include <mutex>
 #include "HostIODeviceWrapper.hpp"
-
+#include <iostream>
 #endif //SYSTYPE_FULL_OS
 
 namespace utils{
