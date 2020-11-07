@@ -52,23 +52,29 @@ namespace utils{
                 return;
             }
 
+            auto max_index = capicity - 1;
+
+            if(newest_idx == max_index && oldest_idx == 0){
+                oldest_idx ++;
+            }
+            if(newest_idx == oldest_idx - 1){
+                oldest_idx ++;
+            }
+
+            if(oldest_idx > max_index){
+                oldest_idx = 0;
+            }
+
             buffer[newest_idx_next] = std::move(val);
+
             newest_idx = newest_idx_next; // hold current new index
-
-
 
             newest_idx_next ++;
 
-            if (newest_idx_next >= capicity) {
+            if (newest_idx_next > max_index) {
                 newest_idx_next = 0;
             }
 
-            if (newest_idx_next == oldest_idx){
-                oldest_idx ++;
-                if(oldest_idx >= capicity){
-                    oldest_idx = 0;
-                }
-            }
 
             for(int i = 0; i < capicity; i ++){
                 LOGD("buffer[%d]=%d", i , buffer[i]);
@@ -109,7 +115,7 @@ namespace utils{
 
     private:
         T_Val* buffer {nullptr};
-        uint32_t capicity{0};
+        const uint32_t capicity{0};
 
         uint32_t oldest_idx{0};
         uint32_t newest_idx_next{0};
