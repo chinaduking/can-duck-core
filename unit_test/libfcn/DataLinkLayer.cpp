@@ -98,7 +98,8 @@ namespace frame_device_test{
 
         thread sendpoll([&](){
             for(int i = 0; i < 1;){
-                frame_dev.writePoll();
+
+                while(frame_dev.writePoll());
                 perciseSleep(0.1);
             }
         });

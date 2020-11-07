@@ -232,7 +232,6 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
 #else
 #define MUTEX_LOCKGUARD
 #endif
-
 bool ByteFrameIODevice::write(DataLinkFrame* frame){
     WR_MUTEX_LOCKGUARD;
 
@@ -245,6 +244,7 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
     frame_buffer.push(*frame);
 
     LOGD("push to frame buffer, b_cnt = %d", frame_buffer.size());
+    //TODO: con_var to trigger send!!
 
     return true;
 
@@ -267,12 +267,12 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
 //    return ll_byte_dev->write(ll_byte_dev->write_buf, len + 4);
 }
 
-void ByteFrameIODevice::writePoll() {
+bool ByteFrameIODevice::writePoll() {
     WR_MUTEX_LOCKGUARD;
 
     if(frame_buffer.empty()){
         LOGD("frame_buffer is empty!!");
-        return;
+        return false;
     }
 
     switch (send_state) {
@@ -293,7 +293,8 @@ void ByteFrameIODevice::writePoll() {
                 ll_byte_dev->write(header_buf, header.size()+1);
                 send_state = SendState::Frame;
             }
-            break;
+            return false;
+//            break;
 
         /* 发送数据帧.这里的包头指串口作为物理层的"模拟数据包" */
         case SendState::Frame:
@@ -303,23 +304,26 @@ void ByteFrameIODevice::writePoll() {
                  * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
                 ll_byte_dev->write(&sending_frame->src_id,
                                    sending_frame->payload_len + 4);
-                send_state = SendState::Crc;
-            }
-            break;
 
-        case SendState::Crc:
-            /* 这里的包头指串口作为物理层的"模拟数据包"*/
-            if(!ll_byte_dev->isWriteBusy()){
                 /* 因Frame成员在内存里地址连续，故可以这样操作。
                  * 注意不要改变DataLinkFrame的内存布局
-                 * 跳过第一个长度信息不计算。*/
+                 * 跳过第一个长度信息不计算。
+                 *
+                 * 注意：在Frame状态里计算CRC可以只计算一次*/
                 uint16_t crc_result = Crc16(&sending_frame->src_id,
                                             sending_frame->payload_len + 4);
 
                 crc_buf[0] = crc_result >> 8;
                 crc_buf[1] = crc_result;
 
+                send_state = SendState::Crc;
+            }
+            return false;
+//            break;
 
+        case SendState::Crc:
+            /* 这里的包头指串口作为物理层的"模拟数据包"*/
+            if(!ll_byte_dev->isWriteBusy()){
                 /* 物理层空闲时发送，如果忙则等待下次发送
                  * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
                 ll_byte_dev->write(crc_buf,
@@ -331,9 +335,12 @@ void ByteFrameIODevice::writePoll() {
                 LOGD("sent frame!!");
 
                 send_state = SendState::Idle;
+                return true;
             }
-            break;
+            return false;
+//            break;
     }
+
 }
 
 /*

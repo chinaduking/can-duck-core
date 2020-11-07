@@ -53,12 +53,14 @@ namespace utils{
                 return;
             }
 
-            size_cnt ++;
 
             auto max_index = capicity - 1;
 
-            if((newest_idx == max_index && oldest_idx == 0)
-                || (newest_idx == oldest_idx - 1)){
+            if(size_cnt > 0 && (
+                      (newest_idx == max_index && oldest_idx == 0)
+                   || (newest_idx == oldest_idx - 1)
+                )
+            ){
 
                 /*release old!!*/
                 buffer[oldest_idx].~T_Val();
@@ -66,6 +68,8 @@ namespace utils{
                 oldest_idx ++;
                 size_cnt --;
             }
+
+            size_cnt ++;
 
 
             if(oldest_idx > max_index){
@@ -86,7 +90,7 @@ namespace utils{
 //            for(int i = 0; i < capicity; i ++){
 //                LOGD("buffer[%d]=%d", i , buffer[i]);
 //            }
-//            LOGD("---> old:%d, new %d", oldest_idx, newest_idx_next);
+//            LOGD("---> oldest_idx:%d, newest_idx %d", oldest_idx, newest_idx);
         }
 
 

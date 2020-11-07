@@ -235,7 +235,7 @@ namespace libfcn_v2{
         /* 功能定义见FrameIODevice::write */
         bool write(DataLinkFrame* frame) override;
 
-        void writePoll();
+        bool writePoll();
 
     private:
         LLByteDevice* const ll_byte_dev;
