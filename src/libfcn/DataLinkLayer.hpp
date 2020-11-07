@@ -258,6 +258,7 @@ namespace libfcn_v2{
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex wr_mutex;
+        std::condition_variable write_ctrl_cv;
 #endif //SYSTYPE_FULL_OS
     };
 

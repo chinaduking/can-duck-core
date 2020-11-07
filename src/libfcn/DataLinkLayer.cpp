@@ -228,23 +228,23 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
 #ifdef SYSTYPE_FULL_OS
 /* 互斥锁 */
 #include <mutex>
-#define WR_MUTEX_LOCKGUARD std::lock_guard<std::mutex> lk(wr_mutex)
-#else
-#define MUTEX_LOCKGUARD
 #endif
+
 bool ByteFrameIODevice::write(DataLinkFrame* frame){
-    WR_MUTEX_LOCKGUARD;
+#ifdef SYSTYPE_FULL_OS
+    std::lock_guard<std::mutex> updating_lk(wr_mutex);
+#endif //SYSTYPE_FULL_OS
 
     if(frame_buffer.full()){
         LOGE("frame buffer is full!!");
-
         return false;
     }
 
     frame_buffer.push(*frame);
 
-    LOGD("push to frame buffer, b_cnt = %d", frame_buffer.size());
+    LOGV("push to frame buffer, b_cnt = %d", frame_buffer.size());
     //TODO: con_var to trigger send!!
+    write_ctrl_cv.notify_all();
 
     return true;
 
@@ -268,16 +268,27 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
 }
 
 bool ByteFrameIODevice::writePoll() {
-    WR_MUTEX_LOCKGUARD;
+#ifdef SYSTYPE_FULL_OS
+    std::unique_lock<std::mutex> updating_lk(wr_mutex);
+    if(frame_buffer.empty()){
+        LOGV("frame_buffer waiting to push..");
+
+        write_ctrl_cv.wait(updating_lk);
+    }
+
+#endif //SYSTYPE_FULL_OS
+
 
     if(frame_buffer.empty()){
-        LOGD("frame_buffer is empty!!");
+        LOGV("frame_buffer is empty!!");
+
+        write_ctrl_cv.wait(updating_lk);
         return false;
     }
 
     switch (send_state) {
         case SendState::Idle:
-            LOGD("get a new frame!!");
+            LOGV("get a new frame!!");
             sending_frame = &frame_buffer.front();
             send_state = SendState::Header;
 
@@ -322,17 +333,16 @@ bool ByteFrameIODevice::writePoll() {
 //            break;
 
         case SendState::Crc:
-            /* 这里的包头指串口作为物理层的"模拟数据包"*/
+            /* 这里的包尾指串口作为物理层的"模拟数据包"*/
             if(!ll_byte_dev->isWriteBusy()){
-                /* 物理层空闲时发送，如果忙则等待下次发送
-                 * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
+                /* 物理层空闲时发送，如果忙则等待下次发送*/
                 ll_byte_dev->write(crc_buf,
                                    2);
 
                 /* 发送成功后，弹出正在发送的数据帧 */
                 frame_buffer.pop();
 
-                LOGD("sent frame!!");
+                LOGV("sent frame!!");
 
                 send_state = SendState::Idle;
                 return true;

@@ -66,7 +66,7 @@ namespace frame_device_test{
 
     TEST(ByteStreamParserTest, io) {
 
-        PosixSerial serial(1);
+        PosixSerial serial(0);
         ByteFrameIODevice frame_dev(&serial);
 
         char* src_test_buffer = (char*)"12345";
@@ -100,7 +100,7 @@ namespace frame_device_test{
             for(int i = 0; i < 1;){
 
                 while(frame_dev.writePoll());
-                perciseSleep(0.1);
+//                perciseSleep(0.1);
             }
         });
 
