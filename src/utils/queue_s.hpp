@@ -24,22 +24,24 @@ namespace utils{
         }
 
         bool empty(){
-            return (oldest_idx == newest_idx_next);
+            return size_cnt == 0;
+//            return (oldest_idx == newest_idx_next);
         }
 
         uint32_t size(){
-            return calc_size();//  valid_cnt;
+            return size_cnt;
         }
 
         /* oldest value ref */
         T_Val& front(){
+//            USER_ASSERT(!empty());
             return buffer[oldest_idx];
         }
 
         /* newest value ref*/
         T_Val& back(){
             USER_ASSERT(!empty());
-            return buffer[newest_idx_next];
+            return buffer[newest_idx];
         }
 
         void push(T_Val& val){
@@ -48,17 +50,21 @@ namespace utils{
 
         //TODO: release old!!
         void push(T_Val&& val) {
-            if (!overwrite_old && is_full()) {
+            if (!overwrite_old && size_cnt == capicity) {
                 return;
             }
+
+            size_cnt ++;
 
             auto max_index = capicity - 1;
 
             if(newest_idx == max_index && oldest_idx == 0){
                 oldest_idx ++;
+                size_cnt --;
             }
             if(newest_idx == oldest_idx - 1){
                 oldest_idx ++;
+                size_cnt --;
             }
 
             if(oldest_idx > max_index){
@@ -76,31 +82,35 @@ namespace utils{
             }
 
 
-            for(int i = 0; i < capicity; i ++){
-                LOGD("buffer[%d]=%d", i , buffer[i]);
-            }
-            LOGD("---> old:%d, new %d", oldest_idx, newest_idx_next);
+//            for(int i = 0; i < capicity; i ++){
+//                LOGD("buffer[%d]=%d", i , buffer[i]);
+//            }
+//            LOGD("---> old:%d, new %d", oldest_idx, newest_idx_next);
         }
 
 
         //TODO: release old!!
         void pop(){
-            if(oldest_idx != newest_idx_next){
-                oldest_idx ++;
-
-                if(oldest_idx >= capicity){
-                    oldest_idx = 0;
-                }
+            if(empty()){
+                return;
             }
 
-            for(int i = 0; i < capicity; i ++){
-                LOGD("buffer[%d]=%d", i , buffer[i]);
+            size_cnt --;
+
+            oldest_idx ++;
+
+            if(oldest_idx >= capicity){
+                oldest_idx = 0;
             }
-            LOGD("---> old:%d, new %d", oldest_idx, newest_idx_next);
+
+//            for(int i = 0; i < capicity; i ++){
+//                LOGD("buffer[%d]=%d", i , buffer[i]);
+//            }
+//            LOGD("---> old:%d, new %d", oldest_idx, newest_idx_next);
         }
 
         T_Val& operator[](uint32_t index){
-            USER_ASSERT(oldest_idx != newest_idx_next);
+            USER_ASSERT(index < size_cnt);
 
             uint32_t index_start = oldest_idx;
 
@@ -124,26 +134,6 @@ namespace utils{
         uint32_t size_cnt{0};
 
         const bool overwrite_old{false};
-
-        bool is_full(){
-            /* old = 0, new = capicity */
-            if(newest_idx_next > oldest_idx){
-                return (oldest_idx == 0 && newest_idx_next == capicity - 1);
-            }
-            else{
-                return (newest_idx_next == oldest_idx - 1);
-            }
-        }
-
-        uint32_t calc_size(){
-            /* 新的在前面 */
-            if(newest_idx_next >= oldest_idx){
-                return (newest_idx_next - oldest_idx);
-            } else{
-                /* 老的在前面 */
-                return (capicity - oldest_idx + newest_idx_next);;
-            }
-        }
     };
 }
 
