@@ -4,7 +4,7 @@
 
 #include "NetworkLayer.hpp"
 #include "OpCode.hpp"
-#include "Log.hpp"
+#include "utils/Tracer.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;

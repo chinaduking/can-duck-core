@@ -29,20 +29,22 @@ PosixSerial::PosixSerial(int id, uint32_t baud,
     auto serial_devices = listUSBDevice();
 
     if(serial_devices.size() == 0){
-        cout << "no usb serial found!!";
+        LOGE("no usb serial found!!");
         return ;
     }
 
     if(id >= serial_devices.size()){
-        cout << "too large serial num. only " << serial_devices.size() <<
-        " devices are found!";
+        LOGE("too large serial num. only %d devices are found!",
+             serial_devices.size());
+
         return ;
     }
 
-    cout << "opening " << serial_devices[id] << endl;
+    LOGD("opening %s", serial_devices[id].c_str());
 
     serial_fd = open(serial_devices[id].c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if(serial_fd < 0) {
+        LOGE("open file failed");
         return;
     }
 
@@ -98,7 +100,7 @@ PosixSerial::PosixSerial(int id, uint32_t baud,
 
     is_open = true;
 
-    cout << "opened " << serial_devices[id] << endl;
+    LOGD("opened %s", serial_devices[id].c_str());
 }
 
 bool PosixSerial::isOpen() {
@@ -107,7 +109,8 @@ bool PosixSerial::isOpen() {
 
 PosixSerial::~PosixSerial()
 {
-    cout << "close serial.." << endl;
+    LOGD("close serial..");
+
     if(!is_open){ return; }
     close(serial_fd);
 }
@@ -151,7 +154,7 @@ std::vector<std::string> PosixSerial::listUSBDevice(){
 //            printf ("%s\n", ent->d_name);
             for(auto pattern : pattern_unix){
                 if(strncmp(pattern, ent->d_name, strlen(pattern)) == 0){
-                    printf ("\nFound USB Serial Device: %s\n", ent->d_name);
+                    LOGD("\nFound USB Serial Device: %s\n", ent->d_name);
                     usb_serial.push_back(dev_dir + "/" + string(ent->d_name));
                 }
             }
@@ -160,6 +163,7 @@ std::vector<std::string> PosixSerial::listUSBDevice(){
         closedir (dir);
     } else {
         /* could not open directory */
+        LOGF("could not open directory /dev");
         throw runtime_error("could not open directory /dev");
     }
 

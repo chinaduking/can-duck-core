@@ -1,9 +1,8 @@
 //
 // Created by hlyl on 18-7-10.
 //
+#include "utils/Tracer.hpp"
 #include "libfcn/DataLinkLayer.hpp"
-#include "libfcn/Log.hpp"
-
 #include "TestUtils.hpp"
 #include "utils/os_only/PosixSerial.hpp"
 

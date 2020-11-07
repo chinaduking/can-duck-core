@@ -10,7 +10,7 @@
 #include "PubSub.hpp"
 #include "ParamServer.hpp"
 #include "DefaultAllocate.h"
-#include "Log.hpp"
+#include "utils/Tracer.hpp"
 
 namespace libfcn_v2{
     class NetworkLayer {

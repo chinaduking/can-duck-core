@@ -25,7 +25,7 @@ target_link_libraries(testServiceObject  fcn_v2 MyCppUtils  GTest::GTest
 
 add_executable(testDataLinkLayer DataLinkLayer.cpp
         ../../src/libfcn/DataLinkLayer.cpp
-        ../../src/libfcn/Log.cpp)
+        )
 target_link_libraries(testDataLinkLayer MyCppUtils GTest::GTest GTest::Main)
 
 

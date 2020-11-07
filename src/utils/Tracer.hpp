@@ -76,7 +76,7 @@ utils::Tracer* getDefaultTracer();
     #define LOGE(...) getDefaultTracer()->printf(utils::Tracer::Level::lError,   __VA_ARGS__)
     #define LOGF(...) getDefaultTracer()->printf(utils::Tracer::Level::lFatal,   __VA_ARGS__)
 #else
-#define LOGI(...) do{}while(0)
+    #define LOGI(...) do{}while(0)
     #define LOGV(...) do{}while(0)
     #define LOGD(...) do{}while(0)
     #define LOGW(...) do{}while(0)

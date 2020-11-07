@@ -9,7 +9,6 @@ add_library(fcn_v2
         ParamServerRequestEv.cpp
         MultiFrame.cpp
 
-        Log.cpp
         Node.cpp
 
         ../utils/DataVerify.cpp
