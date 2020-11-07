@@ -48,5 +48,36 @@ TEST(queue, io){
     }
 }
 
+struct C{
+    int a = 0;
+    ~C(){
+        cout << "C: dtor, a = " << a << endl;
+    }
+};
+
+TEST(queue, des){
+
+    queue_s<C> q(5);
+
+    for(int i = 0; i < 13; i ++){
+        C c;
+        c.a = i;
+        cout << "pushing" << endl;
+        q.push(std::move(c));
+    }
+
+    cout << "\n\n" << endl;
+
+
+    for(int i = 0; i < 7; i ++){
+        cout << "pop" << endl;
+
+        if(!q.empty()){
+            q.pop();
+        }
+    }
+}
+
+
 
 

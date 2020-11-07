@@ -25,7 +25,6 @@ namespace utils{
 
         bool empty(){
             return size_cnt == 0;
-//            return (oldest_idx == newest_idx_next);
         }
 
         uint32_t size(){
@@ -34,7 +33,7 @@ namespace utils{
 
         /* oldest value ref */
         T_Val& front(){
-//            USER_ASSERT(!empty());
+            USER_ASSERT(!empty());
             return buffer[oldest_idx];
         }
 
@@ -48,7 +47,7 @@ namespace utils{
             push(std::move(val));
         }
 
-        //TODO: release old!!
+        //TODO: TEST release old!!
         void push(T_Val&& val) {
             if (!overwrite_old && size_cnt == capicity) {
                 return;
@@ -58,14 +57,16 @@ namespace utils{
 
             auto max_index = capicity - 1;
 
-            if(newest_idx == max_index && oldest_idx == 0){
+            if((newest_idx == max_index && oldest_idx == 0)
+                || (newest_idx == oldest_idx - 1)){
+
+                /*release old!!*/
+                buffer[oldest_idx].~T_Val();
+
                 oldest_idx ++;
                 size_cnt --;
             }
-            if(newest_idx == oldest_idx - 1){
-                oldest_idx ++;
-                size_cnt --;
-            }
+
 
             if(oldest_idx > max_index){
                 oldest_idx = 0;
@@ -89,13 +90,15 @@ namespace utils{
         }
 
 
-        //TODO: release old!!
         void pop(){
             if(empty()){
                 return;
             }
 
             size_cnt --;
+
+            /*release old!!*/
+            buffer[oldest_idx].~T_Val();
 
             oldest_idx ++;
 

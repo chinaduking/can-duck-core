@@ -127,7 +127,7 @@ namespace utils{
 
             /* 中间的，后面递推 */
             for(uint32_t i = index; i < member_cnt; i++){
-            	~array[index]();
+            	array[index].~T();
                 array[i] = array[i+1];
             }
             member_cnt --;
