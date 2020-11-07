@@ -25,7 +25,6 @@ namespace utils{
     #endif //ENABLE_TRACE
 
 
-#ifdef ENABLE_TRACE
     class Tracer{
     public:
         enum class Level : uint8_t{
@@ -47,7 +46,7 @@ namespace utils{
 
         /**/
         int vprintf(Level level, char *format, va_list arg_ptr);
-        int print(Level level, char* fmt, ...);
+        int printf(Level level, char* fmt, ...);
 
     private:
         void batchWrite(const uint8_t *data, uint32_t len);
@@ -64,7 +63,25 @@ namespace utils{
 
         uint64_t timestamp_last{0};
     };
-#endif //ENABLE_TRACE
+
 }
+
+utils::Tracer* getDefaultTracer();
+
+#ifdef ENABLE_TRACE
+    #define LOGV(...) getDefaultTracer()->printf(utils::Tracer::Level::lVerbose, __VA_ARGS__)
+    #define LOGI(...) getDefaultTracer()->printf(utils::Tracer::Level::lInfo,    __VA_ARGS__)
+    #define LOGD(...) getDefaultTracer()->printf(utils::Tracer::Level::lDebug,   __VA_ARGS__)
+    #define LOGW(...) getDefaultTracer()->printf(utils::Tracer::Level::lWarning, __VA_ARGS__)
+    #define LOGE(...) getDefaultTracer()->printf(utils::Tracer::Level::lError,   __VA_ARGS__)
+    #define LOGF(...) getDefaultTracer()->printf(utils::Tracer::Level::lFatal,   __VA_ARGS__)
+#else
+#define LOGI(...) do{}while(0)
+    #define LOGV(...) do{}while(0)
+    #define LOGD(...) do{}while(0)
+    #define LOGW(...) do{}while(0)
+    #define LOGE(...) do{}while(0)
+    #define LOGF(...) do{}while(0)
+#endif
 
 #endif //LIBFCN_TRACER_HPP

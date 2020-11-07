@@ -72,6 +72,7 @@ namespace libfcn_v2{
     };
 #pragma pack(0)
 
+    std::string Frame2Log(DataLinkFrame& frame);
 }
 
 namespace libfcn_v2{

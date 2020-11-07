@@ -292,4 +292,68 @@ bool ByteFrameIODevice::read(DataLinkFrame* frame)
     }
 }
 
+static char* mOpCodeStr[]={
+        (char*)"ForceStop",
+        (char*)"Publish",
+        (char*)"PublishReq ",
+        (char*)"Emergency ",
+        (char*)"ParamServer_ReadReq",
+        (char*)"ParamServer_ReadAck",
+        (char*)"ParamServer_WriteReq",
+        (char*)"ParamServer_WriteAck",
+        (char*)"SVO_MULTI_WRITE_START_REQ",
+        (char*)"SVO_MULTI_WRITE_START_ACK",
+        (char*)"SVO_MULTI_WRITE_TRANS_REQ",
+        (char*)"SVO_MULTI_WRITE_TRANS_ACK",
+        (char*)"SVO_MULTI_WRITE_VERIFY_REQ",
+        (char*)"SVO_MULTI_WRITE_VERIFY_ACK",
+        (char*)"",
+};
 
+std::string libfcn_v2::Frame2Log(DataLinkFrame& frame){
+    static const int BUFFER_RESERVE = 120;
+
+    char buffer[DATALINK_MTU * 4 + BUFFER_RESERVE];
+
+    if(frame.payload_len > DATALINK_MTU){
+        return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
+    }
+    char * opcode_str = "unknown";
+    if(frame.op_code < sizeof(opcode_str) / sizeof(opcode_str[0])) {
+        opcode_str = mOpCodeStr[frame.op_code];
+    }
+
+    sprintf(buffer, "-----FRAME----\n"
+                    " %s (0x%.2X) :  [0x%.2X]->[0x%.2X] \n"
+                    " Message ID = 0x%.2X\n"
+                    " Payload [%.2d] = ",
+
+            opcode_str, frame.op_code  & 0xff,
+            frame.src_id   & 0xff,
+            frame.dest_id  & 0xff,
+
+            frame.msg_id   & 0xff,
+            frame.payload_len);
+
+    static int info_offset = 0;
+
+    if(info_offset == 0){
+        info_offset = strlen(buffer);
+    }
+
+    if(info_offset > BUFFER_RESERVE){
+        return std::string("::: info_offset > BUFFER_RESERVE\n");
+    }
+
+    for(int i = 0; i < frame.payload_len; i ++){
+        sprintf(&buffer[info_offset + i * 3], "%.2X ", frame.payload[i] & 0xff);
+    }
+
+    sprintf(&buffer[info_offset + frame.payload_len * 3], "\n\"%s\"\n", frame
+            .payload);
+
+    //TODO: cutoff
+//    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
+
+    return std::string(buffer);
+}

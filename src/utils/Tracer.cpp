@@ -18,14 +18,14 @@
 
     /* 互斥锁 */
     #include <mutex>
-    #define MUTEX_LOCKGUARD std::lock_guard<std::mutex> lk(update_mutex);
+    #define MUTEX_LOCKGUARD std::lock_guard<std::mutex> lk(update_mutex)
+#else
+	#define MUTEX_LOCKGUARD
 #endif //SYSTYPE_FULL_OS
 
 /* 是否输出操作码的语义 */
 #define OP_CODE_DECODE
 
-
-#ifdef ENABLE_TRACE
 
 #define TRACE_BUFFER_SIZE 1024
 #define MAX_BINDING_OUTPUT_DEVICE 3
@@ -61,13 +61,27 @@ static char* level_color[] = {
         ANSI_COLOR_MAGENTA      //FATAL
 };
 
+Tracer* defaultTracer = nullptr;
+
+Tracer* getDefaultTracer(){
+    if(defaultTracer == nullptr){
+        defaultTracer = new Tracer();
+    }
+
+    return defaultTracer;
+}
+
 Tracer::Tracer(bool enable_color)
-    : enable_color(enable_color),  device(MAX_BINDING_OUTPUT_DEVICE){
+    : enable_color(enable_color),
+      device(MAX_BINDING_OUTPUT_DEVICE)
+{
     tag[0] = 0;
 
-    /* 默认可通过stdout进行输出*/
 #ifdef SYSTYPE_FULL_OS
+    /* 默认可通过stdout进行输出*/
     addByteIODeviece(&stdio_wrapper);
+
+    timestamp_last = getCurrentTimeUs();
 #endif //SYSTYPE_FULL_OS
 }
 
@@ -117,7 +131,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
     int ret = 0;
 
-
+#ifdef ENABLE_TRACE
 
 
     if(filter_level == Level::lNone || device.size() == 0){
@@ -180,10 +194,12 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     std::cout << std::endl;
 #endif
 
+#endif //ENABLE_TRACE
     return ret;
 }
 
-int Tracer::print(Level level, char *format, ...) {
+int Tracer::printf(Level level, char *format, ...) {
+
     va_list arg_ptr;
     va_start(arg_ptr, format);
     int ret = this->vprintf(level, format, arg_ptr);
@@ -192,4 +208,3 @@ int Tracer::print(Level level, char *format, ...) {
     return ret;
 }
 
-#endif //ENABLE_TRACE
