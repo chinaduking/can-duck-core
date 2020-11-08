@@ -22,7 +22,10 @@ namespace libfcn_v2{
     class Node {
     public:
         Node();
-        virtual ~Node() = default;
+        ~Node(){
+            stop();
+            spin();
+        }
 
         int addPort(FrameIODevice* device);
 
@@ -40,13 +43,16 @@ namespace libfcn_v2{
         static NetworkLayer* network_layer;
 
 #ifdef SYSTYPE_FULL_OS
-        std::vector<std::thread> send_threads;
-        std::vector<std::thread> recv_threads;
-        std::mutex io_mutex;
+        std::thread* send_threads{nullptr};
+        std::thread* recv_threads{nullptr};
 #endif //SYSTYPE_FULL_OS
 
         void sendPolling();
         void recvPolling();
+
+#ifdef SYSTYPE_FULL_OS
+        bool stop_flag{false};
+#endif
     };
 
 }

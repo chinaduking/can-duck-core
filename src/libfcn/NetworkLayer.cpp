@@ -83,3 +83,14 @@ void NetworkLayer::recvPolling() {
         }
     }
 }
+
+void NetworkLayer::sendPolling() {
+    /* 轮询读发送数据
+     * 注意，如果有多个端口，且读为阻塞模式，则会多个端口
+     * 之间会互相阻塞，因此需要多线程。但一般上位机只有一个端口（串口）
+     * 因此先不做优化。下位机一般不采用OS，为非阻塞读取，不受影响。
+     * */
+    for(auto& dev : data_link_dev){
+        dev->sendPolling();
+    }
+}

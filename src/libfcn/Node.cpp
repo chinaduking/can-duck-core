@@ -14,6 +14,24 @@ Node::Node() {
     if(network_layer == nullptr){
         network_layer = new NetworkLayer();
     }
+#ifdef SYSTYPE_FULL_OS
+    send_threads = new std::thread([&](){
+        LOGW("start one send thread..");
+        while (!stop_flag){
+            sendPolling();
+        }
+        LOGW("stop one send thread..");
+    });
+
+    recv_threads = new std::thread([&](){
+        LOGW("start one recv thread..");
+        while (!stop_flag){
+            recvPolling();
+        }
+        LOGW("stop one recv thread..");
+    });
+
+#endif //SYSTYPE_FULL_OS
 }
 
 PublisherManager* Node::getPublisherManager(){
@@ -33,21 +51,23 @@ void Node::sendPolling(){
 }
 
 void Node::recvPolling(){
-
+    network_layer->recvPolling();
 }
 
 void Node::spinOnce(){
-
+    sendPolling();
+    recvPolling();
 }
 
 #ifdef SYSTYPE_FULL_OS
 
 void Node::spin(){
-
+    send_threads->join();
+    recv_threads->join();
 }
 
 void Node::stop(){
-
+    stop_flag = true;
 }
 
 

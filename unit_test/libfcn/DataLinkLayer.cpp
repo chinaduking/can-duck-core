@@ -42,6 +42,12 @@ namespace frame_device_test{
             }
         });
 
+        thread send([&](){
+            for(int i = 0; i < 1;){
+                frame_dev.sendPolling();
+            }
+        });
+
         for(int i = 0; i < 100; ){
             if(!serial.isOpen()){
                 break;
@@ -52,5 +58,6 @@ namespace frame_device_test{
             sleep(1);
         }
         recv.join();
+        send.join();
     }
 }

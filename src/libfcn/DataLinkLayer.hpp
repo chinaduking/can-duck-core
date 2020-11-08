@@ -102,15 +102,8 @@ namespace libfcn_v2{
     public:
         FrameIODevice(uint16_t send_buf_size=6)
             : tx_frame_queue(send_buf_size)
-        {
-#ifdef SYSTYPE_FULL_OS
-            send_thread = std::make_shared<std::thread>([&](){
-                for(int i = 0; i < 1; ){
-                    sendPolling();
-                }
-            });
-#endif //SYSTYPE_FULL_OS
-        }
+        {}
+
         virtual ~FrameIODevice() = default;
 
         /* 读取方法。
@@ -180,7 +173,6 @@ namespace libfcn_v2{
 #ifdef SYSTYPE_FULL_OS
         std::mutex wr_mutex;
         std::condition_variable write_ctrl_cv;
-        std::shared_ptr<std::thread> send_thread{nullptr};
 #endif //SYSTYPE_FULL_OS
     };
 

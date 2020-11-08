@@ -33,6 +33,7 @@ namespace libfcn_v2{
         PublisherManager   pub_sub_manager;
         ParamServerManager param_server_manager;
         //LargeDataHandler large_data_handler;
+
     private:
         utils::vector_s<FrameIODevice*> data_link_dev;
         void recvProtocolDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
