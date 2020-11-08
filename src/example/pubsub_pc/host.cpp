@@ -24,9 +24,13 @@ int main(){
 
     for(int i = 0; i < 10; i ++){
         auto target_angle = test_ServoPubSubDict.target_angle;
+
         target_angle << 200 * i;
+
         servo_pub_channel->publish(target_angle);
+
         LOGD("publish a message!");
+
         perciseSleep(0.5);
     }
 

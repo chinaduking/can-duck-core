@@ -7,10 +7,14 @@
 #include "Tracer.hpp"
 
 using namespace libfcn_v2;
+using namespace utils;
+
 
 NetworkLayer* Node::network_layer = nullptr;
 
 Node::Node() {
+    getDefaultTracer()->setFilter(Tracer::Level::lDebug);
+
     if(network_layer == nullptr){
         network_layer = new NetworkLayer();
     }
