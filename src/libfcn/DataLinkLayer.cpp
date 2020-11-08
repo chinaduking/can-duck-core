@@ -26,55 +26,6 @@ using namespace libfcn_v2;
 //    framObjPool.deallocate(p);
 //}
 
-void libfcn_v2::buffer2Frame(DataLinkFrame* frame, uint8_t *buf, uint16_t len) {
-    if(nullptr == buf)
-        return ;
-
-    uint16_t i = 0;
-    frame->payload_len = len - 4; /* remove op_code and msg_id */
-    frame->src_id      = buf[i++];
-    frame->dest_id     = buf[i++];
-    frame->op_code     = buf[i++];
-    frame->msg_id      = buf[i++];
-
-    utils::memcpy(frame->payload, buf+i, frame->payload_len);
-
-    i += frame->payload_len;
-
-    /*No timestamp */
-    if(i+8 > len)
-        return;
-    /*TODO: timestamp */
-//    for(uint8_t j=0; j<8; j++){
-//        frame->timestamp <<= 8;
-//        frame->timestamp |=buf[i++];
-//    }
-}
-
-
-uint16_t libfcn_v2::frame2Buffer(DataLinkFrame* frame, uint8_t *buf) {
-    if(buf == nullptr){
-        return 0;
-    }
-
-    uint16_t i=0;
-    buf[i++] = (uint8_t)(frame->payload_len + 4);
-    buf[i++] = (uint8_t)(frame->src_id);
-    buf[i++] = (uint8_t)(frame->dest_id);
-    buf[i++] = (uint8_t)(frame->op_code);
-    buf[i++] = (uint8_t)(frame->msg_id);
-
-    utils::memcpy(buf+i, frame->payload, frame->payload_len);
-    i += frame->payload_len;
-
-    /*TODO: timestamp */
-//    for(uint8_t j=0; j<8; j++){
-//        buf[i++] = (uint8_t)(frame->timestamp>>(56-j*8));
-//    }
-
-    return i;
-}
-
 
 ByteStreamParser::ByteStreamParser(int max_buf)
 
@@ -254,6 +205,8 @@ bool ByteFrameIODevice::write(DataLinkFrame* frame){
     return true;
 }
 
+
+
 bool ByteFrameIODevice::writePoll() {
 #ifdef SYSTYPE_FULL_OS
     std::unique_lock<std::mutex> updating_lk(wr_mutex);
@@ -317,8 +270,8 @@ bool ByteFrameIODevice::writePoll() {
             return false;
 //            break;
 
+        /* 发送包尾。指串口作为物理层的"模拟数据包"*/
         case SendState::Crc:
-            /* 这里的包尾指串口作为物理层的"模拟数据包"*/
             if(!ll_byte_dev->isWriteBusy()){
                 /* 物理层空闲时发送，如果忙则等待下次发送*/
                 ll_byte_dev->write(crc_buf,
@@ -335,8 +288,9 @@ bool ByteFrameIODevice::writePoll() {
             return false;
 //            break;
     }
-
 }
+
+
 
 /*
  * 获取1帧数据

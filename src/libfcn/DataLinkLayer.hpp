@@ -79,11 +79,6 @@ namespace libfcn_v2{
 }
 
 namespace libfcn_v2{
-
-    void buffer2Frame(DataLinkFrame* frame, uint8_t *buf, uint16_t len);
-    uint16_t frame2Buffer(DataLinkFrame* frame, uint8_t *buf);
-
-
     /* 链路层设备抽象接口（一个硬件网络端口）
      *
      *
