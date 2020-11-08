@@ -8,13 +8,14 @@
 #include "utils/ObjPool.hpp"
 #include "utils/CppUtils.hpp"
 #include "utils/DataVerify.hpp"
+#include "Tracer.hpp"
 
 #include <cstring>
 
 using namespace utils;
 using namespace libfcn_v2;
 
-bool FrameIODevice::send(DataLinkFrame* frame){
+bool FrameIODevice::send(FramePtr frame){
 #ifdef SYSTYPE_FULL_OS
     std::lock_guard<std::mutex> updating_lk(wr_mutex);
 #endif //SYSTYPE_FULL_OS
@@ -53,12 +54,16 @@ bool FrameIODevice::sendPolling() {
         return false;
     }
 
-    sending_frame = &frame_buffer.front();
+    if(sending_frame == nullptr){
+        sending_frame = &frame_buffer.front();
+    }
 
     if(sendFrame(sending_frame)){
         frame_buffer.pop();
+        sending_frame = nullptr;
         return true;
     }
+
     return false;
 }
 
@@ -95,7 +100,7 @@ void ByteStreamParser::setHeader(utils::vector_s<uint8_t>& header_){
     }
 }
 
-bool ByteStreamParser::crc(DataLinkFrame *buf, uint16_t len, uint8_t *crc_out) {
+bool ByteStreamParser::crc(FramePtr buf, uint16_t len, uint8_t *crc_out) {
     /* 因Frame成员在内存里地址连续，故可以这样操作。
      * 注意不要改变DataLinkFrame的内存布局
      * 跳过第一个长度信息不计算。*/
@@ -113,7 +118,7 @@ bool ByteStreamParser::crc(DataLinkFrame *buf, uint16_t len, uint8_t *crc_out) {
 /*
  * 字节流解析状态机
  * */
-int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame_buf)  {
+int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, FramePtr out_frame_buf)  {
     int res = 0;
 
     switch (recv_state) {
@@ -212,8 +217,8 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
 //bool ByteFrameIODevice::write(DataLinkFrame* frame);
 
 
-bool ByteFrameIODevice::sendFrame(DataLinkFrame* frame) {
-
+bool ByteFrameIODevice::sendFrame(FramePtr frame) {
+    USER_ASSERT(frame != nullptr);
 
     switch (send_state) {
         case SendState::Idle:
@@ -291,7 +296,7 @@ bool ByteFrameIODevice::sendFrame(DataLinkFrame* frame) {
  *
  * 参数：frame 必须在read之前就分配好
  * */
-bool ByteFrameIODevice::recv(DataLinkFrame* frame)
+bool ByteFrameIODevice::recv(FramePtr frame)
 {
     uint8_t buf;
     uint8_t len;
@@ -326,6 +331,7 @@ bool ByteFrameIODevice::recv(DataLinkFrame* frame)
     }
 }
 
+#ifdef ENABLE_TRACE
 static char* mOpCodeStr[]={
         (char*)"ForceStop",
         (char*)"Publish",
@@ -343,8 +349,10 @@ static char* mOpCodeStr[]={
         (char*)"SVO_MULTI_WRITE_VERIFY_ACK",
         (char*)"",
 };
+#endif
 
 std::string libfcn_v2::frame2log(DataLinkFrame& frame){
+#ifdef ENABLE_TRACE
     static const int BUFFER_RESERVE = 120;
 
     char buffer[DATALINK_MTU * 4 + BUFFER_RESERVE];
@@ -390,4 +398,9 @@ std::string libfcn_v2::frame2log(DataLinkFrame& frame){
 //    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
 
     return std::string(buffer);
+
+#else
+    return "";
+#endif
+
 }
