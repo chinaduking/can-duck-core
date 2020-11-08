@@ -12,34 +12,21 @@
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
 
-/* ---------------------------------------------------------
- *            Realtime Object Transfer Controller
- * ---------------------------------------------------------
- */
 namespace libfcn_v2 {
-
-    void singleWriteFrameBuilder(
-            DataLinkFrame* result_frame,
-            uint16_t src_id,
-            uint16_t dest_id,
-            uint16_t op_code,
-            uint16_t msg_id,
-            uint8_t* p_data, uint16_t len);
-
-
-    /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-    obj_size_t RtoDictSingleWrite(SerDesDict* dict,
-                                  void* buffer,
-                                  obj_idx_t index,
-                                  uint8_t *data, obj_size_t len);
-
-    obj_size_t RtoBufferWrite(void* buffer,
-                              obj_idx_t index,
-                              uint8_t *data, obj_size_t len);
-
+    /* ---------------------------------------------------------
+     * 前置声明
+     * ---------------------------------------------------------*/
     class NetworkLayer;
     struct SubscribeCallback;
 
+
+
+    /* ---------------------------------------------------------
+     * 发布-订阅消息通道实例。
+     *
+     * 一个每一个消息频道应被分配一个全网唯一地址；
+     * 且同一通道内的消息对应唯一的字典进行消息解析。
+     * --------------------------------------------------------- */
     class PubSubChannel{
     public:
         typedef SubscribeCallback* callbacl_ptr_t;
@@ -56,12 +43,10 @@ namespace libfcn_v2 {
 
         ~PubSubChannel() = default;
 
-        /* 是否为 "多源通道"。TODO: const */
-        bool is_multi_source{false};
 
-        /* 通道ID TODO: const */
-        int channel_addr{0};
-
+        /* ---------------------------------------------------------
+         * 向通道中发布一个消息
+         * ---------------------------------------------------------*/
         template<typename Msg>
         void publish(Msg&& msg){
             uint16_t src_id = 0, dest_id = 0;
@@ -117,12 +102,23 @@ namespace libfcn_v2 {
 
         DataLinkFrame frame_tmp;
 
-        libfcn_v2::NetworkLayer *network_layer;
+        libfcn_v2::NetworkLayer *network_layer{nullptr};
 
         void networkPublish(DataLinkFrame* frame);
 
+
+        /* 是否为 "多源通道"。TODO: const */
+        bool is_multi_source{false};
+
+        /* 通道ID TODO: const */
+        int channel_addr{0};
     };
 
+
+
+    /* ---------------------------------------------------------
+     * 订阅实时消息的回调
+     * ---------------------------------------------------------*/
     struct SubscribeCallback{
         typedef void (*Callback)(void* ctx_obj,
                                  int ev_code, DataLinkFrame* frame);
@@ -140,13 +136,38 @@ namespace libfcn_v2 {
     };
 
 
-#define MAX_PUB_CTRL_RULES 10
+    /* ---------------------------------------------------------
+     * 构造一个数据帧
+     * ---------------------------------------------------------*/
+    void singleWriteFrameBuilder(
+            DataLinkFrame* result_frame,
+            uint16_t src_id,
+            uint16_t dest_id,
+            uint16_t op_code,
+            uint16_t msg_id,
+            uint8_t* p_data, uint16_t len);
 
-    /*
+
+    /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+    obj_size_t RtoDictSingleWrite(SerDesDict* dict,
+                                  void* buffer,
+                                  obj_idx_t index,
+                                  uint8_t *data, obj_size_t len);
+
+    obj_size_t RtoBufferWrite(void* buffer,
+                              obj_idx_t index,
+                              uint8_t *data, obj_size_t len);
+
+
+
+
+    /* ---------------------------------------------------------
     * 网络处理。
     * 不论本地有几个节点，节点均共享一个该实例（单例模式）
     * 但为了降低耦合度，这里不实现单例模式，由上层实现。
-    * */
+    * ---------------------------------------------------------*/
+    #define MAX_PUB_CTRL_RULES 10  //TODO: LINKED LIST
+
     class PubNetworkHandler{
     public:
         PubNetworkHandler(NetworkLayer* network)

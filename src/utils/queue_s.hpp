@@ -47,7 +47,6 @@ namespace utils{
             push(std::move(val));
         }
 
-        //TODO: TEST release old!!
         void push(T_Val&& val) {
             if (!overwrite_old && size_cnt == capicity) {
                 return;
