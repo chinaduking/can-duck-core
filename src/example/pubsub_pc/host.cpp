@@ -22,7 +22,7 @@ int main(){
 
     auto servo_pub_channel = pub_man->createChannel(test_ServoPubSubDict, 0x07);
 
-    for(int i = 0; i < 10; i ++){
+    for(int i = 0; i < 10; i){
         auto target_angle = test_ServoPubSubDict.target_angle;
 
         target_angle << 200 * i;

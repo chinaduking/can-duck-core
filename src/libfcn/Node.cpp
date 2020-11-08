@@ -13,7 +13,7 @@ using namespace utils;
 NetworkLayer* Node::network_layer = nullptr;
 
 Node::Node() {
-    getDefaultTracer()->setFilter(Tracer::Level::lDebug);
+    getDefaultTracer()->setFilter(Tracer::Level::lVerbose);
 
     if(network_layer == nullptr){
         network_layer = new NetworkLayer();

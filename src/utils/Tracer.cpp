@@ -37,10 +37,10 @@ static char* level_name[] = {
         (char*) "N",
         (char*) "V",
         (char*) "I",
-        (char*) "D",
-        (char*) "!W",
-        (char*) "!!E",
-        (char*) "!!!F"
+        (char*) ">> D",
+        (char*) ">>  !W",
+        (char*) ">> !!E",
+        (char*) ">>!!!F"
 };
 
 #define ANSI_COLOR_RED     (char*) "\x1b[31m"
@@ -52,9 +52,9 @@ static char* level_name[] = {
 #define ANSI_COLOR_RESET   (char*) "\x1b[0m"
 
 static char* level_color[] = {
-        (char*) "",             //NONE
-        (char*) "",             //VERBOSE
-        (char*) "",             //INFO
+        "",             //NONE
+        "",             //VERBOSE
+        ANSI_COLOR_GREEN,       //INFO
         ANSI_COLOR_CYAN,        //DEBUG
         ANSI_COLOR_YELLOW,      //WARNING
         ANSI_COLOR_RED,         //ERROR
@@ -65,7 +65,7 @@ Tracer* defaultTracer = nullptr;
 
 Tracer* getDefaultTracer(){
     if(defaultTracer == nullptr){
-        defaultTracer = new Tracer();
+        defaultTracer = new Tracer(true);
     }
 
     return defaultTracer;
@@ -157,7 +157,6 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
     /* Info */
     ret = sprintf(trace_buffer,
-                          ">>> "/* Header */
                           "%s  "  /* Level */
                           "%lu "  /* Timestamp */
                           "(+%lu us) "  /* Timestamp Diff */

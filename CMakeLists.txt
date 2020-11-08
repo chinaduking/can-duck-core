@@ -16,7 +16,7 @@ endif()
 #------------Set Compile Flags-------------------
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops -fpic \
 -Wall -Wno-sign-compare -Wno-unused-private-field -Wno-writable-strings \
--Werror=return-type\
+-Werror=return-type  -Wno-unused-variable\
  -pthread -ffast-math")
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops -fpic -pthread -Wno-sign-compare -Werror=return-type -ffast-math")
