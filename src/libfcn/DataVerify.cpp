@@ -3,7 +3,7 @@
 //
 #include "DataVerify.hpp"
 
-using namespace utils;
+using namespace libfcn_v2;
 
 /*CRC-16 impl:
  * http://www.darkridge.com/~jpr5/mirror/alg/node191.html
@@ -16,7 +16,7 @@ const uint16_t crc_16_table[] =
                 0xA001, 0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400,
         };
 
-uint16_t utils::Crc16(uint8_t* pdata, uint16_t data_len)
+uint16_t libfcn_v2::Crc16(uint8_t* pdata, uint16_t data_len)
 {
     uint16_t wCRC = 0xFFFF;
     uint16_t i;
@@ -30,7 +30,7 @@ uint16_t utils::Crc16(uint8_t* pdata, uint16_t data_len)
 }
 
 
-uint8_t utils::CheckSum1x1(uint8_t *pdata, uint16_t data_len) {
+uint8_t libfcn_v2::CheckSum1x1(uint8_t *pdata, uint16_t data_len) {
     uint8_t checksum = 0;
     if (nullptr == pdata) {
         return 0;
@@ -43,7 +43,7 @@ uint8_t utils::CheckSum1x1(uint8_t *pdata, uint16_t data_len) {
     return checksum;
 }
 
-uint16_t utils::CheckSum1x2(uint8_t *pdata, uint16_t data_len) {
+uint16_t libfcn_v2::CheckSum1x2(uint8_t *pdata, uint16_t data_len) {
     uint16_t checksum = 0;
     if (nullptr == pdata) {
         return 0;
@@ -57,7 +57,7 @@ uint16_t utils::CheckSum1x2(uint8_t *pdata, uint16_t data_len) {
     return checksum;
 }
 
-uint32_t utils::CheckSum1x4(uint8_t *pdata, uint16_t data_len) {
+uint32_t libfcn_v2::CheckSum1x4(uint8_t *pdata, uint16_t data_len) {
     uint32_t checksum = 0;
     if (nullptr == pdata) {
         return 0;
@@ -71,7 +71,7 @@ uint32_t utils::CheckSum1x4(uint8_t *pdata, uint16_t data_len) {
     return checksum;
 }
 
-uint32_t utils::CheckSum4x4(uint8_t *pdata, uint16_t data_len) {
+uint32_t libfcn_v2::CheckSum4x4(uint8_t *pdata, uint16_t data_len) {
     uint32_t checksum = 0;
     if (nullptr == pdata) {
         return 0;

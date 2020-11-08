@@ -6,7 +6,7 @@
 
 #include "utils/CppUtils.hpp"
 #include "utils/EventLoop.hpp"
-#include "FrameUtils.hpp"
+#include "libfcn/DataLinkLayer.hpp"
 
 using namespace std;
 using namespace utils;
@@ -68,7 +68,7 @@ namespace evloop_test{
 
         void evNotifyCallback(DataLinkFrame& msg) override {
             cout << name <<" -- evNotifyCallback!! " << getCurrentTimeUs() << endl;
-            cout << "payload: " << DataLinkFrameToString(msg) << endl;
+            cout << "payload: " << frame2log(msg) << endl;
             cout << name <<" ::: call evRestart. " << endl;
             evRestart();
         }

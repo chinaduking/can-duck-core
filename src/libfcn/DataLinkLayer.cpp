@@ -7,7 +7,7 @@
 
 #include "utils/ObjPool.hpp"
 #include "utils/CppUtils.hpp"
-#include "utils/DataVerify.hpp"
+#include "DataVerify.hpp"
 #include "Tracer.hpp"
 
 #include <cstring>

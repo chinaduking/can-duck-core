@@ -21,7 +21,7 @@ namespace utils{
     #endif //SYSTYPE_FULL_OS
 
     #ifdef ENABLE_TRACE
-        #warning "----> trace is enable!"
+//        #warning "----> trace is enable!"
     #endif //ENABLE_TRACE
 
 

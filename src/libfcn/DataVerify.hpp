@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-namespace utils{
+namespace libfcn_v2{
 
     uint16_t Crc16(uint8_t *pdata, uint16_t data_len);
 

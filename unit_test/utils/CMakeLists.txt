@@ -1,50 +1,47 @@
+set(UT_DEFAULT_LIBS tracer  gtest gtest_main)
+
 include_directories(${PROJECT_SOURCE_DIR}/unit_test)
 
-add_executable(testTracer Tracer.cpp
-        ${PROJECT_SOURCE_DIR}/src/utils/Tracer.cpp
-        ../../src/utils/os_only/HostIODeviceWrapper.cpp)
 
-target_link_libraries(testTracer  GTest::GTest GTest::Main)
+add_executable(testTracer Tracer.cpp)
+target_link_libraries(testTracer ${UT_DEFAULT_LIBS})
 
 
 add_executable(testArray Array.cpp)
-target_link_libraries(testArray  GTest::GTest GTest::Main)
+target_link_libraries(testArray ${UT_DEFAULT_LIBS})
+
+add_executable(testCppUtils CppUtils.cpp)
+target_link_libraries(testCppUtils ${UT_DEFAULT_LIBS})
 
 
-add_executable(testStaticSet vector_s.cpp)
-target_link_libraries(testStaticSet  GTest::GTest GTest::Main)
+add_executable(testVector vector_s.cpp)
+target_link_libraries(testVector ${UT_DEFAULT_LIBS})
 
 
-add_executable(testPosixSerial PosixSerial.cpp
-        ../../src/utils/os_only/PosixSerial.cpp)
-
-target_link_libraries(testPosixSerial  GTest::GTest GTest::Main)
+add_executable(testPosixSerial PosixSerial.cpp)
+target_link_libraries(testPosixSerial serial_port ${UT_DEFAULT_LIBS})
 
 
 add_executable(testESharedPtr ESharedPtr.cpp)
-
-target_link_libraries(testESharedPtr fcn_v2 GTest::GTest GTest::Main)
+target_link_libraries(testESharedPtr fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 add_executable(testEHeap EHeap.cpp)
-
-target_link_libraries(testEHeap  GTest::GTest GTest::Main)
+target_link_libraries(testEHeap  ${UT_DEFAULT_LIBS})
 
 
 add_executable(testLinkedList LinkedList.cpp)
-
-target_link_libraries(testLinkedList  GTest::GTest GTest::Main)
-
+target_link_libraries(testLinkedList ${UT_DEFAULT_LIBS})
 
 
 add_executable(testMemMap MemMap.cpp)
-target_link_libraries(testMemMap  GTest::GTest GTest::Main)
+target_link_libraries(testMemMap ${UT_DEFAULT_LIBS})
 
 
-add_executable(testEvloop EventLoopThreading.cpp)
-target_link_libraries(testEvloop MyCppUtils GTest::GTest GTest::Main)
+add_executable(testEvloop EventLoopThreading.cpp
+        ${PROJECT_SOURCE_DIR}/src/libfcn/DataLinkLayer.cpp)
+target_link_libraries(testEvloop ${UT_DEFAULT_LIBS})
 
 
 add_executable(testQueue queue_s.cpp)
-
-target_link_libraries(testQueue MyCppUtils GTest::GTest GTest::Main)
+target_link_libraries(testQueue ${UT_DEFAULT_LIBS})

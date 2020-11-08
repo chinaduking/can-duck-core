@@ -1,10 +1,10 @@
 //
 // Created by sdong on 2019/11/11.
 //
-#include "utils/DataVerify.hpp"
+#include "libfcn/DataVerify.hpp"
 #include "gtest/gtest.h"
 
-using namespace utils;
+using namespace libfcn_v2;
 using namespace std;
 
 

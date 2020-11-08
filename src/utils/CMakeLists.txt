@@ -1,5 +1,5 @@
-add_library(MyCppUtils
-         DataVerify.cpp
-        os_only/HostIODeviceWrapper.cpp
-        os_only/PosixSerial.cpp
-         Tracer.cpp)
+add_library(tracer Tracer.cpp os_only/HostIODeviceWrapper.cpp)
+
+add_library(serial_port os_only/PosixSerial.cpp)
+target_link_libraries(serial_port tracer)
+

@@ -10,14 +10,13 @@
 #include <iostream>
 #include <thread>
 
-#include "FrameUtils.hpp"
+#include "libfcn/DataLinkLayer.hpp"
 
 using namespace utils;
 using namespace std;
 using namespace libfcn_v2;
 
-extern ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
-
+ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
 
 namespace esharedptr_test{
 
@@ -88,7 +87,7 @@ namespace esharedptr_test{
         ASSERT_EQ(p_frame.refCount(), 1);
 
 
-        cout << "\n\n" << DataLinkFrameToString(*p_frame);
+        cout << "\n\n" << frame2log(*p_frame);
         ASSERT_EQ(framObjPool.usage(), 1);
 
         cout << "pass !" << endl;
@@ -115,8 +114,7 @@ namespace esharedptr_test{
                 ASSERT_EQ(framObjPool.usage(), 2 - i + 1);
             }
 
-            frame_0->server_addr = 1;
-            cout << DataLinkFrameToString(*frame_0) << endl;
+            cout << frame2log(*frame_0) << endl;
         }
         ASSERT_EQ(framObjPool.usage(), 0);
     }
@@ -128,18 +126,18 @@ namespace esharedptr_test{
         for(int i = 0; i < 3; i++){
             ESharedPtr<DataLinkFrame> data(new DataLinkFrame());
             data->msg_id = i;
-            frame_queue.append(data);
+            frame_queue.push(data);
         }
 
-        auto frame_0 = frame_queue.head()->val;
+        auto frame_0 = frame_queue.head();
 
 
         for(int i = 0; i < 3; i++){
-            frame_queue.popHead();
+            frame_queue.pop();
         }
 
         frame_0->msg_id = 10;
-        cout << DataLinkFrameToString(*frame_0) << endl;
+        cout << frame2log(*frame_0) << endl;
     }
 
     class EpopTest{
@@ -151,14 +149,14 @@ namespace esharedptr_test{
                 delete working_frame_p;
             }
 
-            working_frame_p = new FrameShrPtr(queue.head()->val);
+            working_frame_p = new FrameShrPtr(queue.head());
 //            queue.popHead();
         }
 
         void doWork(int time){
             working_thread = new thread([&, time]{
                 sleep(time);
-                cout << DataLinkFrameToString(**working_frame_p) << endl;
+                cout << frame2log(**working_frame_p) << endl;
                 delete(working_frame_p);
                 working_frame_p = nullptr;
             });
@@ -171,7 +169,7 @@ namespace esharedptr_test{
         for(int i = 0; i < 3; i++){
             FrameShrPtr data(new DataLinkFrame());
             data->msg_id = i;
-            frame_queue.append(data);
+            frame_queue.push(data);
         }
 
         EpopTest test1;
@@ -181,7 +179,7 @@ namespace esharedptr_test{
 
         /* try flush all! */
         for(int i = 0; i < 10; i++) {
-            frame_queue.popHead();
+            frame_queue.pop();
         }
         test1.doWork(2);
         test2.doWork(1);

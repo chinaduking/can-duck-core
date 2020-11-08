@@ -8,9 +8,7 @@ add_library(fcn_v2
         ParamServer.cpp
         ParamServerRequestEv.cpp
         MultiFrame.cpp
+        DataVerify.cpp
+        Node.cpp)
 
-        Node.cpp
-
-        ../utils/DataVerify.cpp
-        ../utils/Tracer.cpp
-        ../utils/os_only/HostIODeviceWrapper.cpp)
+target_link_libraries(fcn_v2 tracer serial_port)
