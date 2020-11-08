@@ -147,7 +147,6 @@ namespace libfcn_v2{
 
         bool sendPolling();
 
-
         /* 标志是否是阻塞式LL读取。 */
         bool is_blocking_recv;
 

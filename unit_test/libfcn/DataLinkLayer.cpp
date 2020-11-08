@@ -15,7 +15,7 @@ namespace frame_device_test{
         PosixSerial serial(0);
         ByteFrameIODevice frame_dev(&serial);
 
-        char* src_test_buffer = (char*)"12345";
+        char* src_test_buffer = (char*)"12345 12345";
 
         uint16_t src_buffer_len = strlen(src_test_buffer) + 1;
 
@@ -33,7 +33,7 @@ namespace frame_device_test{
 
         thread recv([&](){
             for(int i = 0; i < 1;){
-                if(frame_dev.read(&dest_frame)){
+                if(frame_dev.recv(&dest_frame)){
                     cout << frame2log(dest_frame) << endl;
                     ASSERT_TRUE(DataLinkFrameCompare(src_frame, dest_frame));
                 } else{
@@ -45,7 +45,7 @@ namespace frame_device_test{
         thread sendpoll([&](){
             for(int i = 0; i < 1;){
 
-                while(frame_dev.writePoll());
+                while(frame_dev.sendPolling());
 //                perciseSleep(0.1);
             }
         });
@@ -54,8 +54,8 @@ namespace frame_device_test{
             if(!serial.isOpen()){
                 break;
             }
-            frame_dev.write(&src_frame);
-            frame_dev.write(&src_frame);
+            frame_dev.send(&src_frame);
+            frame_dev.send(&src_frame);
             cout << "send x2..." << endl;
             sleep(1);
         }

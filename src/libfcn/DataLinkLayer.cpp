@@ -15,6 +15,21 @@
 using namespace utils;
 using namespace libfcn_v2;
 
+
+//ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
+//
+//
+///* 重载New 和 Delete，以无碎片的方式进行内存分配 */
+//void* DataLinkFrame::operator new(size_t size) noexcept{
+//    return framObjPool.allocate();
+//}
+//
+//void DataLinkFrame::operator delete(void * p){
+//    framObjPool.deallocate(p);
+//}
+
+
+
 bool FrameIODevice::send(FramePtr frame){
 #ifdef SYSTYPE_FULL_OS
     std::lock_guard<std::mutex> updating_lk(wr_mutex);
@@ -66,19 +81,6 @@ bool FrameIODevice::sendPolling() {
 
     return false;
 }
-
-//ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
-//
-//
-///* 重载New 和 Delete，以无碎片的方式进行内存分配 */
-//void* DataLinkFrame::operator new(size_t size) noexcept{
-//    return framObjPool.allocate();
-//}
-//
-//void DataLinkFrame::operator delete(void * p){
-//    framObjPool.deallocate(p);
-//}
-
 
 ByteStreamParser::ByteStreamParser(int max_buf)
 
