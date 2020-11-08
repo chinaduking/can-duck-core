@@ -40,7 +40,7 @@ target_link_libraries(testMemMap ${UT_DEFAULT_LIBS})
 
 add_executable(testEvloop EventLoopThreading.cpp
         ${PROJECT_SOURCE_DIR}/src/libfcn/DataLinkLayer.cpp)
-target_link_libraries(testEvloop ${UT_DEFAULT_LIBS})
+target_link_libraries(testEvloop fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 add_executable(testQueue queue_s.cpp)

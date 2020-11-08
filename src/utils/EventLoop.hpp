@@ -21,6 +21,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <iostream>
+#include <utility>
+#include <memory>
 #endif //EVENTLOOP_THREADING
 
 namespace utils {

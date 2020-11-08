@@ -19,14 +19,14 @@ target_link_libraries(testRealtimeObject fcn_v2 ${UT_DEFAULT_LIBS})
 add_executable(testServiceObject ParamServer.cpp
         test_ServoDict.cpp
         )
-target_link_libraries(testServiceObject  fcn_v2 ${UT_DEFAULT_LIBS})
+target_link_libraries(testServiceObject fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 
 add_executable(testDataLinkLayer DataLinkLayer.cpp
         ../../src/libfcn/DataLinkLayer.cpp
         )
-target_link_libraries(testDataLinkLayer ${UT_DEFAULT_LIBS})
+target_link_libraries(testDataLinkLayer fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 

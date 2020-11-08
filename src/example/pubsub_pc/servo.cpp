@@ -30,6 +30,8 @@ int main(){
 
         LOGD("publish a message!");
 
+        LOGD("target_angle = %d", servo_pub_channel->readBuffer(test_ServoPubSubDict.target_angle).data);
+
         perciseSleep(0.5);
     }
 

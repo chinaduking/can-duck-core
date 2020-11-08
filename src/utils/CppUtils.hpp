@@ -96,6 +96,11 @@ namespace utils{
     template<typename T>
     struct is_pointer<T*> { static const bool value = true; };
 
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args) {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
 #ifdef SYSTYPE_FULL_OS
     #define USER_ASSERT(t) assert(t)
 
