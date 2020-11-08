@@ -38,7 +38,7 @@ namespace network_test {
 
         uint32_t cnt = 0;
 
-        auto server = fcn_node.network_layer->svo_network_handler
+        auto server = fcn_node.network_layer->param_server_manager
                 .createServer(test_ServoPubSubDict, local_addr);
 
         server->setWrAccess(test_ServoPubSubDict.mode);
@@ -91,7 +91,7 @@ namespace network_test {
         fcn_node.spin();
 
 
-        auto servo_client = fcn_node.network_layer->svo_network_handler
+        auto servo_client = fcn_node.network_layer->param_server_manager
                 .bindClientToServer(servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){

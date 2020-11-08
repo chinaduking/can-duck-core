@@ -68,7 +68,7 @@ obj_size_t ParamServer::onWriteReq(DataLinkFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->svo_network_handler.handleRecv(&ack_frame, port_id)){
+    if(!ctx_network_layer->param_server_manager.handleRecv(&ack_frame, port_id)){
         ctx_network_layer->sendFrame(port_id, &ack_frame);
     }
 
@@ -123,7 +123,7 @@ obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->svo_network_handler.handleRecv(&ack_frame, port_id)){
+    if(!ctx_network_layer->param_server_manager.handleRecv(&ack_frame, port_id)){
         ctx_network_layer->sendFrame(port_id, &ack_frame);
     }
 
@@ -148,7 +148,7 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) 
     }
 
     /* 先在本地（同进程）已创建的服务器中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->svo_network_handler.handleRecv(frame, port_id)){
+    if(!ctx_network_layer->param_server_manager.handleRecv(frame, port_id)){
         ctx_network_layer->sendFrame(port_id, frame);
     }
 
@@ -156,7 +156,7 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) 
 }
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-ParamServer* ParamServerNetHandle::createServer(SerDesDict& prototype, uint16_t
+ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t
 address){
     ParamServer* server = nullptr;
     for(auto & srv : created_servers){
@@ -183,9 +183,9 @@ address){
 }
 
 
-ParamServerClient* ParamServerNetHandle::bindClientToServer(uint16_t server_addr,
-                                                            uint16_t client_addr,
-                                                            uint16_t port_id){
+ParamServerClient* ParamServerManager::bindClientToServer(uint16_t server_addr,
+                                                          uint16_t client_addr,
+                                                          uint16_t port_id){
     auto client = new ParamServerClient(ctx_network_layer, server_addr, client_addr,
                                         port_id);
 
@@ -199,7 +199,7 @@ ParamServerClient* ParamServerNetHandle::bindClientToServer(uint16_t server_addr
     return client;
 }
 
-int ParamServerNetHandle::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
+int ParamServerManager::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;

@@ -9,7 +9,7 @@
 #include <cstddef>
 
 #include "LLComDevice.hpp"
-//#include "utils/ESharedPtr.hpp"
+#include "ESharedPtr.hpp"
 #include "DefaultAllocate.h"
 #include "vector_s.hpp"
 #include "CppUtils.hpp"
@@ -76,6 +76,9 @@ namespace libfcn_v2{
 #pragma pack(0)
 
     std::string frame2log(DataLinkFrame& frame);
+
+    typedef DataLinkFrame* FramePtr;
+//    typedef utils::ESharedPtr<DataLinkFrame> FramePtr;
 }
 
 namespace libfcn_v2{
@@ -91,7 +94,9 @@ namespace libfcn_v2{
      * */
     class FrameIODevice{
     public:
-        FrameIODevice() = default;
+        FrameIODevice(uint16_t send_buf_size=6)
+            :frame_buffer(send_buf_size)
+        {}
         virtual ~FrameIODevice() = default;
 
         /* 读取方法。
@@ -119,7 +124,7 @@ namespace libfcn_v2{
          * 1. 调用前将frame指针指向一个提前分配好的DataLinkFrame实例；
          * 2. 在非阻塞模式下返回false时，形参frame指针不要更改。
          * */
-        virtual bool read(DataLinkFrame* frame) = 0;
+        virtual bool recv(FramePtr frame) = 0;
 
 
         /* 写入方法。
@@ -138,7 +143,10 @@ namespace libfcn_v2{
          * 2. 阻塞模式
          * 阻塞等待发送完成，并返回true。
          */
-        virtual bool write(DataLinkFrame* frame) = 0;
+        bool send(FramePtr frame);
+
+        bool sendPolling();
+
 
         /* 标志是否是阻塞式LL读取。 */
         bool is_blocking_recv;
@@ -147,6 +155,19 @@ namespace libfcn_v2{
         uint16_t max_payload_size;
 
         uint16_t local_device_id;
+
+    protected:
+        virtual bool sendFrame(FramePtr frame) = 0;
+
+    private:
+        utils::queue_s<DataLinkFrame> frame_buffer;
+
+        FramePtr sending_frame{nullptr};
+
+#ifdef SYSTYPE_FULL_OS
+        std::mutex wr_mutex;
+        std::condition_variable write_ctrl_cv;
+#endif //SYSTYPE_FULL_OS
     };
 
     /*
@@ -163,7 +184,7 @@ namespace libfcn_v2{
         ~ByteStreamParser() = default;
 
         void setHeader(utils::vector_s<uint8_t>& header_);
-        int8_t parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame_buf);
+        int8_t parseOneByte(uint8_t new_byte, FramePtr out_frame_buf);
 
     private:
         enum class State {
@@ -193,9 +214,9 @@ namespace libfcn_v2{
         int valid_frame_cnt  { 0 };
         int error_frame_cnt  { 0 };
 
-//        utils::ESharedPtr<DataLinkFrame> receiving_frame;
+//      FramePtr receiving_frame;
 
-        static bool crc(DataLinkFrame *buf, uint16_t len, uint8_t *crc_out);
+        static bool crc(FramePtr buf, uint16_t len, uint8_t *crc_out);
     };
 
     class ByteFrameIODevice : public FrameIODevice{
@@ -203,9 +224,10 @@ namespace libfcn_v2{
         static const int MAX_HEADER_LEN = 4;
 
         explicit ByteFrameIODevice(LLByteDevice* ll_byte_dev, int frame_buffer_sz=8):
+                FrameIODevice(frame_buffer_sz),
                 ll_byte_dev(ll_byte_dev),
-                header(MAX_HEADER_LEN),
-                frame_buffer(frame_buffer_sz){
+                header(MAX_HEADER_LEN) {
+
             header.push_back(0x55);
             header.push_back(0xAA);
             parser.setHeader(header);
@@ -224,19 +246,15 @@ namespace libfcn_v2{
 
         ~ByteFrameIODevice() override = default;
 
-        /* 功能定义见FrameIODevice::read */
-        bool read(DataLinkFrame* frame) override;
-
-        /* 功能定义见FrameIODevice::write */
-        bool write(DataLinkFrame* frame) override;
-
-        bool writePoll();
+        /* 功能定义见FrameIODevice::recv */
+        bool recv(FramePtr frame) override;
 
     private:
+        bool sendFrame(FramePtr frame) override;
+
         LLByteDevice* const ll_byte_dev;
         utils::vector_s<uint8_t> header;
         ByteStreamParser parser;
-        utils::queue_s<DataLinkFrame> frame_buffer;
 
         enum class SendState{
             Idle = 0,
@@ -247,14 +265,8 @@ namespace libfcn_v2{
 
         SendState send_state{SendState::Idle};
 
-        DataLinkFrame* sending_frame{nullptr};
         uint8_t header_buf[MAX_HEADER_LEN+1];/*一字节长度信息*/
         uint8_t crc_buf   [2];               /*2字节CRC*/
-
-#ifdef SYSTYPE_FULL_OS
-        std::mutex wr_mutex;
-        std::condition_variable write_ctrl_cv;
-#endif //SYSTYPE_FULL_OS
     };
 
 #if 0

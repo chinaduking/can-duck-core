@@ -17,9 +17,9 @@ namespace libfcn_v2{
     public:
         NetworkLayer()
             :
-            rto_network_handler(this),
-            svo_network_handler(this),
-            data_link_dev(MAX_COM_PORT_NUM) {}
+                pub_sub_manager(this),
+                param_server_manager(this),
+                data_link_dev(MAX_COM_PORT_NUM) {}
 
         ~NetworkLayer() = default;
 
@@ -30,12 +30,9 @@ namespace libfcn_v2{
         void recvPolling();
         void sendPolling();
 
-
-        PubNetworkHandler rto_network_handler;
-        ParamServerNetHandle svo_network_handler;
+        PublisherManager   pub_sub_manager;
+        ParamServerManager param_server_manager;
         //LargeDataHandler large_data_handler;
-
-
     private:
         utils::vector_s<FrameIODevice*> data_link_dev;
         void recvProtocolDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);

@@ -26,7 +26,7 @@ int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
         return -1;
     }
 
-    return data_link_dev[port_id]->write(frame);
+    return data_link_dev[port_id]->send(frame);
 }
 
 /* 将不同命令字分配到不同协议上
@@ -42,14 +42,14 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
     if(op_code >= (uint8_t)OpCode::Publish
         && op_code <= (uint8_t)OpCode::PublishReq){
 
-        rto_network_handler.handleWrtie(frame, recv_port_id);
+        pub_sub_manager.handleWrtie(frame, recv_port_id);
     }
 
     /* 服务消息-d */
     if(op_code >= (uint8_t)OpCode::ParamServer_ReadReq
        && op_code <= (uint8_t)OpCode::ParamServer_WriteAck) {
 
-        svo_network_handler.handleRecv(frame, recv_port_id);
+        param_server_manager.handleRecv(frame, recv_port_id);
     }
 
 
@@ -63,7 +63,7 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
         for(auto& port : data_link_dev){
             if(port->local_device_id != recv_port_id){
                 //TODO: shared pointer needed??
-                port->write(frame);
+                port->send(frame);
             }
         }
     }
@@ -78,7 +78,7 @@ void NetworkLayer::recvPolling() {
      * 因此先不做优化。下位机一般不采用OS，为非阻塞读取，不受影响。
      * */
     for(auto& dev : data_link_dev){
-        if(dev->read(&frame_tmp)){
+        if(dev->recv(&frame_tmp)){
             recvProtocolDispatcher(&frame_tmp, dev->local_device_id);
         }
     }

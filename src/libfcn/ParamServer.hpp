@@ -34,7 +34,7 @@ namespace libfcn_v2 {
         Unknown     /*未知错误*/
     };
 
-    class ParamServerNetHandle;
+    class ParamServerManager;
     class NetworkLayer;
 
     class ParamServerClient{
@@ -53,11 +53,11 @@ namespace libfcn_v2 {
 
 #ifdef USE_REQUEST_EVLOOP
 
-#ifdef SYSTYPE_FULL_OS
+    #ifdef SYSTYPE_FULL_OS
                     ,ev_loop(utils::evloopTimeSrouceMS, 0)
-#else //SYSTYPE_FULL_OS
+    #else //SYSTYPE_FULL_OS
     				,ev_loop(globalTimeSourceMS, CLIENT_MAX_REQ_NUM)
-#endif //SYSTYPE_FULL_OS
+    #endif //SYSTYPE_FULL_OS
 
 #endif //USE_REQUEST_EVLOOP
                   {}
@@ -78,7 +78,8 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void readUnblocking(Msg&& msg,
-                            RequestCallback&& callback=RequestCallback()){
+                            RequestCallback&& callback=RequestCallback(),
+                            uint16_t timeout_ms=300, int retry=3){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -96,7 +97,7 @@ namespace libfcn_v2 {
                     this,
                     frame,
                     (uint8_t)OpCode::ParamServer_ReadAck,
-                    300, 3,
+                    timeout_ms, retry,
                     std::move(callback))
                 );
             if(res == -1){
@@ -108,7 +109,8 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void writeUnblocking(Msg&& msg,
-                             RequestCallback&& callback=RequestCallback()){
+                             RequestCallback&& callback=RequestCallback(),
+                             uint16_t timeout_ms=300, int retry=3){
             //TODO: local first
 
             DataLinkFrame frame;
@@ -126,7 +128,7 @@ namespace libfcn_v2 {
                     this,
                     frame,
                     (uint8_t)OpCode::ParamServer_WriteAck,
-                    300, 3,
+                    timeout_ms, retry,
                     std::move(callback))
             );
             if(res == -1){
@@ -153,15 +155,15 @@ namespace libfcn_v2 {
         uint16_t client_addr { 0 };
         uint16_t port_id{0};
 
-//    private:
+    private:
+        friend class ParamServerManager;
+        friend class ParamServerRequestEv;
+
         SerDesDict* const serdes_dict{nullptr};
 
         int networkSendFrame(uint16_t port_id, DataLinkFrame* frame);
 
-
         NetworkLayer* const ctx_network_layer{nullptr};
-
-        friend class ParamServerNetHandle;
 
         void onReadAck(DataLinkFrame* frame);
 
@@ -170,7 +172,6 @@ namespace libfcn_v2 {
 #ifdef USE_REQUEST_EVLOOP
        FcnEvLoop ev_loop;
 #endif
-
     };
 
 
@@ -204,10 +205,6 @@ namespace libfcn_v2 {
 
         }
 
-        utils::BitLUT8 wr_access_table;
-
-        uint16_t server_addr { 0 };
-
         template<typename Msg>
         void updateData(Msg&& msg){
             serdes_dict->serialize(msg, buffer);
@@ -229,7 +226,6 @@ namespace libfcn_v2 {
             wr_access_table.remove(msg.index);
         }
 
-
         /*
          * TODO:
          * 回调分配在堆上。堆为连续的，插入时会将不够的空间向后推。
@@ -243,14 +239,18 @@ namespace libfcn_v2 {
          * */
 //        uint16_t callback_offset[dict_size];
 
+    private:
+        friend class ParamServerManager;
+
+
+        uint16_t server_addr { 0 };
+
+        utils::BitLUT8 wr_access_table;
 
         void* buffer{nullptr};
 
-//    private:
         SerDesDict* const serdes_dict{nullptr};
 
-
-        friend class ParamServerNetHandle;
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
         obj_size_t onWriteReq(DataLinkFrame* frame, uint16_t port_id);
@@ -266,16 +266,15 @@ namespace libfcn_v2 {
     * 不论本地有几个节点，节点均共享一个该实例（单例模式）
     * 但为了降低耦合度，这里不实现单例模式，由上层实现。
     * */
-    class ParamServerNetHandle{
+    class ParamServerManager{
     public:
-        ParamServerNetHandle(NetworkLayer* ctx_network_layer):
+        ParamServerManager(NetworkLayer* ctx_network_layer):
                 ctx_network_layer(ctx_network_layer),
                 created_servers(MAX_LOCAL_NODE_NUM),
                 created_clients(MAX_LOCAL_NODE_NUM)
         {}
 
-
-        virtual ~ParamServerNetHandle() = default;
+        ~ParamServerManager() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
         ParamServer* createServer(SerDesDict& prototype, uint16_t address);
@@ -286,10 +285,9 @@ namespace libfcn_v2 {
 
         int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
 
-        NetworkLayer* ctx_network_layer{nullptr};
+    private:
 
-        uint8_t is_server{0};
-
+        NetworkLayer* const ctx_network_layer{nullptr};
 
         struct CreatedServer{
             int         address {-1};

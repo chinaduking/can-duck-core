@@ -20,7 +20,6 @@ namespace libfcn_v2 {
     struct SubscribeCallback;
 
 
-
     /* ---------------------------------------------------------
      * 发布-订阅消息通道实例。
      *
@@ -168,52 +167,21 @@ namespace libfcn_v2 {
     * ---------------------------------------------------------*/
     #define MAX_PUB_CTRL_RULES 10  //TODO: LINKED LIST
 
-    class PubNetworkHandler{
+    class PublisherManager{
     public:
-        PubNetworkHandler(NetworkLayer* network)
+        PublisherManager(NetworkLayer* network)
             : ctx_network_layer(network),
               shared_buffers(MAX_LOCAL_NODE_NUM),
               pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
               pub_ctrl_rules(MAX_PUB_CTRL_RULES)
               { }
 
-        virtual ~PubNetworkHandler() = default;
+        ~PublisherManager() = default;
 
-        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address){
-            void* buffer = nullptr;
-            for(auto & sh_b : shared_buffers){
-                if(sh_b.id == address){
-                    buffer = sh_b.buffer;
-                    USER_ASSERT(buffer != nullptr);
-                }
-            }
-            if(buffer == nullptr){
-                buffer = prototype.createBuffer();
-                SharedBuffer sh_b = {
-                        .id = address,
-                        .buffer = buffer
-                };
-
-                shared_buffers.push_back(sh_b);
-            }
-
-            auto channel = new PubSubChannel(&prototype, buffer);
-            channel->network_layer = ctx_network_layer;
-            channel->channel_addr = address;
-
-
-            pub_sub_channels.push_back(channel);
-
-            return channel;
-        }
+        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address);
 
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
-                                     void* static_buffer){
-            auto channel = new PubSubChannel(&prototype, static_buffer);
-            channel->network_layer = ctx_network_layer;
-            channel->channel_addr = address;
-            return channel;
-        }
+                                     void* static_buffer);
 
         void handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id);
 
@@ -245,7 +213,7 @@ namespace libfcn_v2 {
             uint32_t freq_divier_cnt{0};
 
             uint32_t send_busy_cnt {0};
-            friend class PubNetworkHandler;
+            friend class PublisherManager;
 
         };
 

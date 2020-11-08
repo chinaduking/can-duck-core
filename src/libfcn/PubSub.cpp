@@ -102,7 +102,7 @@ void PubSubChannel::networkPublish(DataLinkFrame *frame) {
  */
 
 
-void PubNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
+void PublisherManager::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
     PubSubChannel* channel = nullptr;
 
     for(auto& ch : pub_sub_channels){
@@ -141,13 +141,50 @@ void PubNetworkHandler::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id)
 
 }
 
-void PubNetworkHandler::addPubCtrlRule(PubCtrlRule& rule){
+PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t address){
+    void* buffer = nullptr;
+    for(auto & sh_b : shared_buffers){
+        if(sh_b.id == address){
+            buffer = sh_b.buffer;
+            USER_ASSERT(buffer != nullptr);
+        }
+    }
+    if(buffer == nullptr){
+        buffer = prototype.createBuffer();
+        SharedBuffer sh_b = {
+                .id = address,
+                .buffer = buffer
+        };
+
+        shared_buffers.push_back(sh_b);
+    }
+
+    auto channel = new PubSubChannel(&prototype, buffer);
+    channel->network_layer = ctx_network_layer;
+    channel->channel_addr = address;
+
+
+    pub_sub_channels.push_back(channel);
+
+    return channel;
+}
+
+PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t address,
+                             void* static_buffer){
+    auto channel = new PubSubChannel(&prototype, static_buffer);
+    channel->network_layer = ctx_network_layer;
+    channel->channel_addr = address;
+    return channel;
+}
+
+
+void PublisherManager::addPubCtrlRule(PubCtrlRule& rule){
     pub_ctrl_rules.push_back(rule);
 }
 
 DataLinkFrame frame_tmp;
 
-void PubNetworkHandler::update(){
+void PublisherManager::update(){
 
     for(auto & pub_ctrl_rule : pub_ctrl_rules){
         pub_ctrl_rule.freq_divier_cnt ++;
@@ -181,7 +218,7 @@ void PubNetworkHandler::update(){
                  * 一般write采用非阻塞模式。
                  * 对于RTO，如果本次写入失败，则直接放弃，但同时记录该信息以便下次调整频率。
                  * */
-                bool is_busy = port->write(&frame_tmp);
+                bool is_busy = port->send(&frame_tmp);
 
                 if(is_busy){
                     pub_ctrl_rule.send_busy_cnt ++;

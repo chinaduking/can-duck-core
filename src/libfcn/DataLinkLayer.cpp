@@ -14,6 +14,54 @@
 using namespace utils;
 using namespace libfcn_v2;
 
+bool FrameIODevice::send(DataLinkFrame* frame){
+#ifdef SYSTYPE_FULL_OS
+    std::lock_guard<std::mutex> updating_lk(wr_mutex);
+#endif //SYSTYPE_FULL_OS
+
+    if(frame_buffer.full()){
+        LOGE("frame buffer is full!!");
+        return false;
+    }
+
+    frame_buffer.push(*frame);
+
+    LOGV("push to frame buffer, b_cnt = %d", frame_buffer.size());
+    //TODO: con_var to trigger send!!
+
+#ifdef SYSTYPE_FULL_OS
+    write_ctrl_cv.notify_all();
+#endif //SYSTYPE_FULL_OS
+
+    return true;
+}
+
+bool FrameIODevice::sendPolling() {
+#ifdef SYSTYPE_FULL_OS
+    std::unique_lock<std::mutex> updating_lk(wr_mutex);
+    if(frame_buffer.empty()){
+        LOGV("frame_buffer waiting to push..");
+
+        write_ctrl_cv.wait(updating_lk);
+    }
+
+#endif //SYSTYPE_FULL_OS
+
+
+    if(frame_buffer.empty()){
+        LOGV("frame_buffer is empty!!");
+        return false;
+    }
+
+    sending_frame = &frame_buffer.front();
+
+    if(sendFrame(sending_frame)){
+        frame_buffer.pop();
+        return true;
+    }
+    return false;
+}
+
 //ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
 //
 //
@@ -71,26 +119,18 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
     switch (recv_state) {
         /* 接收包头0 */
         case State::HEADER0: {
-            if (new_byte == header[0]) {
-                recv_state = State::HEADER1;
-            }
-        }
-            break;
+            if (new_byte == header[0]) { recv_state = State::HEADER1; }
+        } break;
 
-
-            /* 接收包头1 */
+        /* 接收包头1 */
         case State::HEADER1: {
             /* 包头匹配，继续接收长度 */
-            if (new_byte == header[1]) {
-                recv_state = State::LEN;
-            } else {
-                /* 包头不匹配，返回等待下一个包头 */
-                recv_state = State::HEADER0;
-            }
-        }
-            break;
+            if (new_byte == header[1]) { recv_state = State::LEN; }
+            /* 包头不匹配，返回等待下一个包头 */
+            else { recv_state = State::HEADER0; }
+        } break;
 
-            /* 接收包长度 */
+        /* 接收包长度 */
         case State::LEN: {
             if (new_byte < max_buf && new_byte >= 4) {
                 /* 长度小于缓冲区长度，且大于四个关键数据（srcID~msgID）总长度，
@@ -110,38 +150,27 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
                 recv_state = State::HEADER0;
             }
         }
-            break;
-            /* 接收源地址 */
-        case State::SRC_ID: {
-            out_frame_buf->src_id = new_byte;
-            recv_state = State::DEST_ID;
-        }
-            break;
+        break;
 
-            /* 接收目标地址 */
-        case State::DEST_ID: {
-            out_frame_buf->dest_id = new_byte;
-            recv_state = State::OP_CODE;
-        }
-            break;
+        case State::SRC_ID:{ /* 接收源地址 */
+            out_frame_buf->src_id = new_byte; recv_state = State::DEST_ID;
+        }break;
 
-            /* 接收操作码 */
-        case State::OP_CODE: {
-            out_frame_buf->op_code = new_byte;
-            recv_state = State::MSG_ID;
-        }
-            break;
+        case State::DEST_ID:{ /* 接收目标地址 */
+            out_frame_buf->dest_id = new_byte; recv_state = State::OP_CODE;
+        }break;
 
-            /* 接收消息ID */
-        case State::MSG_ID: {
-            out_frame_buf->msg_id = new_byte;
-            recv_state = State::PAYLOAD;
+
+        case State::OP_CODE:{  /* 接收操作码 */
+            out_frame_buf->op_code = new_byte; recv_state = State::MSG_ID;
+        }break;
+
+        case State::MSG_ID:{ /* 接收消息ID */
+            out_frame_buf->msg_id = new_byte;  recv_state = State::PAYLOAD;
             payload_recv_cnt = 0;
-        }
-            break;
+        }break;
 
-            /* 接收数据内容 */
-        case State::PAYLOAD: {
+        case State::PAYLOAD: {/* 接收数据内容 */
             out_frame_buf->payload[payload_recv_cnt] = new_byte;
             payload_recv_cnt++;
 
@@ -149,14 +178,12 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
             if (payload_recv_cnt >= out_frame_buf->payload_len) {
                 recv_state = State::CRC0;
             }
-        }
-            break;
+        }break;
 
         case State::CRC0: {
-            crc_buf[0] = new_byte;
-            recv_state = State::CRC1;
-        }
-            break;
+            crc_buf[0] = new_byte; recv_state = State::CRC1;
+        } break;
+
         case State::CRC1: {
             crc_buf[1] = new_byte;
             recv_state = State::HEADER0;
@@ -171,8 +198,7 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
             }
 
             recv_state = State::HEADER0;
-        }
-            break;
+        } break;
     }
 
     return res;
@@ -183,58 +209,22 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, DataLinkFrame* out_frame
 #include <mutex>
 #endif
 
-bool ByteFrameIODevice::write(DataLinkFrame* frame){
-#ifdef SYSTYPE_FULL_OS
-    std::lock_guard<std::mutex> updating_lk(wr_mutex);
-#endif //SYSTYPE_FULL_OS
-
-    if(frame_buffer.full()){
-        LOGE("frame buffer is full!!");
-        return false;
-    }
-
-    frame_buffer.push(*frame);
-
-    LOGV("push to frame buffer, b_cnt = %d", frame_buffer.size());
-    //TODO: con_var to trigger send!!
-
-#ifdef SYSTYPE_FULL_OS
-    write_ctrl_cv.notify_all();
-#endif //SYSTYPE_FULL_OS
-
-    return true;
-}
+//bool ByteFrameIODevice::write(DataLinkFrame* frame);
 
 
+bool ByteFrameIODevice::sendFrame(DataLinkFrame* frame) {
 
-bool ByteFrameIODevice::writePoll() {
-#ifdef SYSTYPE_FULL_OS
-    std::unique_lock<std::mutex> updating_lk(wr_mutex);
-    if(frame_buffer.empty()){
-        LOGV("frame_buffer waiting to push..");
-
-        write_ctrl_cv.wait(updating_lk);
-    }
-
-#endif //SYSTYPE_FULL_OS
-
-
-    if(frame_buffer.empty()){
-        LOGV("frame_buffer is empty!!");
-        return false;
-    }
 
     switch (send_state) {
         case SendState::Idle:
             LOGV("get a new frame!!");
-            sending_frame = &frame_buffer.front();
             send_state = SendState::Header;
 
         /* 发送包头 + 长度*/
         case SendState::Header:
             /* 这里的数据长度是串口作为物理层的"模拟数据包"的长度（即包头-包尾CRC直接所有数据
              * 的字节数）。等于payload_len+src_id+dest_id+msg_id+opcode*/
-            header_buf[header.size()] = sending_frame->payload_len + 4;
+            header_buf[header.size()] = frame->payload_len + 4;
 
             /* 这里的包头指串口作为物理层的"模拟数据包"*/
             if(!ll_byte_dev->isWriteBusy()){
@@ -251,16 +241,16 @@ bool ByteFrameIODevice::writePoll() {
             if(!ll_byte_dev->isWriteBusy()){
                 /* 物理层空闲时发送，如果忙则等待下次发送
                  * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
-                ll_byte_dev->write(&sending_frame->src_id,
-                                   sending_frame->payload_len + 4);
+                ll_byte_dev->write(&frame->src_id,
+                                   frame->payload_len + 4);
 
                 /* 因Frame成员在内存里地址连续，故可以这样操作。
                  * 注意不要改变DataLinkFrame的内存布局
                  * 跳过第一个长度信息不计算。
                  *
                  * 注意：在Frame状态里计算CRC可以只计算一次*/
-                uint16_t crc_result = Crc16(&sending_frame->src_id,
-                                            sending_frame->payload_len + 4);
+                uint16_t crc_result = Crc16(&frame->src_id,
+                                            frame->payload_len + 4);
 
                 crc_buf[0] = crc_result >> 8;
                 crc_buf[1] = crc_result;
@@ -276,9 +266,7 @@ bool ByteFrameIODevice::writePoll() {
                 /* 物理层空闲时发送，如果忙则等待下次发送*/
                 ll_byte_dev->write(crc_buf,
                                    2);
-
                 /* 发送成功后，弹出正在发送的数据帧 */
-                frame_buffer.pop();
 
                 LOGV("sent frame!!");
 
@@ -303,7 +291,7 @@ bool ByteFrameIODevice::writePoll() {
  *
  * 参数：frame 必须在read之前就分配好
  * */
-bool ByteFrameIODevice::read(DataLinkFrame* frame)
+bool ByteFrameIODevice::recv(DataLinkFrame* frame)
 {
     uint8_t buf;
     uint8_t len;

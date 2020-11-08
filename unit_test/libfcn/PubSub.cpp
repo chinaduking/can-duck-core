@@ -140,11 +140,11 @@ namespace network_test {
         DataLinkFrame frame_tmp;
 
         auto rto_channel = fcn_node
-                .network_layer->rto_network_handler.
+                .network_layer->pub_sub_manager.
                 createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
 
         auto rto_channel_2 = fcn_node
-                .network_layer->rto_network_handler.
+                .network_layer->pub_sub_manager.
                 createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
 
         fcn_node.spin();
@@ -193,7 +193,7 @@ namespace network_test {
         int servo_addr = SERVO_ADDR;
 
         auto servo_rto_channel = fcn_node
-                .network_layer->rto_network_handler.
+                .network_layer->pub_sub_manager.
                 createChannel (fcnmsg::test_ServoPubSubDict, servo_addr);
 
         fcn_node.spin();
