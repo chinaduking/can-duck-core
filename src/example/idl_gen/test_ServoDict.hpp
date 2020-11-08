@@ -58,7 +58,9 @@ namespace fcnmsg{
             int16_t mode;
         };
 
-        void* createBuffer() override;
+        inline void* createBuffer() override{
+            return new test_ServoPubSubDict_C::Buffer;
+        }
     };
 #pragma pack(0)
 

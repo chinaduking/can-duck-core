@@ -21,10 +21,13 @@ int main(){
 
     auto servo_pub_channel = pub_man->createChannel(test_ServoPubSubDict, 0x07);
 
-    for(int i = 0; i < 10; i){
+    auto servo_pub_channel_2 = pub_man->createChannel(test_ServoPubSubDict, 0x07);
+
+    int cnt = 0;
+    for(int i = 0; i < 1; i){
         auto angle = test_ServoPubSubDict.angle;
 
-        angle << 200 * i;
+        angle << cnt;
 
         servo_pub_channel->publish(angle);
 
@@ -33,6 +36,8 @@ int main(){
         LOGD("target_angle = %d", servo_pub_channel->readBuffer(test_ServoPubSubDict.target_angle).data);
 
         perciseSleep(0.5);
+
+        cnt ++;
     }
 
     node.spin();
