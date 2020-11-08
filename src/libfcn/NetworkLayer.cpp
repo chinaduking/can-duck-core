@@ -19,14 +19,14 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 
 int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
 
-    LOGI("NetworkLayer::sendFrame:\n\r%s",
+    LOGI("NetworkLayer::popTxQueue:\n\r%s",
          frame2log(*frame).c_str());
 
     if(port_id >= data_link_dev.size()){
         return -1;
     }
 
-    return data_link_dev[port_id]->send(frame);
+    return data_link_dev[port_id]->pushTxQueue(frame);
 }
 
 /* 将不同命令字分配到不同协议上
@@ -63,7 +63,7 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
         for(auto& port : data_link_dev){
             if(port->local_device_id != recv_port_id){
                 //TODO: shared pointer needed??
-                port->send(frame);
+                port->pushTxQueue(frame);
             }
         }
     }
@@ -78,7 +78,7 @@ void NetworkLayer::recvPolling() {
      * 因此先不做优化。下位机一般不采用OS，为非阻塞读取，不受影响。
      * */
     for(auto& dev : data_link_dev){
-        if(dev->recv(&frame_tmp)){
+        if(dev->popRxQueue(&frame_tmp)){
             recvProtocolDispatcher(&frame_tmp, dev->local_device_id);
         }
     }

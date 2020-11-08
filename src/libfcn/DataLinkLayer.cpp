@@ -30,19 +30,19 @@ using namespace libfcn_v2;
 
 
 
-bool FrameIODevice::send(FramePtr frame){
+bool FrameIODevice::pushTxQueue(FramePtr frame){
 #ifdef SYSTYPE_FULL_OS
     std::lock_guard<std::mutex> updating_lk(wr_mutex);
 #endif //SYSTYPE_FULL_OS
 
-    if(frame_buffer.full()){
+    if(tx_frame_queue.full()){
         LOGE("frame buffer is full!!");
         return false;
     }
 
-    frame_buffer.push(*frame);
+    tx_frame_queue.push(*frame);
 
-    LOGV("push to frame buffer, b_cnt = %d", frame_buffer.size());
+    LOGV("push to frame buffer, b_cnt = %d", tx_frame_queue.size());
     //TODO: con_var to trigger send!!
 
 #ifdef SYSTYPE_FULL_OS
@@ -55,7 +55,7 @@ bool FrameIODevice::send(FramePtr frame){
 bool FrameIODevice::sendPolling() {
 #ifdef SYSTYPE_FULL_OS
     std::unique_lock<std::mutex> updating_lk(wr_mutex);
-    if(frame_buffer.empty()){
+    if(tx_frame_queue.empty()){
         LOGV("frame_buffer waiting to push..");
 
         write_ctrl_cv.wait(updating_lk);
@@ -64,17 +64,17 @@ bool FrameIODevice::sendPolling() {
 #endif //SYSTYPE_FULL_OS
 
 
-    if(frame_buffer.empty()){
+    if(tx_frame_queue.empty()){
         LOGV("frame_buffer is empty!!");
         return false;
     }
 
     if(sending_frame == nullptr){
-        sending_frame = &frame_buffer.front();
+        sending_frame = &tx_frame_queue.front();
     }
 
-    if(sendFrame(sending_frame)){
-        frame_buffer.pop();
+    if(popTxQueue(sending_frame)){
+        tx_frame_queue.pop();
         sending_frame = nullptr;
         return true;
     }
@@ -219,7 +219,7 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, FramePtr out_frame_buf) 
 //bool ByteFrameIODevice::write(DataLinkFrame* frame);
 
 
-bool ByteFrameIODevice::sendFrame(FramePtr frame) {
+bool ByteFrameIODevice::popTxQueue(FramePtr frame) {
     USER_ASSERT(frame != nullptr);
 
     switch (send_state) {
@@ -298,7 +298,7 @@ bool ByteFrameIODevice::sendFrame(FramePtr frame) {
  *
  * 参数：frame 必须在read之前就分配好
  * */
-bool ByteFrameIODevice::recv(FramePtr frame)
+bool ByteFrameIODevice::popRxQueue(FramePtr frame)
 {
     uint8_t buf;
     uint8_t len;

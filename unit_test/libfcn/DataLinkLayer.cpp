@@ -33,7 +33,7 @@ namespace frame_device_test{
 
         thread recv([&](){
             for(int i = 0; i < 1;){
-                if(frame_dev.recv(&dest_frame)){
+                if(frame_dev.popRxQueue(&dest_frame)){
                     cout << frame2log(dest_frame) << endl;
                     ASSERT_TRUE(DataLinkFrameCompare(src_frame, dest_frame));
                 } else{
@@ -42,24 +42,15 @@ namespace frame_device_test{
             }
         });
 
-        thread sendpoll([&](){
-            for(int i = 0; i < 1;){
-
-                while(frame_dev.sendPolling());
-//                perciseSleep(0.1);
-            }
-        });
-
         for(int i = 0; i < 100; ){
             if(!serial.isOpen()){
                 break;
             }
-            frame_dev.send(&src_frame);
-            frame_dev.send(&src_frame);
+            frame_dev.pushTxQueue(&src_frame);
+            frame_dev.pushTxQueue(&src_frame);
             cout << "send x2..." << endl;
             sleep(1);
         }
         recv.join();
-        sendpoll.join();
     }
 }

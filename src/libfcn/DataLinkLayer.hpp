@@ -81,6 +81,12 @@ namespace libfcn_v2{
 //    typedef utils::ESharedPtr<DataLinkFrame> FramePtr;
 }
 
+#ifdef SYSTYPE_FULL_OS
+#include <thread>
+#include <mutex>
+#include <memory>
+#endif
+
 namespace libfcn_v2{
     /* 链路层设备抽象接口（一个硬件网络端口）
      *
@@ -95,8 +101,16 @@ namespace libfcn_v2{
     class FrameIODevice{
     public:
         FrameIODevice(uint16_t send_buf_size=6)
-            :frame_buffer(send_buf_size)
-        {}
+            : tx_frame_queue(send_buf_size)
+        {
+#ifdef SYSTYPE_FULL_OS
+            send_thread = std::make_shared<std::thread>([&](){
+                for(int i = 0; i < 1; ){
+                    sendPolling();
+                }
+            });
+#endif //SYSTYPE_FULL_OS
+        }
         virtual ~FrameIODevice() = default;
 
         /* 读取方法。
@@ -124,7 +138,7 @@ namespace libfcn_v2{
          * 1. 调用前将frame指针指向一个提前分配好的DataLinkFrame实例；
          * 2. 在非阻塞模式下返回false时，形参frame指针不要更改。
          * */
-        virtual bool recv(FramePtr frame) = 0;
+        virtual bool popRxQueue(FramePtr frame) = 0;
 
 
         /* 写入方法。
@@ -143,7 +157,7 @@ namespace libfcn_v2{
          * 2. 阻塞模式
          * 阻塞等待发送完成，并返回true。
          */
-        bool send(FramePtr frame);
+        bool pushTxQueue(FramePtr frame);
 
         bool sendPolling();
 
@@ -156,16 +170,17 @@ namespace libfcn_v2{
         uint16_t local_device_id;
 
     protected:
-        virtual bool sendFrame(FramePtr frame) = 0;
+        virtual bool popTxQueue(FramePtr frame) = 0;
 
     private:
-        utils::queue_s<DataLinkFrame> frame_buffer;
+        utils::queue_s<DataLinkFrame> tx_frame_queue;
 
         FramePtr sending_frame{nullptr};
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex wr_mutex;
         std::condition_variable write_ctrl_cv;
+        std::shared_ptr<std::thread> send_thread{nullptr};
 #endif //SYSTYPE_FULL_OS
     };
 
@@ -245,11 +260,11 @@ namespace libfcn_v2{
 
         ~ByteFrameIODevice() override = default;
 
-        /* 功能定义见FrameIODevice::recv */
-        bool recv(FramePtr frame) override;
+        /* 功能定义见FrameIODevice::popRxQueue */
+        bool popRxQueue(FramePtr frame) override;
 
     private:
-        bool sendFrame(FramePtr frame) override;
+        bool popTxQueue(FramePtr frame) override;
 
         LLByteDevice* const ll_byte_dev;
         utils::vector_s<uint8_t> header;

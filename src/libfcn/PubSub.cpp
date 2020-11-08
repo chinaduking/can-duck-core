@@ -218,7 +218,7 @@ void PublisherManager::update(){
                  * 一般write采用非阻塞模式。
                  * 对于RTO，如果本次写入失败，则直接放弃，但同时记录该信息以便下次调整频率。
                  * */
-                bool is_busy = port->send(&frame_tmp);
+                bool is_busy = port->pushTxQueue(&frame_tmp);
 
                 if(is_busy){
                     pub_ctrl_rule.send_busy_cnt ++;

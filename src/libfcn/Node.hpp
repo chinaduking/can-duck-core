@@ -24,9 +24,10 @@ namespace libfcn_v2{
         Node();
         virtual ~Node() = default;
 
+        int addPort(FrameIODevice* device);
+
         PublisherManager* getPublisherManager();
         ParamServerManager* getParamServerManager();
-        int addPort(FrameIODevice* device);
 
 #ifdef SYSTYPE_FULL_OS
         void stop();
