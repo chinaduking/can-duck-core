@@ -23,8 +23,11 @@ namespace libfcn_v2{
     public:
         Node();
         ~Node(){
+#ifdef SYSTYPE_FULL_OS
             stop();
             spin();
+#endif //SYSTYPE_FULL_OS
+
         }
 
         int addPort(FrameIODevice* device);

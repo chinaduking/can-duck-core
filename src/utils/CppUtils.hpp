@@ -5,7 +5,7 @@
 #ifndef LIBFCN_CPPUTILS_HPP
 #define LIBFCN_CPPUTILS_HPP
 #include <cstdint>
-
+#include <memory>
 #ifdef SYSTYPE_FULL_OS
 #include <vector>
 #include <chrono>

@@ -15,6 +15,7 @@
 #include "BitLUT8.hpp"
 #include "DefaultAllocate.h"
 #include "utils/Tracer.hpp"
+#include "CppUtils.hpp"
 
 #ifdef USE_REQUEST_EVLOOP
 #include "ParamServerRequestEv.hpp"
