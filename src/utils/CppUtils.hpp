@@ -82,7 +82,6 @@ namespace utils{
     inline void perciseSleep(double time_d){
         #ifndef WIN32
         timespec ts = double2Timespec(time_d);
-        //TODO: windows nanosleep!
         nanosleep(&ts, nullptr);
         #else // WIN32
         nanosleep(time_d * 10e6);
