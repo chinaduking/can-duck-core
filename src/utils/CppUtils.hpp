@@ -127,13 +127,7 @@ namespace utils{
     template<typename T>
     struct is_pointer<T*> { static const bool value = true; };
 
-    /* support make_unique on C++11 */
-#if __cplusplus <= 201103L
-    template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args) {
-        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-    }
-#endif
+
 
 #ifdef SYSTYPE_FULL_OS
     #include <cassert>
@@ -145,5 +139,16 @@ namespace utils{
 #endif //SYSTYPE_FULL_OS
 
 }
+
+/* support make_unique on C++11 */
+
+#if __cplusplus <= 201103L
+namespace std{
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args) {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+}
+#endif
 
 #endif //LIBFCN_CPPUTILS_HPP

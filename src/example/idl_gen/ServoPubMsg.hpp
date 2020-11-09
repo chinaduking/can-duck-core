@@ -10,7 +10,7 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct test_ServoPubSubDict_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsg_C : public libfcn_v2::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         libfcn_v2::SerDesDictVal<int16_t> speed;
@@ -19,7 +19,7 @@ namespace fcnmsg{
         libfcn_v2::SerDesDictVal<int32_t> target_angle;
         libfcn_v2::SerDesDictVal<int16_t> mode;
 
-        test_ServoPubSubDict_C() : SerDesDict(
+        ServoPubMsg_C() : SerDesDict(
             5,
             &speed)
         ,
@@ -59,12 +59,12 @@ namespace fcnmsg{
         };
 
         inline void* createBuffer() override{
-            return new test_ServoPubSubDict_C::Buffer;
+            return new ServoPubMsg_C::Buffer;
         }
     };
 #pragma pack(0)
 
-    extern test_ServoPubSubDict_C test_ServoPubSubDict;
+    extern ServoPubMsg_C ServoPubMsg;
 }
 
 

@@ -3,7 +3,7 @@
 //
 #include "Node.hpp"
 #include "os_only/PosixSerial.hpp"
-#include "../idl_gen/test_ServoDict.hpp"
+#include "../idl_gen/ServoPubMsg.hpp"
 #include "Tracer.hpp"
 
 using namespace libfcn_v2;
@@ -19,13 +19,13 @@ int main(){
 
     auto pub_man = node.getPublisherManager();
 
-    auto servo_pub_channel = pub_man->createChannel(test_ServoPubSubDict, 0x07);
+    auto servo_pub_channel = pub_man->createChannel(ServoPubMsg, 0x07);
 
-    auto servo_pub_channel_2 = pub_man->createChannel(test_ServoPubSubDict, 0x07);
+    auto servo_pub_channel_2 = pub_man->createChannel(ServoPubMsg, 0x07);
 
     int cnt = 0;
     for(int i = 0; i < 1; i){
-        auto angle = test_ServoPubSubDict.angle;
+        auto angle = ServoPubMsg.angle;
 
         angle << cnt;
 
@@ -33,9 +33,9 @@ int main(){
 
         LOGD("publish a message!");
 
-        LOGD("target_angle = %d", servo_pub_channel->readBuffer(test_ServoPubSubDict.target_angle).data);
+        LOGD("target_angle = %d", servo_pub_channel->readBuffer(ServoPubMsg.target_angle).data);
 
-        LOGD("angle from local node = %d", servo_pub_channel_2->readBuffer(test_ServoPubSubDict.target_angle).data);
+        LOGD("angle from local node = %d", servo_pub_channel_2->readBuffer(ServoPubMsg.target_angle).data);
 
 
         perciseSleep(0.5);
