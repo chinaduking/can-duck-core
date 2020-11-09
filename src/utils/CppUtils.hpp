@@ -11,6 +11,33 @@
 #include <chrono>
 #endif //SYSTYPE_FULL_OS
 
+#ifdef WIN32
+#include <windows.h>	/* WinAPI */
+
+/* Windows sleep in 100ns units */
+inline BOOLEAN nanosleep(LONGLONG ns){
+    /* Declarations */
+    HANDLE timer;	/* Timer handle */
+    LARGE_INTEGER li;	/* Time defintion */
+    /* Create timer */
+    if(!(timer = CreateWaitableTimer(NULL, TRUE, NULL)))
+        return FALSE;
+    /* Set timer properties */
+    li.QuadPart = -ns;
+    if(!SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE)){
+        CloseHandle(timer);
+        return FALSE;
+    }
+    /* Start & wait for timer */
+    WaitForSingleObject(timer, INFINITE);
+    /* Clean resources */
+    CloseHandle(timer);
+    /* Slept without problems */
+    return TRUE;
+}
+
+#endif
+
 namespace utils{
 
 #ifdef SYSTYPE_FULL_OS
@@ -53,9 +80,13 @@ namespace utils{
     }
 
     inline void perciseSleep(double time_d){
+        #ifndef WIN32
         timespec ts = double2Timespec(time_d);
         //TODO: windows nanosleep!
-        //nanosleep(&ts, nullptr);
+        nanosleep(&ts, nullptr);
+        #else // WIN32
+        nanosleep(time_d * 10e6);
+        #endif // WIN32
     }
 #endif //SYSTYPE_FULL_OS
 

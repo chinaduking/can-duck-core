@@ -23,9 +23,17 @@ TEST(CppUtils, existInVector) {
 
 TEST(CppUtils, perciseSleep) {
 
-    for(int i = 0; i < 100; i ++){
+    for(int i = 0; i < 10; i ++){
         cout << i << endl;
+        cout << getCurrentTimeUs() << endl;
+        perciseSleep(1);
+        cout << getCurrentTimeUs() << endl;
+    }
+    for(int i = 0; i < 10; i ++){
+        cout << i << endl;
+        cout << getCurrentTimeUs() << endl;
         perciseSleep(0.1);
+        cout << getCurrentTimeUs() << endl;
     }
 
 }

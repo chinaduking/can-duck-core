@@ -43,7 +43,6 @@ bool FrameIODevice::pushTxQueue(FramePtr frame){
     tx_frame_queue.push(*frame);
 
     LOGV("push to frame buffer, b_cnt = %d", tx_frame_queue.size());
-    //TODO: con_var to trigger send!!
 
 #ifdef SYSTYPE_FULL_OS
     write_ctrl_cv.notify_all();
