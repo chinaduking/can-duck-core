@@ -6,7 +6,7 @@
 #define LIBFCN_V2_PARAMSERVER_HPP
 
 #include <cstdint>
-#include <utility>
+#include <memory>
 #include "vector_s.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
@@ -94,7 +94,7 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(utils::make_unique<ParamServerRequestEv>(
+            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
                     this,
                     frame,
                     (uint8_t)OpCode::ParamServer_ReadAck,
@@ -125,7 +125,7 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(utils::make_unique<ParamServerRequestEv>(
+            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
                     this,
                     frame,
                     (uint8_t)OpCode::ParamServer_WriteAck,
