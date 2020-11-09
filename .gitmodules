@@ -1,3 +1,0 @@
-[submodule "src/example/libfcn_stm32"]
-	path = src/example/libfcn_stm32
-	url = ssh://git@123.57.138.117:2223/dev/libfcn_stm32.git
