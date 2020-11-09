@@ -35,6 +35,9 @@ int main(){
 
         LOGD("target_angle = %d", servo_pub_channel->readBuffer(test_ServoPubSubDict.target_angle).data);
 
+        LOGD("angle from local node = %d", servo_pub_channel_2->readBuffer(test_ServoPubSubDict.target_angle).data);
+
+
         perciseSleep(0.5);
 
         cnt ++;
