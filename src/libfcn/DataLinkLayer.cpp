@@ -356,8 +356,8 @@ static char* mOpCodeStr[]={
 std::string libfcn_v2::frame2log(DataLinkFrame& frame){
 #ifdef ENABLE_TRACE
     static const int BUFFER_RESERVE = 120;
-
-    char buffer[DATALINK_MTU * 4 + BUFFER_RESERVE];
+    static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;
+    char buffer[BUFFER_SIZE];
 
     if(frame.payload_len > DATALINK_MTU){
         return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
@@ -367,7 +367,8 @@ std::string libfcn_v2::frame2log(DataLinkFrame& frame){
         opcode_str = mOpCodeStr[frame.op_code];
     }
 
-    sprintf(buffer, "-----FRAME----\n"
+    snprintf(buffer, BUFFER_SIZE - 2,
+             "-----FRAME----\n"
                     " %s (0x%.2X) :  [0x%.2X]->[0x%.2X] \n"
                     " Message ID = 0x%.2X\n"
                     " Payload [%.2d] = ",
@@ -390,11 +391,14 @@ std::string libfcn_v2::frame2log(DataLinkFrame& frame){
     }
 
     for(int i = 0; i < frame.payload_len; i ++){
-        sprintf(&buffer[info_offset + i * 3], "%.2X ", frame.payload[i] & 0xff);
+        snprintf(&buffer[info_offset + i * 3],
+                 BUFFER_SIZE - 2,
+                 "%.2X ", frame.payload[i] & 0xff);
     }
 
-    sprintf(&buffer[info_offset + frame.payload_len * 3], "\n\"%s\"\n", frame
-            .payload);
+    snprintf(&buffer[info_offset + frame.payload_len * 3],
+            BUFFER_SIZE - 2,
+            "\n\"%s\"\n", frame.payload);
 
     //TODO: cutoff
 //    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';

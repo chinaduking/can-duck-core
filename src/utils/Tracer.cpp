@@ -155,26 +155,33 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
         //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     }
 
-    /* Info */
-    ret = sprintf(trace_buffer,
+    /* Info
+     * split into two part, or snprintf will crash under windows
+     * */
+    ret = snprintf(trace_buffer,TRACE_BUFFER_SIZE - 3,
                           "%s  "  /* Level */
                           "%lu "  /* Timestamp */
                           "(+%lu us) "  /* Timestamp Diff */
-                          "[%s] "  /* Tag */
-                            ,level_name[(uint8_t)level]
-                             , timestamp,
-                              (uint64_t)(timestamp - timestamp_last),
-                            tag);
-
-    timestamp_last = timestamp;
-
+                        , level_name[(uint8_t)level]
+                        , timestamp
+                        , (uint64_t)(timestamp - timestamp_last)
+                        );
     if(ret >= 0){
         trace_buffer[ret] = 0;
         batchWrite((uint8_t*)trace_buffer, strlen(trace_buffer) + 1);
     }
 
+    timestamp_last = timestamp;
+
+    ret = snprintf(trace_buffer,TRACE_BUFFER_SIZE - 3,"[%s]  " , tag);
+    if(ret >= 0){
+        trace_buffer[ret] = 0;
+        batchWrite((uint8_t*)trace_buffer, strlen(trace_buffer) + 1);
+    }
+
+
     /* Content */
-    ret = vsprintf(trace_buffer, format, arg_ptr);
+    ret = vsnprintf(trace_buffer,TRACE_BUFFER_SIZE - 3 , format, arg_ptr);
 
     if(ret >= 0){
         trace_buffer[ret] = 0;
