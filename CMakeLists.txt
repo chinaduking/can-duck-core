@@ -62,8 +62,6 @@ message("-----> git describe: " ${GIT_COMMAND_OUTPUT})
 
 add_definitions(-DGIT_DESCRIBE_STR="${GIT_COMMAND_OUTPUT}")
 
-add_subdirectory(thirdparty/googletest)
-
 #------------Check Target Platform---------------
 # CMAKE_SYSTEM_NAME may be: Linux, Windows, Darwin(MacOSX), Android
 message("----> CMAKE_SYSTEM_NAME is: " ${CMAKE_SYSTEM_NAME})
