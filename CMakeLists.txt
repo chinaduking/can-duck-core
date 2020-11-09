@@ -14,12 +14,16 @@ else()
 endif()
 
 #------------Set Compile Flags-------------------
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops -fpic \
--Wall -Wno-sign-compare -Wno-unused-private-field -Wno-writable-strings \
--Werror=return-type  -Wno-unused-variable\
- -pthread -ffast-math")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops -fpic \
+#-Wall -Wno-sign-compare -Wno-unused-private-field -Wno-writable-strings \
+#-Werror=return-type  -Wno-unused-variable\
+# -pthread -ffast-math")
+#
+#set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops -fpic -pthread -Wno-sign-compare -Werror=return-type -ffast-math")
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops -fpic -pthread -Wno-sign-compare -Werror=return-type -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops")
+
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops")
 
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
@@ -66,6 +70,11 @@ message("----> CMAKE_SYSTEM_NAME is: " ${CMAKE_SYSTEM_NAME})
 message("----> CMAKE_SYSTEM_PROCESSOR is: " ${CMAKE_SYSTEM_PROCESSOR})
 
 add_definitions(-DSYSTYPE_FULL_OS)
+
+
+
+find_package(GTest CONFIG REQUIRED)
+
 
 #------------Add Submodule---------------
 

@@ -54,7 +54,8 @@ namespace utils{
 
     inline void perciseSleep(double time_d){
         timespec ts = double2Timespec(time_d);
-        nanosleep(&ts, nullptr);
+        //TODO: windows nanosleep!
+        //nanosleep(&ts, nullptr);
     }
 #endif //SYSTYPE_FULL_OS
 
@@ -102,6 +103,7 @@ namespace utils{
     }
 
 #ifdef SYSTYPE_FULL_OS
+    #include <cassert>
     #define USER_ASSERT(t) assert(t)
 
 #else //SYSTYPE_FULL_OS

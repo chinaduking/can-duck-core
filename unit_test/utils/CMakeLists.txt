@@ -1,4 +1,4 @@
-set(UT_DEFAULT_LIBS tracer  gtest gtest_main)
+set(UT_DEFAULT_LIBS tracer GTest::gmock_main  GTest::gtest  GTest::gtest_main)
 
 include_directories(${PROJECT_SOURCE_DIR}/unit_test)
 
