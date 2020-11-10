@@ -10,6 +10,11 @@
 using namespace std;
 /*
  * http://members.ee.net/brey/Serial.pdf
+ *
+ * https://docs.microsoft.com/en-us/previous-versions/ms810467(v=msdn.10)?redirectedfrom=MSDN
+ *
+ *
+ * https://doc.qt.io/qt-5/qserialport.html#baudRate-prop
  **/
 bool WriteComPort(CString PortSpecifier, CString data)
 {
