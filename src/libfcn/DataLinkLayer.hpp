@@ -52,8 +52,9 @@ namespace libfcn_v2{
          * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
         DataLinkFrame& operator=(const DataLinkFrame& other){
 
-            /*单周期拷贝前8字节数据 (src_id ~ payload[2])*/
-            *((uint64_t*) this) = *((uint64_t*)&other);
+            /*2周期拷贝前8字节数据 (src_id ~ payload[2])*/
+//            *((uint64_t*) this) = *((uint64_t*)&other);
+            utils::memcpy(this, (void*)&other, 8);
 
             /* 小于2字节数据，则在上一操作中已经拷贝完成。不需要知道具体payload大小 */
             if(payload_len <= 2){
