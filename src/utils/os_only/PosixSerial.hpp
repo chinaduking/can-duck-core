@@ -22,6 +22,9 @@ namespace utils{
         ~PosixSerial();
         int32_t read(uint8_t *data, uint32_t len) override ;
         int32_t write(const uint8_t *data, uint32_t len) override;
+
+        bool isWriteBusy() override;
+
         int32_t sync();
         int32_t reinit();
 

@@ -115,12 +115,17 @@ PosixSerial::~PosixSerial()
     close(serial_fd);
 }
 
+
 int32_t PosixSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
 
     int res = (int32_t)::read(serial_fd, data, len);
 
     return res;
+}
+
+bool PosixSerial::isWriteBusy() {
+    return false;
 }
 
 int32_t PosixSerial::write(const uint8_t *data, uint32_t len) {

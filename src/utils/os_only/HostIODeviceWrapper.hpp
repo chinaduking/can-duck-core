@@ -15,6 +15,9 @@ namespace utils{
         ~StdoutIODviceWrapper() override = default;
         int32_t read(uint8_t *data, uint32_t len) override ;
         int32_t write(const uint8_t *data, uint32_t len) override ;
+        inline bool isWriteBusy() override{
+            return false;
+        }
     };
 
     class FileIODviceWrapper : public LLByteDevice{
@@ -23,6 +26,10 @@ namespace utils{
         ~FileIODviceWrapper() override = default;
         int32_t read(uint8_t *data, uint32_t len) override ;
         int32_t write(const uint8_t *data, uint32_t len) override ;
+
+        inline bool isWriteBusy() override{
+            return false;
+        }
 
     private:
         std::string path;
