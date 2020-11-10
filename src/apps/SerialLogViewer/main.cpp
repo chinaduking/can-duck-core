@@ -44,7 +44,7 @@ int main( int argc, char *argv[]){
         }
     }
 
-    PosixSerial serial(0, B921600);
+    PosixSerial serial(sid, B921600);
 
 
     uint8_t line_wrap = 20;
