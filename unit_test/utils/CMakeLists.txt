@@ -7,7 +7,7 @@ add_executable(testTracer Tracer.cpp)
 target_link_libraries(testTracer ${UT_DEFAULT_LIBS})
 
 
-add_executable(testArray Array.cpp)
+add_executable(testArray Array.cpp WinSerial.cpp)
 target_link_libraries(testArray ${UT_DEFAULT_LIBS})
 
 add_executable(testCppUtils CppUtils.cpp)
@@ -17,10 +17,8 @@ target_link_libraries(testCppUtils ${UT_DEFAULT_LIBS})
 add_executable(testVector vector_s.cpp)
 target_link_libraries(testVector ${UT_DEFAULT_LIBS})
 
-
 add_executable(testPosixSerial PosixSerial.cpp)
 target_link_libraries(testPosixSerial serial_port ${UT_DEFAULT_LIBS})
-
 
 add_executable(testESharedPtr ESharedPtr.cpp)
 target_link_libraries(testESharedPtr fcn_v2 ${UT_DEFAULT_LIBS})
@@ -45,3 +43,6 @@ target_link_libraries(testEvloop fcn_v2 ${UT_DEFAULT_LIBS})
 
 add_executable(testQueue queue_s.cpp)
 target_link_libraries(testQueue ${UT_DEFAULT_LIBS})
+
+add_executable(testWinSerial WinSerial.cpp)
+
