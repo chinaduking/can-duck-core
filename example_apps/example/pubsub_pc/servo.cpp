@@ -1,10 +1,9 @@
 //
 // Created by sdong on 2020/11/8.
 //
-#include "Node.hpp"
-#include "os_only/HostSerial.hpp"
+#include "libfcn/Node.hpp"
+#include "utils/os_only/HostSerial.hpp"
 #include "../idl_gen/ServoPubMsg.hpp"
-#include "Tracer.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;

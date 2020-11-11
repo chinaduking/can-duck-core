@@ -1,5 +1,4 @@
-include_directories(../../src/libfcn)
-include_directories(../../src/utils)
+include_directories(../../src)
 
 add_executable(pubsub_pc_host
         pubsub_pc/host.cpp

@@ -1,4 +1,3 @@
-include_directories(${PROJECT_SOURCE_DIR}/src/libfcn)
 
 set(UT_DEFAULT_LIBS tracer GTest::gmock_main  GTest::gtest  GTest::gtest_main)
 
