@@ -18,44 +18,82 @@
 using namespace utils;
 using namespace std;
 
-HostSerial::HostSerial(int id, uint32_t baud,
-                       uint16_t read_timeout_ms ): LLByteDevice(),
-                                                     baud(baud){
-    /*TODO: use FTDI device ID to open serial (FTDI-D2XX Driver)
-     * AR: @jin.wang*/
+vector<uint32_t> HostSerial::defaultBaudRates = {
+    2400,
+    4800,
+    9600,
+    115200,
+    256000,
+    512000,
+    921600,
+    2000000,
+    3000000
+};
+
+std::vector<std::string> HostSerial::discoverPort() {
+#ifndef WIN32
+    vector<string> usb_serial;
+
+    char* pattern_unix[] = {
+            (char*)"ttyUSB",   /*Ubuntu下的串口设备*/
+            (char*)"cu.usbserial-", /*Mac下的串口设备*/
+            (char*)"ttyS"  /*Android下的串口设备*/
+    };
+
+    DIR *dir;
+    struct dirent *ent;
+
+    string dev_dir = "/dev";
+    if ((dir = opendir (dev_dir.c_str())) != NULL) {
+        /* 列出路径下所有文件 */
+        while ((ent = readdir (dir)) != NULL) {
+//            printf ("%s\n", ent->d_name);
+            for(auto pattern : pattern_unix){
+                if(strncmp(pattern, ent->d_name, strlen(pattern)) == 0){
+                    LOGD("\nFound USB Serial Device: %s\n", ent->d_name);
+                    usb_serial.push_back(dev_dir + "/" + string(ent->d_name));
+                }
+            }
+
+        }
+        closedir (dir);
+    } else {
+        /* could not open directory */
+        LOGF("could not open directory /dev");
+        throw runtime_error("could not open directory /dev");
+    }
+
+    return usb_serial;
+#else  //WIN32
+#endif  //WIN32
+}
+
+
+int HostSerial::open(std::string port_name_,
+                     uint32_t baud_,
+                     uint16_t read_timeout_ms) {
+    if(is_open){
+        LOGE("port %s is already opened!", this->port_name.c_str());
+        return -3;
+    }
     is_open = false;
 
-
-    auto serial_devices = listUSBDevice();
-
-    if(serial_devices.size() == 0){
-        LOGE("no usb serial found!!");
-        return ;
-    }
-
-    if(id >= serial_devices.size()){
-        LOGE("too large serial num. only %d devices are found!",
-             serial_devices.size());
-
-        return ;
-    }
-
-    LOGD("opening %s", serial_devices[id].c_str());
-
-    serial_fd = open(serial_devices[id].c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+#ifndef WIN32
+    serial_fd = ::open(port_name_.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if(serial_fd < 0) {
         LOGE("open file failed");
-        return;
+        return -1;
     }
 
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
     if(tcgetattr(serial_fd, &tty) != 0) {
-        return;
+        LOGE("tcgetattr failed");
+        return -2;
     }
 
-    cfsetispeed(&tty, baud);
-    cfsetospeed(&tty, baud);
+    cfsetispeed(&tty, baud_);
+    cfsetospeed(&tty, baud_);
 
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
     // disable IGNBRK for mismatched speed tests; otherwise receive break
@@ -85,7 +123,6 @@ HostSerial::HostSerial(int id, uint32_t baud,
     }
     is_blocking_recv = true;
 
-
     tty.c_iflag &= ~(IXON | IXOFF | IXANY | ICRNL);     // shut off xon/xoff ctrl; Don't translate CR to newline
 
     tty.c_cflag |= (CLOCAL | CREAD);                    // ignore modem controls,
@@ -95,86 +132,85 @@ HostSerial::HostSerial(int id, uint32_t baud,
     tty.c_cflag &= ~CRTSCTS;
 
     if(tcsetattr(serial_fd, TCSANOW, &tty) != 0) {
-        return;
+        LOGE("tcsetattr failed");
+        return -2;
     }
 
     is_open = true;
 
-    LOGD("opened %s", serial_devices[id].c_str());
+    this->port_name = port_name_;
+    this->baud = baud_;
+
+    return 0;
+#else  //WIN32
+#endif  //WIN32
+}
+
+int HostSerial::open(int id, uint32_t baud, uint16_t read_timeout_ms) {
+    is_open = false;
+
+    auto serial_devices = discoverPort();
+
+    if(serial_devices.size() == 0){
+        LOGE("no usb serial found!!");
+        return -1;
+    }
+
+    if(id >= serial_devices.size()){
+        LOGE("too large serial num. only %d devices are found!",
+             serial_devices.size());
+        return -2;
+    }
+
+    LOGD("opening %s", serial_devices[id].c_str());
+    int res = open(serial_devices[id], baud, read_timeout_ms);
+    LOGD("opened %s", port_name.c_str());
+
+    return res;
+}
+
+
+int HostSerial::close() {
+#ifndef WIN32
+    ::close(serial_fd);
+#else  //WIN32
+#endif  //WIN32
 }
 
 bool HostSerial::isOpen() {
     return is_open;
 }
 
-HostSerial::~HostSerial()
-{
+HostSerial::~HostSerial() {
     LOGD("close serial..");
-
     if(!is_open){ return; }
-    close(serial_fd);
+    close();
 }
 
 
 int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
-
+#ifndef WIN32
     int res = (int32_t)::read(serial_fd, data, len);
-
-    return res;
+#else  //WIN32
+#endif  //WIN32
 }
 
 bool HostSerial::isWriteBusy() {
-    return false;
+    return !isOpen();
 }
 
 int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
+#ifndef WIN32
     return (int32_t)::write(serial_fd, data, len);
+#else  //WIN32
+#endif  //WIN32
 }
 
 int32_t HostSerial::sync() {
-    return fsync(serial_fd);
+#ifndef WIN32
+    return ::fsync(serial_fd);
+#else  //WIN32
+#endif  //WIN32
 }
-
-int32_t HostSerial::reinit() {
-
-    return 0;
-}
-
-std::vector<std::string> HostSerial::listUSBDevice(){
-    vector<string> usb_serial;
-
-    char* pattern_unix[] = {
-            (char*)"ttyUSB",   /*Ubuntu下的串口设备*/
-            (char*)"cu.usbserial-", /*Mac下的串口设备*/
-            (char*)"ttyS"  /*Android下的串口设备*/
-    };
-
-
-    DIR *dir;
-    struct dirent *ent;
-
-    string dev_dir = "/dev";
-    if ((dir = opendir (dev_dir.c_str())) != NULL) {
-        /* 列出路径下所有文件 */
-        while ((ent = readdir (dir)) != NULL) {
-//            printf ("%s\n", ent->d_name);
-            for(auto pattern : pattern_unix){
-                if(strncmp(pattern, ent->d_name, strlen(pattern)) == 0){
-                    LOGD("\nFound USB Serial Device: %s\n", ent->d_name);
-                    usb_serial.push_back(dev_dir + "/" + string(ent->d_name));
-                }
-            }
-
-        }
-        closedir (dir);
-    } else {
-        /* could not open directory */
-        LOGF("could not open directory /dev");
-        throw runtime_error("could not open directory /dev");
-    }
-
-    return usb_serial;
-}
-
