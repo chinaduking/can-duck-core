@@ -87,5 +87,5 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 
-add_subdirectory(src/example/)
-add_subdirectory(src/apps/SerialLogViewer)
+add_subdirectory(example_apps/example/)
+add_subdirectory(example_apps/apps/SerialLogViewer)
