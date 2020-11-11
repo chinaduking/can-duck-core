@@ -5,7 +5,7 @@
 #ifndef LIBFCN_STDIO_HPP
 #define LIBFCN_STDIO_HPP
 
-#include "LLComDevice.hpp"
+#include "utils/LLComDevice.hpp"
 
 #include <string>
 namespace utils{

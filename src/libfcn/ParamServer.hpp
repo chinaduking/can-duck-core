@@ -7,15 +7,19 @@
 
 #include <cstdint>
 #include <memory>
-#include "vector_s.hpp"
+
+#include "utils/BitLUT8.hpp"
+#include "utils/Tracer.hpp"
+#include "utils/vector_s.hpp"
+#include "utils/CppUtils.hpp"
+
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "DefaultAllocate.h"
 #include "OpCode.hpp"
-#include "BitLUT8.hpp"
 #include "DefaultAllocate.h"
-#include "utils/Tracer.hpp"
-#include "CppUtils.hpp"
+
+
 
 #ifdef USE_REQUEST_EVLOOP
 #include "ParamServerRequestEv.hpp"

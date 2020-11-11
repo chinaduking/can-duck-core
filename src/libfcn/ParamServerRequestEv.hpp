@@ -7,8 +7,8 @@
 
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
-#include "EventLoop.hpp"
-#include "ObjPool.hpp"
+#include "utils/EventLoop.hpp"
+#include "utils/ObjPool.hpp"
 
 namespace libfcn_v2{
 

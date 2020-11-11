@@ -69,18 +69,13 @@ message("----> CMAKE_SYSTEM_PROCESSOR is: " ${CMAKE_SYSTEM_PROCESSOR})
 
 add_definitions(-DSYSTYPE_FULL_OS)
 
-
-
 find_package(GTest CONFIG REQUIRED)
-
-
 #------------Add Submodule---------------
 
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/libfcn)
-include_directories(${PROJECT_SOURCE_DIR}/src/utils)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)

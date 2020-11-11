@@ -8,14 +8,13 @@
 #include <cstdint>
 #include <cstddef>
 
-#include "LLComDevice.hpp"
-#include "ESharedPtr.hpp"
 #include "DefaultAllocate.h"
-#include "vector_s.hpp"
-#include "CppUtils.hpp"
-#include "queue_s.hpp"
 
-
+#include "utils/CppUtils.hpp"
+#include "utils/ESharedPtr.hpp"
+#include "utils/vector_s.hpp"
+#include "utils/queue_s.hpp"
+#include "utils/LLComDevice.hpp"
 
 namespace libfcn_v2{
     /* IDs */

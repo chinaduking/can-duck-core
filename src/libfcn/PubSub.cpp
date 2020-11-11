@@ -5,8 +5,8 @@
 #include "PubSub.hpp"
 #include "NetworkLayer.hpp"
 #include "OpCode.hpp"
-#include "CppUtils.hpp"
 
+#include "utils/CppUtils.hpp"
 #include "utils/Tracer.hpp"
 
 using namespace libfcn_v2;
