@@ -2,10 +2,9 @@
 // Created by sdong on 2020/10/22.
 //
 
-#include "Node.hpp"
-#include "os_only/HostSerial.hpp"
+#include "libfcn/Node.hpp"
+#include "utils/os_only/HostSerial.hpp"
 #include "../idl_gen/ServoPubMsg.hpp"
-#include "Tracer.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;
@@ -27,7 +26,7 @@ int main(){
     for(int i = 0; i < 1; i){
         auto target_angle = ServoPubMsg.target_angle;
 
-        target_angle << 200 * cnt;
+        target_angle  << cnt;
 
         servo_pub_channel->publish(target_angle);
 
