@@ -19,7 +19,7 @@ namespace frame_device_test{
 
         uint16_t src_buffer_len = strlen(src_test_buffer) + 1;
 
-        DataLinkFrame src_frame;
+        FcnFrame src_frame;
 //        ESharedPtr<DataLinkFrame> src_frame(new DataLinkFrame());
 
         src_frame.src_id  = 0x03;
@@ -29,7 +29,7 @@ namespace frame_device_test{
         src_frame.payload_len = src_buffer_len;
         memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
 
-        DataLinkFrame dest_frame;
+        FcnFrame dest_frame;
 
         thread recv([&](){
             for(int i = 0; i < 1;){

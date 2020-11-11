@@ -17,7 +17,7 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
     return device->local_device_id;
 }
 
-int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
+int NetworkLayer::sendFrame(uint16_t port_id, FcnFrame *frame) {
 
     LOGI("NetworkLayer::popTxQueue:\n\r%s",
          frame2log(*frame).c_str());
@@ -31,7 +31,7 @@ int NetworkLayer::sendFrame(uint16_t port_id, DataLinkFrame *frame) {
 
 /* 将不同命令字分配到不同协议上
  * */
-void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_port_id) {
+void NetworkLayer::recvProtocolDispatcher(FcnFrame *frame, uint16_t recv_port_id) {
 
     LOGI("NetworkLayer::recvProtocolDispatcher:\n\r%s",
          frame2log(*frame).c_str());
@@ -70,7 +70,7 @@ void NetworkLayer::recvProtocolDispatcher(DataLinkFrame *frame, uint16_t recv_po
 }
 
 void NetworkLayer::recvPolling() {
-    DataLinkFrame frame_tmp;
+    FcnFrame frame_tmp;
 
     /* 轮询读取数据
      * 注意，如果有多个端口，且读为阻塞模式，则会多个端口

@@ -16,7 +16,7 @@ using namespace libfcn_v2;
 
 namespace evloop_test{
 
-    using FcnEvLoop = EventLoop<DataLinkFrame> ;
+    using FcnEvLoop = EventLoop<FcnFrame> ;
 
     class TestTask : public FcnEvLoop::Task {
     public:
@@ -60,7 +60,7 @@ namespace evloop_test{
             prev_callback_time_us = time_us;
         }
 
-        bool matchNotifyMsg(DataLinkFrame& msg) override {
+        bool matchNotifyMsg(FcnFrame& msg) override {
             if(msg.src_id == 1){
                 return true;
             }
@@ -68,7 +68,7 @@ namespace evloop_test{
             return false;
         }
 
-        void evNotifyCallback(DataLinkFrame& msg) override {
+        void evNotifyCallback(FcnFrame& msg) override {
             cout << name <<" -- evNotifyCallback!! " << getCurrentTimeUs() << endl;
             cout << "payload: " << frame2log(msg) << endl;
             cout << name <<" ::: call evRestart. " << endl;
@@ -153,7 +153,7 @@ namespace evloop_test{
         evloop.addTask(make_unique<TestTask>(300, "300ms_task", 100));
         sleep(1);
 
-        DataLinkFrame msg;
+        FcnFrame msg;
 
         char* payload = "hello world";
         int payload_size = strlen(payload) + 1;

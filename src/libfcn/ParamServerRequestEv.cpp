@@ -40,14 +40,14 @@ void ParamServerRequestEv::evUpdate(){
 }
 
 
-bool ParamServerRequestEv::matchNotifyMsg(DataLinkFrame& frame){
+bool ParamServerRequestEv::matchNotifyMsg(FcnFrame& frame){
     return frame.src_id == cached_req.dest_id
            && frame.op_code == ack_op_code
            && frame.msg_id == cached_req.msg_id;
 }
 
 
-void ParamServerRequestEv::evNotifyCallback(DataLinkFrame& frame){
+void ParamServerRequestEv::evNotifyCallback(FcnFrame& frame){
     onRecv(frame);
     evExit();
 }
@@ -69,7 +69,7 @@ void ParamServerRequestEv::evTimeoutCallback() {
 }
 
 
-void RequestCallback::call(int ev_code, DataLinkFrame *frame){
+void RequestCallback::call(int ev_code, FcnFrame *frame){
     if(cb != nullptr){
         (*cb)(ctx_obj, ev_code ,frame);
     }
@@ -82,7 +82,7 @@ void ParamServerRequestEv::onTimeout() {
     callback.call(2, nullptr);
 }
 
-void ParamServerRequestEv::onRecv(DataLinkFrame &frame) {
+void ParamServerRequestEv::onRecv(FcnFrame &frame) {
 //    if(context_client->serdes_dict == nullptr){
 //        return;
 //    }

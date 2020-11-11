@@ -61,7 +61,7 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
 }
 
 void libfcn_v2::singleWriteFrameBuilder(
-        DataLinkFrame* result_frame,
+        FcnFrame* result_frame,
         uint16_t src_id,
         uint16_t dest_id,
         uint16_t op_code,
@@ -88,7 +88,7 @@ void libfcn_v2::singleWriteFrameBuilder(
 
 }
 
-void PubSubChannel::networkPublish(DataLinkFrame *frame) {
+void PubSubChannel::networkPublish(FcnFrame *frame) {
     if(network_layer != nullptr){
         //TODO: by publish ctrl rules!!
         network_layer->sendFrame(0, frame);
@@ -102,7 +102,7 @@ void PubSubChannel::networkPublish(DataLinkFrame *frame) {
  */
 
 
-void PublisherManager::handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id) {
+void PublisherManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
     PubSubChannel* channel = nullptr;
 
     for(auto& ch : pub_sub_channels){
@@ -182,7 +182,7 @@ void PublisherManager::addPubCtrlRule(PubCtrlRule& rule){
     pub_ctrl_rules.push_back(rule);
 }
 
-DataLinkFrame frame_tmp;
+FcnFrame frame_tmp;
 
 void PublisherManager::update(){
 

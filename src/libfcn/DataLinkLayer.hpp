@@ -23,47 +23,76 @@ namespace libfcn_v2{
 
     /* 注意：为了能快速计算CRC，选择数组长度时请保证Frame的内存对齐。*/
     static const int DATALINK_MTU = DATALINK_MAX_TRANS_UNIT;
-    static const int MAX_NODE_NUM = 8;
-    static const int MAX_NODE_ID = MAX_NODE_NUM - 1;
+    static const int MAX_NODE_NUM = MAX_LOCAL_NODE_NUM;
+    static const int MAX_NODE_ID  = MAX_NODE_NUM - 1;
+
+    static const int FRAME_HEADER_LEN = 2;
+    static const int FRAME_CRC_LEN    = 2;
 
 #pragma pack(4)
-    struct DataLinkFrame{
-        /* 为了能快速计算CRC，请
-         * 保证内存对齐。*/
-        uint16_t payload_len { 0 };   /* [3:2] 数据内容长度，放在第一个，CRC计算时跳过*/
+    /* 为了能快速收发数据和计算CRC，请保证在当前内存对齐配置下，成员的地址连续。*/
+    struct FcnFrame{
+        uint8_t priority    { 0 };     /* [DW0 3] 优先级*/
 
-        uint8_t  src_id      { 0 };   /* [1]   源节点ID   */
-        uint8_t  dest_id     { 0 };   /* [0]   目标节点ID */
+        /* [DW0 2:1] 以字节形式传输的通信设备的帧头。注意为低位对高位
+         *           如默认帧头为[0, 0x55, 0xAA]，保持和长度地址连续*/
+        uint8_t header[FRAME_HEADER_LEN] { 0, 0 };
 
-        uint8_t  op_code     { 0 };   /* [3]   操作码     */
-        uint8_t  msg_id      { 0 };   /* [2]   消息ID     */
+        uint8_t frame_len   { 0 };   /* [DW0 0] 整个数据帧长度，放在第一个，CRC计算时跳过*/
 
-        uint8_t  payload[DATALINK_MTU] {}; /*[1:0][...]  数据内容。
-         *
-         * TODO：分长短两种payload。长payload在64byte大小的堆上，地址在payload中存储。
-         * 在payloadlen中进行标记。短Frame为8Byte
-         * */
+        /* 网络层信息自此开始
+         * Network Layer Info */
+        uint8_t src_id      { 0 };   /* [DW1 3] 源节点ID   */
+        uint8_t dest_id     { 0 };   /* [DW1 2] 目标节点ID */
 
-//        framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。
-//                               * 进行传输时，最大值为65535
-//                               * （6.5535s）*/
+        uint8_t op_code     { 0 };   /* [DW1 1] 操作码     */
+        uint8_t msg_id      { 0 };   /* [DW1 0] 消息ID     */
+
+        uint8_t payload[DATALINK_MTU + FRAME_CRC_LEN] {};
+        uint8_t payload_len   { 0 };
+
+        /* 获取指向第一个帧头的指针 */
+        inline uint8_t* getHeaderPtr(){
+            return (uint8_t*)&header;
+        }
+
+        /* 获取指向网路数据包帧信息开头的指针 */
+        inline uint8_t* getNetworkFramePtr(){
+            return (uint8_t*)&src_id;
+        }
+        /* 获取指向网路数据包帧大小 */
+        inline uint16_t getNetworkFrameSize(){
+            /* 4个帧信息:
+             *  src_id | dest_id | op_code | msg_id
+             */
+            return payload_len + 4;
+        }
+
+        /* 获取指向CRC起始的指针 */
+        inline uint8_t* getCrcPtr(){
+            return payload + payload_len;
+        }
+
+        /* 获取整个数据帧占有内存的有效大小 */
+        inline uint16_t getFrameMemSize(){
+            /* 5个帧信息:
+             * payload_len | src_id | dest_id | op_code | msg_id
+             *
+             * 2个CRC
+             * */
+            return FRAME_HEADER_LEN + 7 + payload_len;
+        };
+
+//        framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。进行传输时，最大值为65535 */
 
         /* 快速数据帧拷贝
          * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
-        DataLinkFrame& operator=(const DataLinkFrame& other){
+        FcnFrame& operator=(const FcnFrame& other){
 
-            /*2周期拷贝前8字节数据 (src_id ~ payload[2])*/
-//            *((uint64_t*) this) = *((uint64_t*)&other);
-            utils::memcpy(this, (void*)&other, 8);
+            utils::memcpy(this, (FcnFrame*)&other,
+                          ((FcnFrame&)other).getFrameMemSize());
 
-            /* 小于2字节数据，则在上一操作中已经拷贝完成。不需要知道具体payload大小 */
-            if(payload_len <= 2){
-                return *this;
-            }
-
-            /* 拷贝剩余数据 */
-            utils::memcpy(&payload[2], (void*)&(other.payload[2]),
-                          payload_len - 2);
+            this->payload_len = other.payload_len;
             return *this;
         }
 
@@ -76,9 +105,9 @@ namespace libfcn_v2{
     };
 #pragma pack(0)
 
-    std::string frame2log(DataLinkFrame& frame);
+    std::string frame2log(FcnFrame& frame);
 
-    typedef DataLinkFrame* FramePtr;
+    typedef FcnFrame* FramePtr;
 //    typedef utils::ESharedPtr<DataLinkFrame> FramePtr;
 }
 
@@ -167,7 +196,7 @@ namespace libfcn_v2{
         virtual bool popTxQueue(FramePtr frame) = 0;
 
     private:
-        utils::queue_s<DataLinkFrame> tx_frame_queue;
+        utils::queue_s<FcnFrame> tx_frame_queue;
 
         FramePtr sending_frame{nullptr};
 
@@ -191,32 +220,25 @@ namespace libfcn_v2{
         ~ByteStreamParser() = default;
 
         void setHeader(utils::vector_s<uint8_t>& header_);
-        int8_t parseOneByte(uint8_t new_byte, FramePtr out_frame_buf);
+        int8_t rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame);
 
     private:
-        enum class State {
+        utils::vector_s<uint8_t> header;
+
+        enum class State : uint8_t {
             HEADER0 = 0,
             HEADER1,
             LEN,
-            SRC_ID,
-            DEST_ID,
-            OP_CODE,
-            MSG_ID,
-            PAYLOAD,
-            CRC0,
-            CRC1
+            NWK_FRM_CRC,
         };
+
         State recv_state { State::HEADER0 };
 
-        utils::vector_s<uint8_t> header;
+        uint8_t* frame_wr_ptr {nullptr};
 
-        /*  high 8b -> crc_buf[0]
-         *  low  8b -> crc_buf[1] */
-        uint8_t  crc_buf[2] { 0, 0 };
         uint32_t expect_len { 0 };
 
         int max_buf { 0 };
-        int payload_recv_cnt { 0 };
 
         int valid_frame_cnt  { 0 };
         int error_frame_cnt  { 0 };
@@ -228,7 +250,7 @@ namespace libfcn_v2{
 
     class ByteFrameIODevice : public FrameIODevice{
     public:
-        static const int MAX_HEADER_LEN = 4;
+        static const int MAX_HEADER_LEN = FRAME_HEADER_LEN;
 
         explicit ByteFrameIODevice(LLByteDevice* ll_byte_dev, int frame_buffer_sz=8):
                 FrameIODevice(frame_buffer_sz),
@@ -257,7 +279,7 @@ namespace libfcn_v2{
         bool popRxQueue(FramePtr frame) override;
 
     private:
-        bool popTxQueue(FramePtr frame) override;
+        bool popTxQueue(FramePtr send_frame) override;
 
         LLByteDevice* const ll_byte_dev;
         utils::vector_s<uint8_t> header;
@@ -284,8 +306,8 @@ namespace libfcn_v2{
 
         ~CanFrameIODevice() override = default;
 
-        bool read(DataLinkFrame* frame) override;
-        bool write(DataLinkFrame* frame) override;
+        bool read(FcnFrame* frame) override;
+        bool write(FcnFrame* frame) override;
 
     private:
         LLCanBus* const ll_can;

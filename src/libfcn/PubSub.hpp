@@ -99,11 +99,11 @@ namespace libfcn_v2 {
 //        /* 上述数组长度 */
 //        uint8_t* callback_mapped_ptr_num;
 
-        DataLinkFrame frame_tmp;
+        FcnFrame frame_tmp;
 
         libfcn_v2::NetworkLayer *network_layer{nullptr};
 
-        void networkPublish(DataLinkFrame* frame);
+        void networkPublish(FcnFrame* frame);
 
 
         /* 是否为 "多源通道"。TODO: const */
@@ -120,7 +120,7 @@ namespace libfcn_v2 {
      * ---------------------------------------------------------*/
     struct SubscribeCallback{
         typedef void (*Callback)(void* ctx_obj,
-                                 int ev_code, DataLinkFrame* frame);
+                                 int ev_code, FcnFrame* frame);
 
         SubscribeCallback() = default;
 
@@ -139,7 +139,7 @@ namespace libfcn_v2 {
      * 构造一个数据帧
      * ---------------------------------------------------------*/
     void singleWriteFrameBuilder(
-            DataLinkFrame* result_frame,
+            FcnFrame* result_frame,
             uint16_t src_id,
             uint16_t dest_id,
             uint16_t op_code,
@@ -183,7 +183,7 @@ namespace libfcn_v2 {
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
                                      void* static_buffer);
 
-        void handleWrtie(DataLinkFrame* frame, uint16_t recv_port_id);
+        void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
 
         struct PubCtrlRule{

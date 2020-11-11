@@ -17,13 +17,13 @@ namespace libfcn_v2{
         static void deallocate(void* p);
     };
 
-    using FcnEvLoop = utils::EventLoop<DataLinkFrame, LinkedListNodeAllocator>;
+    using FcnEvLoop = utils::EventLoop<FcnFrame, LinkedListNodeAllocator>;
 
     class ParamServerClient;
 
     struct RequestCallback{
         typedef void (*Callback)(void* ctx_obj,
-                                 int ev_code, DataLinkFrame* frame);
+                                 int ev_code, FcnFrame* frame);
 
         RequestCallback() = default;
 
@@ -31,7 +31,7 @@ namespace libfcn_v2{
                 cb(cb), ctx_obj(ctx_obj)
         {}
 
-        void call(int ev_code, DataLinkFrame* frame);
+        void call(int ev_code, FcnFrame* frame);
 
         Callback cb {nullptr};
         void* ctx_obj {nullptr};
@@ -46,7 +46,7 @@ namespace libfcn_v2{
 
         ParamServerRequestEv(
                 ParamServerClient* context_client,
-                DataLinkFrame& frame,
+                FcnFrame& frame,
                 uint16_t ack_op_code,
                 uint16_t timeout_ms, int retry_max=-1,
                 RequestCallback&& callback=RequestCallback()):
@@ -66,7 +66,7 @@ namespace libfcn_v2{
 
         ~ParamServerRequestEv() override = default;
 
-        DataLinkFrame cached_req;
+        FcnFrame cached_req;
 
         void* operator new(size_t size) noexcept;
         void operator delete(void * p);
@@ -76,7 +76,7 @@ namespace libfcn_v2{
         void onTimeout();
 
         /* 解析目标节点的应答数据 */
-        void onRecv(DataLinkFrame& frame);
+        void onRecv(FcnFrame& frame);
 
         RequestCallback callback;
 
@@ -89,9 +89,9 @@ namespace libfcn_v2{
 
         ParamServerClient* const context_client{nullptr};
 
-        bool matchNotifyMsg(DataLinkFrame& frame) override;
+        bool matchNotifyMsg(FcnFrame& frame) override;
         void evUpdate() override;
-        void evNotifyCallback(DataLinkFrame& frame) override;
+        void evNotifyCallback(FcnFrame& frame) override;
         void evTimeoutCallback() override;
     };
 

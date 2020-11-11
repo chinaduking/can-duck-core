@@ -16,7 +16,7 @@ using namespace utils;
 using namespace std;
 using namespace libfcn_v2;
 
-ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
+ObjPool<FcnFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
 
 namespace esharedptr_test{
 
@@ -32,7 +32,7 @@ namespace esharedptr_test{
         }
     };
 
-    typedef ESharedPtr<DataLinkFrame, RefCntAllocator> FrameShrPtr;
+    typedef ESharedPtr<FcnFrame, RefCntAllocator> FrameShrPtr;
 
     void AquirePtrRefrence(FrameShrPtr& p_frame){
 
@@ -65,7 +65,7 @@ namespace esharedptr_test{
 
 
     TEST(AutoPtr, test) {
-        FrameShrPtr p_frame(new DataLinkFrame());
+        FrameShrPtr p_frame(new FcnFrame());
         cout << "refcnt after created: " << p_frame.refCount() << endl;
 
         cout << "\n\nrefcnt before AquirePtrRefrence: "
@@ -96,10 +96,10 @@ namespace esharedptr_test{
 
     TEST(AutoPtr, FrameVector) {
         {
-            vector<ESharedPtr<DataLinkFrame>> frame_queue;
+            vector<ESharedPtr<FcnFrame>> frame_queue;
 
             for(int i = 0; i < 3; i++){
-                frame_queue.emplace_back(new DataLinkFrame());
+                frame_queue.emplace_back(new FcnFrame());
                 frame_queue[i]->msg_id = i;
             }
             ASSERT_EQ(framObjPool.usage(), 3);
@@ -121,10 +121,10 @@ namespace esharedptr_test{
 
 
     TEST(AutoPtr, FrameLinkedList) {
-        LinkedList<ESharedPtr<DataLinkFrame>> frame_queue;
+        LinkedList<ESharedPtr<FcnFrame>> frame_queue;
 
         for(int i = 0; i < 3; i++){
-            ESharedPtr<DataLinkFrame> data(new DataLinkFrame());
+            ESharedPtr<FcnFrame> data(new FcnFrame());
             data->msg_id = i;
             frame_queue.push(data);
         }
@@ -167,7 +167,7 @@ namespace esharedptr_test{
         LinkedList<FrameShrPtr> frame_queue;
 
         for(int i = 0; i < 3; i++){
-            FrameShrPtr data(new DataLinkFrame());
+            FrameShrPtr data(new FcnFrame());
             data->msg_id = i;
             frame_queue.push(data);
         }

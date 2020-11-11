@@ -101,110 +101,84 @@ void ByteStreamParser::setHeader(utils::vector_s<uint8_t>& header_){
     }
 }
 
-bool ByteStreamParser::crc(FramePtr buf, uint16_t len, uint8_t *crc_out) {
-    /* 因Frame成员在内存里地址连续，故可以这样操作。
-     * 注意不要改变DataLinkFrame的内存布局
-     * 跳过第一个长度信息不计算。*/
-    uint16_t crc_result = Crc16((uint8_t*)&(buf->src_id), len);
-    uint16_t crc_t = crc_out[0];
-    crc_t = crc_t<<8 | crc_out[1];
-
-    if(crc_result == crc_t)
-        return true;
-    else
-        return false;
-}
-
-
 /*
  * 字节流解析状态机
  * */
-int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, FramePtr out_frame_buf)  {
+int8_t ByteStreamParser::rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame)  {
     int res = 0;
 
     switch (recv_state) {
         /* 接收包头0 */
         case State::HEADER0: {
-            if (new_byte == header[0]) { recv_state = State::HEADER1; }
+            if (recv_byte == header[0]) { recv_state = State::HEADER1; }
         } break;
 
         /* 接收包头1 */
         case State::HEADER1: {
             /* 包头匹配，继续接收长度 */
-            if (new_byte == header[1]) { recv_state = State::LEN; }
+            if (recv_byte == header[1]) { recv_state = State::LEN; }
             /* 包头不匹配，返回等待下一个包头 */
             else { recv_state = State::HEADER0; }
         } break;
 
         /* 接收包长度 */
         case State::LEN: {
-            if (new_byte < max_buf && new_byte >= 4) {
+            if (recv_byte < max_buf && recv_byte >= 4) {
                 /* 长度小于缓冲区长度，且大于四个关键数据（srcID~msgID）总长度，
                  * 开始接收内容 */
-                recv_state = State::SRC_ID;
-                expect_len = new_byte;
+                recv_frame->frame_len   = recv_byte;
+                recv_frame->payload_len = recv_byte - 4;
+
+                frame_wr_ptr = recv_frame->getNetworkFramePtr();
+
+                expect_len = recv_byte + FRAME_CRC_LEN;
+
+                recv_state = State::NWK_FRM_CRC;
 
 //                /* 直接构造一个新的数据帧。智能指针可以自动释放之前未使用的数据帧，
 //                 * 且保留正在使用的数据帧 */
 //                receiving_frame = ESharedPtr<DataLinkFrame>(new DataLinkFrame());
 //                receiving_frame->payload_len = expect_len - 4;
-
-                out_frame_buf->payload_len = expect_len - 4;
-
             } else {
                 /* 长度过长或过短，认为不匹配，返回等待下一个包头 */
                 recv_state = State::HEADER0;
+                frame_wr_ptr = nullptr;
             }
         }
         break;
 
-        case State::SRC_ID:{ /* 接收源地址 */
-            out_frame_buf->src_id = new_byte; recv_state = State::DEST_ID;
-        }break;
-
-        case State::DEST_ID:{ /* 接收目标地址 */
-            out_frame_buf->dest_id = new_byte; recv_state = State::OP_CODE;
-        }break;
-
-
-        case State::OP_CODE:{  /* 接收操作码 */
-            out_frame_buf->op_code = new_byte; recv_state = State::MSG_ID;
-        }break;
-
-        case State::MSG_ID:{ /* 接收消息ID */
-            out_frame_buf->msg_id = new_byte;  recv_state = State::PAYLOAD;
-            payload_recv_cnt = 0;
-        }break;
-
-        case State::PAYLOAD: {/* 接收数据内容 */
-            out_frame_buf->payload[payload_recv_cnt] = new_byte;
-            payload_recv_cnt++;
-
-            /* 已经收满，即将进行CRC */
-            if (payload_recv_cnt >= out_frame_buf->payload_len) {
-                recv_state = State::CRC0;
-            }
-        }break;
-
-        case State::CRC0: {
-            crc_buf[0] = new_byte; recv_state = State::CRC1;
-        } break;
-
-        case State::CRC1: {
-            crc_buf[1] = new_byte;
-            recv_state = State::HEADER0;
-            if (crc(&(*out_frame_buf), expect_len, crc_buf)) {
-//                /* 接收成功，推入接收队列 */
-//                frame = receiving_frame;
-                valid_frame_cnt++;
-                res = 1;
-            } else {
-                res = -1;
-                error_frame_cnt++;
+        /* 接收数据内容 */
+        case State::NWK_FRM_CRC: {
+            if(expect_len > 0){
+                *frame_wr_ptr = recv_byte;
+                frame_wr_ptr ++;
+                expect_len --;
             }
 
-            recv_state = State::HEADER0;
-        } break;
+            if(expect_len == 0){
+                /* 已经收满，进行CRC TODO: order??*/
+                recv_state = State::HEADER0;
+                frame_wr_ptr = nullptr;
+
+                uint16_t crc_result = Crc16(recv_frame->getNetworkFramePtr(),
+                                            recv_frame->getNetworkFrameSize());
+                uint8_t* crc_ptr = recv_frame->getCrcPtr();
+                uint16_t crc_t   = crc_ptr[0];
+                crc_t = crc_t<<8 | crc_ptr[1];
+
+                if(crc_result == crc_t){
+                    /* 接收成功 */
+                    valid_frame_cnt++;
+                    res = 1;
+                }
+                else {
+                    res = -1;
+                    error_frame_cnt++;
+                    LOGW("frame recv error! CRC=%X(exp. %X)", crc_result, *(uint16_t*)crc_ptr);
+                }
+            }
+
+        }break;
     }
 
     return res;
@@ -218,73 +192,33 @@ int8_t ByteStreamParser::parseOneByte(uint8_t new_byte, FramePtr out_frame_buf) 
 //bool ByteFrameIODevice::write(DataLinkFrame* frame);
 
 
-bool ByteFrameIODevice::popTxQueue(FramePtr frame) {
-    USER_ASSERT(frame != nullptr);
+bool ByteFrameIODevice::popTxQueue(FramePtr send_frame) {
+    USER_ASSERT(send_frame != nullptr);
 
-    switch (send_state) {
-        case SendState::Idle:
-            LOGV("get a new frame!!");
-            send_state = SendState::Header;
-
-        /* 发送包头 + 长度*/
-        case SendState::Header:
-            /* 这里的数据长度是串口作为物理层的"模拟数据包"的长度（即包头-包尾CRC直接所有数据
-             * 的字节数）。等于payload_len+src_id+dest_id+msg_id+opcode*/
-            header_buf[header.size()] = frame->payload_len + 4;
-
-            /* 这里的包头指串口作为物理层的"模拟数据包"*/
-            if(!ll_byte_dev->isWriteBusy()){
-                /* 物理层空闲时发送，如果忙则等待下次发送*/
-                ll_byte_dev->write(header_buf, header.size()+1);
-                send_state = SendState::Frame;
-            }
-            return false;
-//            break;
-
-        /* 发送数据帧.这里的包头指串口作为物理层的"模拟数据包" */
-        case SendState::Frame:
-            /* */
-            if(!ll_byte_dev->isWriteBusy()){
-                /* 物理层空闲时发送，如果忙则等待下次发送
-                 * 因DatalinkFrame从src_id开始地址连续，因此可以作为buffer直接发送*/
-                ll_byte_dev->write(&frame->src_id,
-                                   frame->payload_len + 4);
-
-                /* 因Frame成员在内存里地址连续，故可以这样操作。
-                 * 注意不要改变DataLinkFrame的内存布局
-                 * 跳过第一个长度信息不计算。
-                 *
-                 * 注意：在Frame状态里计算CRC可以只计算一次*/
-                uint16_t crc_result = Crc16(&frame->src_id,
-                                            frame->payload_len + 4);
-
-                crc_buf[0] = crc_result >> 8;
-                crc_buf[1] = crc_result;
-
-                send_state = SendState::Crc;
-            }
-            return false;
-//            break;
-
-        /* 发送包尾。指串口作为物理层的"模拟数据包"*/
-        case SendState::Crc:
-            if(!ll_byte_dev->isWriteBusy()){
-                /* 物理层空闲时发送，如果忙则等待下次发送*/
-                ll_byte_dev->write(crc_buf,
-                                   2);
-                /* 发送成功后，弹出正在发送的数据帧 */
-
-                LOGV("sent frame!!");
-
-                send_state = SendState::Idle;
-                return true;
-            }
-            return false;
-//            break;
+    /* 物理层空闲时发送，如果忙则等待下次发送*/
+    if(ll_byte_dev->isWriteBusy()){
+        return false;
     }
+
+    /* 添加包头 */
+    send_frame->getHeaderPtr()[0] = header[0];
+    send_frame->getHeaderPtr()[1] = header[1];
+    send_frame->frame_len = send_frame->payload_len + 4;
+
+    /* 添加包尾校验 */
+    uint16_t crc_result = Crc16(send_frame->getNetworkFramePtr(),
+                                send_frame->getNetworkFrameSize());
+
+    uint8_t* crc_ptr = send_frame->getCrcPtr();
+
+    crc_ptr[0] = crc_result >> 8;
+    crc_ptr[1] = crc_result;
+
+    /* 发送整个数据帧
+     * */
+    ll_byte_dev->write(send_frame->getHeaderPtr(), send_frame->getFrameMemSize());
+    return true;
 }
-
-
 
 /*
  * 获取1帧数据
@@ -317,7 +251,7 @@ bool ByteFrameIODevice::popRxQueue(FramePtr frame)
             }
         }
 
-        parse_res = parser.parseOneByte(buf, frame);
+        parse_res = parser.rxParseUpdate(buf, frame);
 
         switch(parse_res) {
             case 0:
@@ -352,7 +286,7 @@ static char* mOpCodeStr[]={
 };
 #endif
 
-std::string libfcn_v2::frame2log(DataLinkFrame& frame){
+std::string libfcn_v2::frame2log(FcnFrame& frame){
 #ifdef ENABLE_TRACE
     static const int BUFFER_RESERVE = 120;
     static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;

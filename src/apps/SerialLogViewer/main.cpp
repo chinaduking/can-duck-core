@@ -38,8 +38,8 @@ int main( int argc, char *argv[]){
             exit(-1);
         }
 
-        if(sid < 5){
-            cerr << "error: sid > 5" << endl;
+        if(sid > 9){
+            cerr << "error: sid > 9" << endl;
             exit(-1);
         }
     }

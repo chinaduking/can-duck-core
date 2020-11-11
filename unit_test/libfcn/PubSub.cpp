@@ -137,7 +137,7 @@ namespace network_test {
 
         Node fcn_node(0);
 
-        DataLinkFrame frame_tmp;
+        FcnFrame frame_tmp;
 
         auto rto_channel = fcn_node
                 .network_layer->pub_sub_manager.

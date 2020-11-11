@@ -66,7 +66,7 @@ namespace libfcn_v2 {
         ~ParamServerClient() = default;
 
         template<typename Prototype>
-        static Prototype readBuffer(Prototype&& msg, DataLinkFrame* frame){
+        static Prototype readBuffer(Prototype&& msg, FcnFrame* frame){
             USER_ASSERT(frame!= nullptr);
             USER_ASSERT(frame->msg_id == msg.index);
             USER_ASSERT(frame->payload_len == sizeof(msg.data));
@@ -83,7 +83,7 @@ namespace libfcn_v2 {
                             uint16_t timeout_ms=300, int retry=3){
             //TODO: local first
 
-            DataLinkFrame frame;
+            FcnFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_ReadReq;
@@ -114,7 +114,7 @@ namespace libfcn_v2 {
                              uint16_t timeout_ms=300, int retry=3){
             //TODO: local first
 
-            DataLinkFrame frame;
+            FcnFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_WriteReq;
@@ -162,13 +162,13 @@ namespace libfcn_v2 {
 
         SerDesDict* const serdes_dict{nullptr};
 
-        int networkSendFrame(uint16_t port_id, DataLinkFrame* frame);
+        int networkSendFrame(uint16_t port_id, FcnFrame* frame);
 
         NetworkLayer* const ctx_network_layer{nullptr};
 
-        void onReadAck(DataLinkFrame* frame);
+        void onReadAck(FcnFrame* frame);
 
-        void onWriteAck(DataLinkFrame* frame);
+        void onWriteAck(FcnFrame* frame);
 
 #ifdef USE_REQUEST_EVLOOP
        FcnEvLoop ev_loop;
@@ -254,9 +254,9 @@ namespace libfcn_v2 {
 
 
         /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-        obj_size_t onWriteReq(DataLinkFrame* frame, uint16_t port_id);
+        obj_size_t onWriteReq(FcnFrame* frame, uint16_t port_id);
 
-        obj_size_t onReadReq(DataLinkFrame* frame, uint16_t port_id);
+        obj_size_t onReadReq(FcnFrame* frame, uint16_t port_id);
 
         NetworkLayer* const ctx_network_layer{nullptr};
     };
@@ -284,7 +284,7 @@ namespace libfcn_v2 {
                                               uint16_t client_addr,
                                               uint16_t port_id);
 
-        int handleRecv(DataLinkFrame* frame, uint16_t recv_port_id);
+        int handleRecv(FcnFrame* frame, uint16_t recv_port_id);
 
     private:
 

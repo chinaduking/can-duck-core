@@ -34,7 +34,7 @@ namespace network_test {
 
         Node fcn_node(0);
 
-        DataLinkFrame frame_tmp;
+        FcnFrame frame_tmp;
 
         uint32_t cnt = 0;
 
@@ -59,7 +59,7 @@ namespace network_test {
     }
 
 
-    void angle_rd_callback(void* obj_ptr, int ev_code, DataLinkFrame* frame){
+    void angle_rd_callback(void* obj_ptr, int ev_code, FcnFrame* frame){
         if(ev_code == 2){
             LOGW("Read angle timeout");
             return;
@@ -73,7 +73,7 @@ namespace network_test {
         }
     }
 
-    void mode_wr_callback(void* obj_ptr, int ev_code, DataLinkFrame* frame){
+    void mode_wr_callback(void* obj_ptr, int ev_code, FcnFrame* frame){
         if(ev_code == 1){
             LOGW("Write mode done!");
         }

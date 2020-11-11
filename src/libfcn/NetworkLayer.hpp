@@ -25,7 +25,7 @@ namespace libfcn_v2{
 
         int addDataLinkDevice(FrameIODevice* device);
 
-        int sendFrame(uint16_t port_id, DataLinkFrame* frame);
+        int sendFrame(uint16_t port_id, FcnFrame* frame);
 
         void recvPolling();
         void sendPolling();
@@ -36,7 +36,7 @@ namespace libfcn_v2{
 
     private:
         utils::vector_s<FrameIODevice*> data_link_dev;
-        void recvProtocolDispatcher(DataLinkFrame* frame, uint16_t recv_port_id);
+        void recvProtocolDispatcher(FcnFrame* frame, uint16_t recv_port_id);
     };
 }
 

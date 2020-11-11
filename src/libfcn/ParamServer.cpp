@@ -11,7 +11,7 @@ using namespace libfcn_v2;
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回1为成功，否则为失败
  * */
-obj_size_t ParamServer::onWriteReq(DataLinkFrame* frame,
+obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
                                    uint16_t port_id){
 
     auto index = frame->msg_id;
@@ -58,7 +58,7 @@ obj_size_t ParamServer::onWriteReq(DataLinkFrame* frame,
 
     //TODO: zero copy frame?
     // 也许在采用Frame优化过的拷贝方法后，不需要（SVO实时性不强）
-    DataLinkFrame ack_frame;
+    FcnFrame ack_frame;
     ack_frame.payload[0] = ack_code;
     ack_frame.payload_len = 1;
 
@@ -78,7 +78,7 @@ obj_size_t ParamServer::onWriteReq(DataLinkFrame* frame,
 
 /* 响应读取请求
  * */
-obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
+obj_size_t ParamServer::onReadReq(FcnFrame* frame,
                                   uint16_t port_id){
 
     auto index = frame->msg_id;
@@ -110,7 +110,7 @@ obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
 
     //TODO: zero copy frame?
     // 也许在采用Frame优化过的拷贝方法后，不需要（SVO实时性不强）
-    DataLinkFrame ack_frame;
+    FcnFrame ack_frame;
 
     utils::memcpy(ack_frame.payload,
                   (uint8_t*)buffer + offset, size);
@@ -130,19 +130,19 @@ obj_size_t ParamServer::onReadReq(DataLinkFrame* frame,
     return 0;
 }
 
-void ParamServerClient::onReadAck(DataLinkFrame* frame){
+void ParamServerClient::onReadAck(FcnFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
      ev_loop.notify(*frame);
 }
 
-void ParamServerClient::onWriteAck(DataLinkFrame* frame){
+void ParamServerClient::onWriteAck(FcnFrame* frame){
 //   TODO:
 //    event_loop->notify(frame);
     ev_loop.notify(*frame);
 }
 
-int ParamServerClient::networkSendFrame(uint16_t port_id, DataLinkFrame *frame) {
+int ParamServerClient::networkSendFrame(uint16_t port_id, FcnFrame *frame) {
     if(ctx_network_layer == nullptr){
         return -1;
     }
@@ -199,7 +199,7 @@ ParamServerClient* ParamServerManager::bindClientToServer(uint16_t server_addr,
     return client;
 }
 
-int ParamServerManager::handleRecv(DataLinkFrame *frame, uint16_t recv_port_id) {
+int ParamServerManager::handleRecv(FcnFrame *frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;

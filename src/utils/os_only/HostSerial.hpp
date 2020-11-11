@@ -8,7 +8,14 @@
 #include "LLComDevice.hpp"
 #include <vector>
 #include <string>
+
+#ifndef WIN32
 #include <termios.h>
+#else
+#include <windows.h>
+#include <atlstr.h>
+#endif
+
 
 namespace utils{
 #ifndef B921600

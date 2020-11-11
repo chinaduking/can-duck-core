@@ -23,7 +23,7 @@ using namespace std;
 #include "libfcn/DataLinkLayer.hpp"
 
 namespace libfcn_v2{
-    inline bool DataLinkFrameCompare(DataLinkFrame& frame1, DataLinkFrame&
+    inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
     frame2){
         if(frame1.payload_len != frame2.payload_len){
             return false;
@@ -48,8 +48,8 @@ namespace libfcn_v2{
         return memcmp(frame1.payload, frame2.payload, frame1.payload_len) == 0;
     }
 
-    inline bool DataLinkFramePayloadCompare(DataLinkFrame& frame1,
-                                            DataLinkFrame& frame2){
+    inline bool DataLinkFramePayloadCompare(FcnFrame& frame1,
+                                            FcnFrame& frame2){
         if(frame1.payload_len != frame2.payload_len){
             return false;
         }
