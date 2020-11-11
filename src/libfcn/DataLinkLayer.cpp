@@ -116,9 +116,14 @@ int8_t ByteStreamParser::rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame)  
         /* 接收包头1 */
         case State::HEADER1: {
             /* 包头匹配，继续接收长度 */
-            if (recv_byte == header[1]) { recv_state = State::LEN; }
+            if (recv_byte == header[1]) {
+            	recv_state = State::LEN;
+            }
             /* 包头不匹配，返回等待下一个包头 */
-            else { recv_state = State::HEADER0; }
+            else {
+            	recv_state = State::HEADER0;
+            	res = -2;
+            }
         } break;
 
         /* 接收包长度 */
@@ -133,6 +138,8 @@ int8_t ByteStreamParser::rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame)  
                 expect_len = recv_byte + FRAME_CRC_LEN;
 
                 recv_state = State::NWK_FRM_CRC;
+
+                LOGI("frame header matched");
 
 //                /* 直接构造一个新的数据帧。智能指针可以自动释放之前未使用的数据帧，
 //                 * 且保留正在使用的数据帧 */
@@ -251,16 +258,9 @@ bool ByteFrameIODevice::popRxQueue(FramePtr frame)
 
         parse_res = parser.rxParseUpdate(buf, frame);
 
-        switch(parse_res) {
-            case 0:
-                continue;
-            case 1:
-                return true;
-            case -1:
-                return false;
-            default:
-                break;
-        }
+        if(parse_res == 0){ continue; }
+        else if(parse_res == 1) { return true; }
+        else{ return false; }
     }
 }
 
