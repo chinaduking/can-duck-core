@@ -50,7 +50,7 @@ TEST(serial, loop){
         char* s = "hello world.";
 
         serial.write((uint8_t *)s, strlen(s) + 1);
-        sleep(1);
+        perciseSleep(1);
     }
 
     t.join();
