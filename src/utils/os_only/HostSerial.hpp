@@ -53,15 +53,19 @@ namespace utils{
         int32_t sync();
 
         bool isOpen();
-        bool isWriteBusy() override;
+        inline bool isWriteBusy() override{ return !isOpen(); }
         inline uint32_t getBaud(){ return baud; }
 
     private:
         bool is_open  { false };
         uint32_t baud { 0     };
 
-        int32_t  serial_fd { 0 };
+        int32_t  posix_serial_fd { 0 };
         std::string port_name { "-" };
+
+#ifdef WIN32
+        HANDLE hPort;
+#endif
     };
 }
 

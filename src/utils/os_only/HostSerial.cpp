@@ -79,15 +79,15 @@ int HostSerial::open(std::string port_name_,
     is_open = false;
 
 #ifndef WIN32
-    serial_fd = ::open(port_name_.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-    if(serial_fd < 0) {
+    posix_serial_fd = ::open(port_name_.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    if(posix_serial_fd < 0) {
         LOGE("open file failed");
         return -1;
     }
 
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
-    if(tcgetattr(serial_fd, &tty) != 0) {
+    if(tcgetattr(posix_serial_fd, &tty) != 0) {
         LOGE("tcgetattr failed");
         return -2;
     }
@@ -131,7 +131,7 @@ int HostSerial::open(std::string port_name_,
     tty.c_cflag &= ~CSTOPB;
     tty.c_cflag &= ~CRTSCTS;
 
-    if(tcsetattr(serial_fd, TCSANOW, &tty) != 0) {
+    if(tcsetattr(posix_serial_fd, TCSANOW, &tty) != 0) {
         LOGE("tcsetattr failed");
         return -2;
     }
@@ -142,7 +142,41 @@ int HostSerial::open(std::string port_name_,
     this->baud = baud_;
 
     return 0;
+
 #else  //WIN32
+    DCB dcb;
+    DWORD byteswritten;
+    CString PortSpecifier = "COM1";//TODO: from std::string!
+
+    HANDLE hPort = CreateFile(
+            PortSpecifier,
+            GENERIC_WRITE,
+            0,
+            NULL,
+            OPEN_EXISTING,
+            0,
+            NULL
+    );
+
+    if (!GetCommState(hPort,&dcb)){
+        return -1;
+    }
+
+    dcb.BaudRate = baud_; //9600 Baud
+    dcb.ByteSize = 8; //8 data bits
+    dcb.Parity   = NOPARITY; //no parity
+    dcb.StopBits = ONESTOPBIT; //1 stop
+
+    if (!SetCommState(hPort,&dcb)){
+        return -2;
+    }
+
+    is_open = true;
+
+    this->port_name = port_name_;
+    this->baud = baud_;
+
+    return 0;
 #endif  //WIN32
 }
 
@@ -172,8 +206,9 @@ int HostSerial::open(int id, uint32_t baud, uint16_t read_timeout_ms) {
 
 int HostSerial::close() {
 #ifndef WIN32
-    ::close(serial_fd);
+    ::close(posix_serial_fd);
 #else  //WIN32
+    CloseHandle(hPort);
 #endif  //WIN32
 }
 
@@ -191,26 +226,37 @@ HostSerial::~HostSerial() {
 int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
 #ifndef WIN32
-    int res = (int32_t)::read(serial_fd, data, len);
+    int res = (int32_t)::read(posix_serial_fd, data, len);
+    return res;
 #else  //WIN32
+    int retVal;
+    DWORD dwBytesTransferred;
+    DWORD dwCommModemStatus;
+
+    SetCommMask (hPort, EV_RXCHAR | EV_ERR); //receive character event
+    WaitCommEvent (hPort, &dwCommModemStatus, 0); //wait for character
+    if (dwCommModemStatus & EV_RXCHAR)
+        ReadFile (hPort, data, len, &dwBytesTransferred, 0); //read 1
+    else if (dwCommModemStatus & EV_ERR)
+        retVal = 0x101;
+    retVal = Byte;
+    return dwBytesTransferred;
 #endif  //WIN32
 }
 
-bool HostSerial::isWriteBusy() {
-    return !isOpen();
-}
 
 int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
 #ifndef WIN32
-    return (int32_t)::write(serial_fd, data, len);
+    return (int32_t)::write(posix_serial_fd, data, len);
 #else  //WIN32
 #endif  //WIN32
 }
 
 int32_t HostSerial::sync() {
 #ifndef WIN32
-    return ::fsync(serial_fd);
+    return ::fsync(posix_serial_fd);
 #else  //WIN32
+    bool retVal = WriteFile(hPort,data,1,&byteswritten,NULL);
 #endif  //WIN32
 }
