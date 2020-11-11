@@ -70,7 +70,7 @@ std::vector<std::string> HostSerial::discoverPort() {
     return usb_serial;
 #else  //WIN32
     vector<string> usb_serial;
-    //TODO: dicover win serial
+    //TODO: discover win serial
     return usb_serial;
 #endif  //WIN32
 }
@@ -152,7 +152,6 @@ int HostSerial::open(std::string port_name_,
 
 #else  //WIN32
     DCB dcb;
-    DWORD byteswritten;
     CString PortSpecifier = port_name_.c_str();
 
     HANDLE hPort = CreateFile(
@@ -242,7 +241,7 @@ int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     DWORD dwCommModemStatus;
 
     SetCommMask (hPort, EV_RXCHAR | EV_ERR); //receive character event
-    WaitCommEvent (hPort, &dwCommModemStatus, 0); //wait for character
+    WaitCommEvent(hPort, &dwCommModemStatus, 0); //wait for character
 
     if (dwCommModemStatus & EV_RXCHAR)
         ReadFile (hPort, data, len, &dwBytesTransferred, 0); //read
@@ -259,8 +258,8 @@ int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     return (int32_t)::write(posix_serial_fd, data, len);
 #else  //WIN32
     DWORD byteswritten;
-    CString data_str; //TODO: build from *data
-    bool retVal = WriteFile(hPort,data_str,1,&byteswritten,NULL);
+    CString data_str = data; //TODO: build from *data
+    WriteFile(hPort,data_str,len,&byteswritten,NULL);
     return byteswritten;
 #endif  //WIN32
 }
