@@ -330,22 +330,19 @@ uint32_t libfcn_v2::frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_
     buffer_remain -= info_len;
 
     p_buffer += info_len;
-//    *p_buffer = '\0';
 
     return p_buffer - buffer;
 }
 
-#ifdef ENABLE_TRACE
-static const int BUFFER_RESERVE = 120;
-static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;
-char buffer[BUFFER_SIZE];
-#endif
 
-std::string libfcn_v2::frame2log(FcnFrame& frame){
+std::string libfcn_v2::frame2stdstr(FcnFrame& frame){
 #ifdef ENABLE_TRACE
 
+    static const int BUFFER_RESERVE = 150;
+    static const int BUFFER_SIZE = DATALINK_MTU * 3 + BUFFER_RESERVE;
+    char buffer[BUFFER_SIZE];
 
-    frame2strbuf(frame, buffer, BUFFER_SIZE);
+    int used_size = frame2strbuf(frame, buffer, BUFFER_SIZE);
     //TODO: cutoff
 //    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
 

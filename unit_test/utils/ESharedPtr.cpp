@@ -87,7 +87,7 @@ namespace esharedptr_test{
         ASSERT_EQ(p_frame.refCount(), 1);
 
 
-        cout << "\n\n" << frame2log(*p_frame);
+        cout << "\n\n" << frame2stdstr(*p_frame);
         ASSERT_EQ(framObjPool.usage(), 1);
 
         cout << "pass !" << endl;
@@ -114,7 +114,7 @@ namespace esharedptr_test{
                 ASSERT_EQ(framObjPool.usage(), 2 - i + 1);
             }
 
-            cout << frame2log(*frame_0) << endl;
+            cout << frame2stdstr(*frame_0) << endl;
         }
         ASSERT_EQ(framObjPool.usage(), 0);
     }
@@ -137,7 +137,7 @@ namespace esharedptr_test{
         }
 
         frame_0->msg_id = 10;
-        cout << frame2log(*frame_0) << endl;
+        cout << frame2stdstr(*frame_0) << endl;
     }
 
     class EpopTest{
@@ -156,7 +156,7 @@ namespace esharedptr_test{
         void doWork(int time){
             working_thread = new thread([&, time]{
                 sleep(time);
-                cout << frame2log(**working_frame_p) << endl;
+                cout << frame2stdstr(**working_frame_p) << endl;
                 delete(working_frame_p);
                 working_frame_p = nullptr;
             });
@@ -185,7 +185,7 @@ namespace esharedptr_test{
         test2.doWork(1);
 
 //        frame_0->msg_id = 10;
-//        cout << frame2log(*frame_0) << endl;
+//        cout << frame2stdstr(*frame_0) << endl;
 
         test1.working_thread->join();
         test2.working_thread->join();

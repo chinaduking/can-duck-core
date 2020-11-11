@@ -70,7 +70,7 @@ namespace evloop_test{
 
         void evNotifyCallback(FcnFrame& msg) override {
             cout << name <<" -- evNotifyCallback!! " << getCurrentTimeUs() << endl;
-            cout << "payload: " << frame2log(msg) << endl;
+            cout << "payload: " << frame2stdstr(msg) << endl;
             cout << name <<" ::: call evRestart. " << endl;
             evRestart();
         }

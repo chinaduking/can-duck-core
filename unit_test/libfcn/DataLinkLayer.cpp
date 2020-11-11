@@ -23,10 +23,10 @@ namespace frame_device_test{
         src_frame.dest_id = 0x05;
         src_frame.op_code = 0x01;
         src_frame.msg_id  = 0x07;
-        src_frame.setPayloadLen(src_buffer_len);
+        src_frame.setPayloadLen(64);
         memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
 
-        cout << frame2log(src_frame) << endl;
+        cout << frame2stdstr(src_frame) << endl;
 
 
     }
@@ -50,14 +50,14 @@ namespace frame_device_test{
         src_frame.setPayloadLen(src_buffer_len);
         memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
 
-        cout << frame2log(src_frame) << endl;
+        cout << frame2stdstr(src_frame) << endl;
 
         FcnFrame dest_frame;
 
         thread recv([&](){
             for(int i = 0; i < 1;){
                 if(frame_dev.popRxQueue(&dest_frame)){
-                    cout << frame2log(dest_frame) << endl;
+                    cout << frame2stdstr(dest_frame) << endl;
                     ASSERT_TRUE(DataLinkFrameCompare(src_frame, dest_frame));
                 } else{
                     cout << "no more frame.." << endl;

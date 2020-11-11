@@ -126,7 +126,7 @@ namespace libfcn_v2{
     };
 #pragma pack(0)
 
-    std::string frame2log(FcnFrame& frame);
+    std::string frame2stdstr(FcnFrame& frame);
 
     uint32_t frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size);
 
