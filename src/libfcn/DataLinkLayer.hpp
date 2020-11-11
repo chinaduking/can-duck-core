@@ -28,7 +28,7 @@ namespace libfcn_v2{
 
     static const int FRAME_HEADER_LEN = 2;
     static const int FRAME_CRC_LEN    = 2;
-
+    static const int FRAME_NWK_INFO_LEN = 4;
 #pragma pack(4)
     /* 为了能快速收发数据和计算CRC，请保证在当前内存对齐配置下，成员的地址连续。*/
     struct FcnFrame{
@@ -38,8 +38,10 @@ namespace libfcn_v2{
          *           如默认帧头为[0, 0x55, 0xAA]，保持和长度地址连续*/
         uint8_t header[FRAME_HEADER_LEN] { 0, 0 };
 
+    private:
         uint8_t frame_len   { 0 };   /* [DW0 0] 整个数据帧长度，放在第一个，CRC计算时跳过*/
 
+    public:
         /* 网络层信息自此开始
          * Network Layer Info */
         uint8_t src_id      { 0 };   /* [DW1 3] 源节点ID   */
@@ -49,7 +51,27 @@ namespace libfcn_v2{
         uint8_t msg_id      { 0 };   /* [DW1 0] 消息ID     */
 
         uint8_t payload[DATALINK_MTU + FRAME_CRC_LEN] {};
+
+    private:
         uint8_t payload_len   { 0 };
+
+    public:
+        inline void setFrameLen(uint16_t len){
+            USER_ASSERT(len >= FRAME_NWK_INFO_LEN
+                    && len <= DATALINK_MTU + FRAME_NWK_INFO_LEN);
+            frame_len = len;
+            payload_len = len - FRAME_NWK_INFO_LEN;
+        }
+
+        inline void setPayloadLen(uint16_t len){
+            USER_ASSERT(len <= DATALINK_MTU);
+            payload_len = len;
+            frame_len = len + FRAME_NWK_INFO_LEN;
+        }
+
+        inline uint16_t getPayloadLen(){
+            return payload_len;
+        }
 
         /* 获取指向第一个帧头的指针 */
         inline uint8_t* getHeaderPtr(){

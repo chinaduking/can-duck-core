@@ -123,11 +123,10 @@ int8_t ByteStreamParser::rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame)  
 
         /* 接收包长度 */
         case State::LEN: {
-            if (recv_byte < max_buf && recv_byte >= 4) {
+            if (recv_byte < max_buf && recv_byte >= FRAME_NWK_INFO_LEN) {
                 /* 长度小于缓冲区长度，且大于四个关键数据（srcID~msgID）总长度，
                  * 开始接收内容 */
-                recv_frame->frame_len   = recv_byte;
-                recv_frame->payload_len = recv_byte - 4;
+                recv_frame->setFrameLen(recv_byte);
 
                 frame_wr_ptr = recv_frame->getNetworkFramePtr();
 
@@ -203,7 +202,6 @@ bool ByteFrameIODevice::popTxQueue(FramePtr send_frame) {
     /* 添加包头 */
     send_frame->getHeaderPtr()[0] = header[0];
     send_frame->getHeaderPtr()[1] = header[1];
-    send_frame->frame_len = send_frame->payload_len + 4;
 
     /* 添加包尾校验 */
     uint16_t crc_result = Crc16(send_frame->getNetworkFramePtr(),
@@ -292,7 +290,7 @@ std::string libfcn_v2::frame2log(FcnFrame& frame){
     static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;
     char buffer[BUFFER_SIZE];
 
-    if(frame.payload_len > DATALINK_MTU){
+    if(frame.getPayloadLen() > DATALINK_MTU){
         return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
     }
     char * opcode_str = "unknown";
@@ -311,7 +309,7 @@ std::string libfcn_v2::frame2log(FcnFrame& frame){
             frame.dest_id  & 0xff,
 
             frame.msg_id   & 0xff,
-            frame.payload_len);
+            frame.getPayloadLen());
 
     static int info_offset = 0;
 
@@ -323,13 +321,13 @@ std::string libfcn_v2::frame2log(FcnFrame& frame){
         return std::string("::: info_offset > BUFFER_RESERVE\n");
     }
 
-    for(int i = 0; i < frame.payload_len; i ++){
+    for(int i = 0; i < frame.getPayloadLen(); i ++){
         snprintf(&buffer[info_offset + i * 3],
                  BUFFER_SIZE - 2,
                  "%.2X ", frame.payload[i] & 0xff);
     }
 
-    snprintf(&buffer[info_offset + frame.payload_len * 3],
+    snprintf(&buffer[info_offset + frame.getPayloadLen() * 3],
             BUFFER_SIZE - 2,
             "\n\"%s\"\n", frame.payload);
 

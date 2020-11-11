@@ -33,7 +33,7 @@ obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
         USER_ASSERT(size != 0);
 
         /* 单数据写入，要求长度要求必须匹配 */
-        if(size != frame->payload_len){
+        if(size != frame->getPayloadLen()){
             ack_code = 2;
         }
 
@@ -60,7 +60,7 @@ obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
     // 也许在采用Frame优化过的拷贝方法后，不需要（SVO实时性不强）
     FcnFrame ack_frame;
     ack_frame.payload[0] = ack_code;
-    ack_frame.payload_len = 1;
+    ack_frame.setPayloadLen(1);
 
     ack_frame.msg_id  = frame->msg_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_WriteAck;
@@ -115,7 +115,7 @@ obj_size_t ParamServer::onReadReq(FcnFrame* frame,
     utils::memcpy(ack_frame.payload,
                   (uint8_t*)buffer + offset, size);
 
-    ack_frame.payload_len = size;
+    ack_frame.setPayloadLen(size);
 
     ack_frame.msg_id  = frame->msg_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_ReadAck;

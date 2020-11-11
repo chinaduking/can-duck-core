@@ -25,7 +25,7 @@ using namespace std;
 namespace libfcn_v2{
     inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
     frame2){
-        if(frame1.payload_len != frame2.payload_len){
+        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
             return false;
         }
 
@@ -45,16 +45,16 @@ namespace libfcn_v2{
             return false;
         }
 
-        return memcmp(frame1.payload, frame2.payload, frame1.payload_len) == 0;
+        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
     }
 
     inline bool DataLinkFramePayloadCompare(FcnFrame& frame1,
                                             FcnFrame& frame2){
-        if(frame1.payload_len != frame2.payload_len){
+        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
             return false;
         }
 
-        return memcmp(frame1.payload, frame2.payload, frame1.payload_len) == 0;
+        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
     }
 
 }

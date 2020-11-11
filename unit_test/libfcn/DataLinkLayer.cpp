@@ -26,7 +26,7 @@ namespace frame_device_test{
         src_frame.dest_id = 0x05;
         src_frame.op_code = 0x01;
         src_frame.msg_id  = 0x07;
-        src_frame.payload_len = src_buffer_len;
+        src_frame.setPayloadLen(src_buffer_len);
         memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
 
         FcnFrame dest_frame;

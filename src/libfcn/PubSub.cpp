@@ -78,7 +78,7 @@ void libfcn_v2::singleWriteFrameBuilder(
     result_frame->op_code = op_code;
     result_frame->msg_id  = msg_id; /* 消息ID为起始ID */
 
-    result_frame->payload_len = len;      /* 开始对数据长度进行累加 */
+    result_frame->setPayloadLen(len);      /* 开始对数据长度进行累加 */
 
     uint8_t * payload_ptr = result_frame->payload;
 
@@ -128,7 +128,7 @@ void PublisherManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
                     channel->serdes_dict,
                     channel->buffer,
                     frame->msg_id,
-                    frame->payload, frame->payload_len);
+                    frame->payload, frame->getPayloadLen());
 
             break;
 

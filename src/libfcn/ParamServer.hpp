@@ -69,7 +69,7 @@ namespace libfcn_v2 {
         static Prototype readBuffer(Prototype&& msg, FcnFrame* frame){
             USER_ASSERT(frame!= nullptr);
             USER_ASSERT(frame->msg_id == msg.index);
-            USER_ASSERT(frame->payload_len == sizeof(msg.data));
+            USER_ASSERT(frame->getPayloadLen() == sizeof(msg.data));
 
             Prototype res = msg;
             utils::memcpy(&res.data, frame->payload, sizeof(res.data));
@@ -88,7 +88,7 @@ namespace libfcn_v2 {
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_ReadReq;
             frame.msg_id = msg.index;
-            frame.payload_len = 1;
+            frame.setPayloadLen(1);
             frame.payload[0] =  msg.data_size;
 
 #ifndef USE_REQUEST_EVLOOP
@@ -119,7 +119,7 @@ namespace libfcn_v2 {
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_WriteReq;
             frame.msg_id = msg.index;
-            frame.payload_len = msg.data_size;
+            frame.setPayloadLen(msg.data_size);
             utils::memcpy(frame.payload, &msg.data, msg.data_size);
 
 #ifndef USE_REQUEST_EVLOOP
