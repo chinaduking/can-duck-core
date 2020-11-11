@@ -162,7 +162,7 @@ int8_t ByteStreamParser::rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame)  
             }
 
             if(expect_len == 0){
-                /* 已经收满，进行CRC TODO: order??*/
+                /* 已经收满，进行CRC*/
                 recv_state = State::HEADER0;
                 frame_wr_ptr = nullptr;
 

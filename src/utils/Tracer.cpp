@@ -88,27 +88,20 @@ Tracer::Tracer(bool enable_color)
 void Tracer::setFilter(Level level){
     MUTEX_LOCKGUARD;
 
-    if(level > Level::lFatal){
-        return;
+    if(level <= lFatal){
+        filter_level = level;
     }
-
-    filter_level = level;
 }
 
 void Tracer::addByteIODeviece(LLByteDevice* device){
     MUTEX_LOCKGUARD;
-
-
-    if(device == nullptr){
-        return;
+    if(device != nullptr){
+        this->device.push_back(device);
     }
-
-    this->device.push_back(device);
 }
 
 
 void Tracer::setTag(char* tag){
-
     MUTEX_LOCKGUARD;
 
     //TODO: str handle!
@@ -126,19 +119,15 @@ void Tracer::batchWrite(const uint8_t *data, uint32_t len) {
 char trace_buffer[TRACE_BUFFER_SIZE];
 
 int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
-
     MUTEX_LOCKGUARD;
-
     int ret = 0;
 
 #ifdef ENABLE_TRACE
-
-
-    if(filter_level == Level::lNone || device.size() == 0){
+    if(filter_level == lNone || device.size() == 0){
         return 0;
     }
 
-    if(level < filter_level || level > Level::lFatal){
+    if(level < filter_level || level > lFatal){
         return 0;
     }
 

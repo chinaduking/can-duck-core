@@ -27,7 +27,8 @@ namespace utils{
 
     class Tracer{
     public:
-        enum class Level : uint8_t{
+        //TODO: no enum class !
+        enum Level : uint8_t{
             lNone = 0,
             lVerbose,
             lInfo,
@@ -52,7 +53,7 @@ namespace utils{
         void batchWrite(const uint8_t *data, uint32_t len);
 
         bool enable_color;
-        Level filter_level {Level::lVerbose};
+        Level filter_level {lVerbose};
         vector_s<LLByteDevice*> device;
 
         char tag[64];
@@ -69,12 +70,12 @@ namespace utils{
 utils::Tracer* getDefaultTracer();
 
 #ifdef ENABLE_TRACE
-    #define LOGV(...) getDefaultTracer()->printf(utils::Tracer::Level::lVerbose, __VA_ARGS__)
-    #define LOGI(...) getDefaultTracer()->printf(utils::Tracer::Level::lInfo,    __VA_ARGS__)
-    #define LOGD(...) getDefaultTracer()->printf(utils::Tracer::Level::lDebug,   __VA_ARGS__)
-    #define LOGW(...) getDefaultTracer()->printf(utils::Tracer::Level::lWarning, __VA_ARGS__)
-    #define LOGE(...) getDefaultTracer()->printf(utils::Tracer::Level::lError,   __VA_ARGS__)
-    #define LOGF(...) getDefaultTracer()->printf(utils::Tracer::Level::lFatal,   __VA_ARGS__)
+    #define LOGV(...) getDefaultTracer()->printf(utils::Tracer::lVerbose, __VA_ARGS__)
+    #define LOGI(...) getDefaultTracer()->printf(utils::Tracer::lInfo,    __VA_ARGS__)
+    #define LOGD(...) getDefaultTracer()->printf(utils::Tracer::lDebug,   __VA_ARGS__)
+    #define LOGW(...) getDefaultTracer()->printf(utils::Tracer::lWarning, __VA_ARGS__)
+    #define LOGE(...) getDefaultTracer()->printf(utils::Tracer::lError,   __VA_ARGS__)
+    #define LOGF(...) getDefaultTracer()->printf(utils::Tracer::lFatal,   __VA_ARGS__)
 #else
     #define LOGI(...) do{}while(0)
     #define LOGV(...) do{}while(0)
