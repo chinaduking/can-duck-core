@@ -4,7 +4,7 @@
 #include "utils/Tracer.hpp"
 #include "libfcn/DataLinkLayer.hpp"
 #include "TestUtils.hpp"
-#include "utils/os_only/PosixSerial.hpp"
+#include "utils/os_only/HostSerial.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;
@@ -12,7 +12,7 @@ using namespace utils;
 namespace frame_device_test{
     TEST(DataLinkLayer, SerialFrameDev) {
 
-        PosixSerial serial(0);
+        HostSerial serial(0);
         ByteFrameIODevice frame_dev(&serial);
 
         char* src_test_buffer = (char*)"12345 12345";

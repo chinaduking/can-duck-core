@@ -3,7 +3,7 @@
 //
 
 #include "Node.hpp"
-#include "os_only/PosixSerial.hpp"
+#include "os_only/HostSerial.hpp"
 #include "../idl_gen/ServoPubMsg.hpp"
 #include "Tracer.hpp"
 
@@ -13,7 +13,7 @@ using namespace fcnmsg;
 
 int main(){
     Node node;
-    PosixSerial serial(0);
+    HostSerial serial(0);
     ByteFrameIODevice serial_frame_dev(&serial);
 
     node.addPort(&serial_frame_dev);

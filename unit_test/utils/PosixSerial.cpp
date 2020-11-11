@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/20.
 //
 
-#include "utils/os_only/PosixSerial.hpp"
+#include "utils/os_only/HostSerial.hpp"
 #include "libfcn/TestUtils.hpp"
 #include <gtest/gtest.h>
 #include <iostream>
@@ -12,7 +12,7 @@ using namespace std;
 
 
 TEST(serial, recv){
-    PosixSerial serial(0, B921600);
+    HostSerial serial(0, B921600);
 
     if(serial.isOpen()){
         cout << "serial is open!" << endl;
@@ -28,7 +28,7 @@ TEST(serial, recv){
 }
 
 TEST(serial, loop){
-    PosixSerial serial(0, B921600);
+    HostSerial serial(0, B921600);
 
     if(serial.isOpen()){
         cout << "serial is open!" << endl;
@@ -58,8 +58,8 @@ TEST(serial, loop){
 
 
 TEST(serial, dual){
-    PosixSerial serial(0, B921600);
-    PosixSerial serial1(1, B921600);
+    HostSerial serial(0, B921600);
+    HostSerial serial1(1, B921600);
 
 
     if(serial.isOpen() && serial1.isOpen()){

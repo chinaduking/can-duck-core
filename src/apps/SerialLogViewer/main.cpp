@@ -1,7 +1,7 @@
 //
 // Created by sdong on 2020/11/2.
 //
-#include "utils/os_only/PosixSerial.hpp"
+#include "utils/os_only/HostSerial.hpp"
 #include <cstring>
 #include <iostream>
 using namespace utils;
@@ -44,7 +44,7 @@ int main( int argc, char *argv[]){
         }
     }
 
-    PosixSerial serial(sid, B921600);
+    HostSerial serial(sid, B921600);
 
 
     uint8_t line_wrap = 20;

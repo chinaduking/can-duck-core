@@ -16,10 +16,10 @@ namespace utils{
 #define B921600 921600
 #endif
 
-    class PosixSerial : public LLByteDevice {
+    class HostSerial : public LLByteDevice {
     public:
-        PosixSerial(int id = 0, uint32_t baud = B921600, uint16_t read_timeout_ms = 0);
-        ~PosixSerial();
+        HostSerial(int id = 0, uint32_t baud = B921600, uint16_t read_timeout_ms = 0);
+        ~HostSerial();
         int32_t read(uint8_t *data, uint32_t len) override ;
         int32_t write(const uint8_t *data, uint32_t len) override;
 

@@ -31,5 +31,5 @@ target_link_libraries(testDataLinkLayer fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 add_executable(testNetworkLayer NetworkLayer.cpp
-        ../../src/utils/os_only/PosixSerial.cpp)
+        ../../src/utils/os_only/HostSerial.cpp)
 target_link_libraries(testNetworkLayer fcn_v2 ${UT_DEFAULT_LIBS})

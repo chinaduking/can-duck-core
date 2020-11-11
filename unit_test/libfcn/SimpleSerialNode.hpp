@@ -7,7 +7,7 @@
 
 #include "libfcn/NetworkLayer.hpp"
 
-#include "utils/os_only/PosixSerial.hpp"
+#include "utils/os_only/HostSerial.hpp"
 #include "utils/Tracer.hpp"
 
 namespace network_test{
@@ -18,7 +18,7 @@ namespace network_test{
         Node(int sid) :
                 network_layer(&gNetworkLayer) {
 
-            serial = new utils::PosixSerial(sid);
+            serial = new utils::HostSerial(sid);
             frame_dev = new libfcn_v2::ByteFrameIODevice(serial);
             network_layer->addDataLinkDevice(frame_dev);
         }
@@ -37,7 +37,7 @@ namespace network_test{
             }
         }
 
-        utils::PosixSerial* serial;
+        utils::HostSerial* serial;
         libfcn_v2::ByteFrameIODevice* frame_dev;
         libfcn_v2::NetworkLayer *const network_layer;
 

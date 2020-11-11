@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/12.
 //
 
-#include "PosixSerial.hpp"
+#include "HostSerial.hpp"
 
 #include "utils/Tracer.hpp"
 
@@ -18,8 +18,8 @@
 using namespace utils;
 using namespace std;
 
-PosixSerial::PosixSerial(int id, uint32_t baud,
-                         uint16_t read_timeout_ms ): LLByteDevice(),
+HostSerial::HostSerial(int id, uint32_t baud,
+                       uint16_t read_timeout_ms ): LLByteDevice(),
                                                      baud(baud){
     /*TODO: use FTDI device ID to open serial (FTDI-D2XX Driver)
      * AR: @jin.wang*/
@@ -103,11 +103,11 @@ PosixSerial::PosixSerial(int id, uint32_t baud,
     LOGD("opened %s", serial_devices[id].c_str());
 }
 
-bool PosixSerial::isOpen() {
+bool HostSerial::isOpen() {
     return is_open;
 }
 
-PosixSerial::~PosixSerial()
+HostSerial::~HostSerial()
 {
     LOGD("close serial..");
 
@@ -116,7 +116,7 @@ PosixSerial::~PosixSerial()
 }
 
 
-int32_t PosixSerial::read(uint8_t *data, uint32_t len) {
+int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
 
     int res = (int32_t)::read(serial_fd, data, len);
@@ -124,25 +124,25 @@ int32_t PosixSerial::read(uint8_t *data, uint32_t len) {
     return res;
 }
 
-bool PosixSerial::isWriteBusy() {
+bool HostSerial::isWriteBusy() {
     return false;
 }
 
-int32_t PosixSerial::write(const uint8_t *data, uint32_t len) {
+int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     if(!is_open){ return 0; }
     return (int32_t)::write(serial_fd, data, len);
 }
 
-int32_t PosixSerial::sync() {
+int32_t HostSerial::sync() {
     return fsync(serial_fd);
 }
 
-int32_t PosixSerial::reinit() {
+int32_t HostSerial::reinit() {
 
     return 0;
 }
 
-std::vector<std::string> PosixSerial::listUSBDevice(){
+std::vector<std::string> HostSerial::listUSBDevice(){
     vector<string> usb_serial;
 
     char* pattern_unix[] = {
