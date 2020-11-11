@@ -198,6 +198,8 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     /* 进行跨平台的强制终端输出。*/
 #ifdef SYSTYPE_FULL_OS
     std::cout << std::endl;
+#else
+    batchWrite((uint8_t*)"\n", 1);
 #endif
 
 #endif //ENABLE_TRACE
