@@ -49,11 +49,11 @@ static char* level_name[] = {
 #define ANSI_COLOR_BLUE    (char*) "\x1b[34m"
 #define ANSI_COLOR_MAGENTA (char*) "\x1b[35m"
 #define ANSI_COLOR_CYAN    (char*) "\x1b[36m"
-#define ANSI_COLOR_RESET   (char*) "\x1b[0m"
+#define ANSI_COLOR_RESET   (char*) "\x1b[0m "
 
 static char* level_color[] = {
-        "",             //NONE
-        "",             //VERBOSE
+        ANSI_COLOR_RESET,       //NONE
+        ANSI_COLOR_RESET,       //VERBOSE
         ANSI_COLOR_GREEN,       //INFO
         ANSI_COLOR_CYAN,        //DEBUG
         ANSI_COLOR_YELLOW,      //WARNING
@@ -138,9 +138,11 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     uint64_t timestamp = 0;
 #endif
     /* Color */
+    static int color_str_len = strlen(ANSI_COLOR_RED) + 1;
+
     if(enable_color){
         str_tmp = level_color[(uint8_t)level];
-        batchWrite((uint8_t*)str_tmp, strlen(str_tmp) + 1);
+        batchWrite((uint8_t*)str_tmp, color_str_len);
         //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     }
 
@@ -157,7 +159,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
                         );
     if(ret >= 0){
         trace_buffer[ret] = 0;
-        batchWrite((uint8_t*)trace_buffer, strlen(trace_buffer) + 1);
+        batchWrite((uint8_t*)trace_buffer, ret + 1);
     }
 
     timestamp_last = timestamp;
@@ -165,7 +167,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     ret = snprintf(trace_buffer,TRACE_BUFFER_SIZE - 3,"[%s]  " , tag);
     if(ret >= 0){
         trace_buffer[ret] = 0;
-        batchWrite((uint8_t*)trace_buffer, strlen(trace_buffer) + 1);
+        batchWrite((uint8_t*)trace_buffer, ret + 1);
     }
 
 
@@ -174,14 +176,14 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
 
     if(ret >= 0){
         trace_buffer[ret] = 0;
-        batchWrite((uint8_t*)trace_buffer,  strlen(trace_buffer) + 1);
+        batchWrite((uint8_t*)trace_buffer,  ret + 1);
     }
 
     /* Color */
     if(enable_color)
     {
         str_tmp = ANSI_COLOR_RESET;
-        batchWrite((uint8_t*)str_tmp, strlen(str_tmp) + 1);
+        batchWrite((uint8_t*)str_tmp, color_str_len);
     }
 
     /* 进行跨平台的强制终端输出。*/
