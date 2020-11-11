@@ -284,53 +284,68 @@ static char* mOpCodeStr[]={
 };
 #endif
 
-std::string libfcn_v2::frame2log(FcnFrame& frame){
-#ifdef ENABLE_TRACE
-    static const int BUFFER_RESERVE = 120;
-    static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;
-    char buffer[BUFFER_SIZE];
+uint32_t libfcn_v2::frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size){
 
     if(frame.getPayloadLen() > DATALINK_MTU){
-        return std::string("::: DataLinkFrame  > DATALINK_MTU\n");
+        LOGW("frame2strbuf: too long frame!");
+//        return 0;
     }
+
     char * opcode_str = "unknown";
     if(frame.op_code < sizeof(opcode_str) / sizeof(opcode_str[0])) {
         opcode_str = mOpCodeStr[frame.op_code];
     }
 
-    snprintf(buffer, BUFFER_SIZE - 2,
+    char* p_buffer = buffer;
+    uint32_t buffer_remain = buffer_size;
+
+    int info_len = snprintf(p_buffer, buffer_size - 2,
              "-----FRAME----\n"
-                    " %s (0x%.2X) :  [0x%.2X]->[0x%.2X] \n"
-                    " Message ID = 0x%.2X\n"
-                    " Payload [%.2d] = ",
+             " %s (0x%.2X) :  [0x%.2X]->[0x%.2X] \n"
+             " Message ID = 0x%.2X\n"
+             " Payload [%.2d] = ",
 
-            opcode_str, frame.op_code  & 0xff,
-            frame.src_id   & 0xff,
-            frame.dest_id  & 0xff,
+             opcode_str, frame.op_code  & 0xff,
+             frame.src_id   & 0xff,
+             frame.dest_id  & 0xff,
 
-            frame.msg_id   & 0xff,
-            frame.getPayloadLen());
+             frame.msg_id   & 0xff,
+             frame.getPayloadLen());
 
-    static int info_offset = 0;
-
-    if(info_offset == 0){
-        info_offset = strlen(buffer);
-    }
-
-    if(info_offset > BUFFER_RESERVE){
-        return std::string("::: info_offset > BUFFER_RESERVE\n");
-    }
+    buffer_remain -= info_len;
+    p_buffer += info_len;
 
     for(int i = 0; i < frame.getPayloadLen(); i ++){
-        snprintf(&buffer[info_offset + i * 3],
-                 BUFFER_SIZE - 2,
-                 "%.2X ", frame.payload[i] & 0xff);
+        sprintf(p_buffer, "%.2X ", frame.payload[i]);
+        p_buffer += 3;
+        buffer_remain -= 3;
+
+        if(buffer_remain < 3){
+            LOGW("frame2strbuf: buffer is not enough. stop.");
+            return p_buffer - buffer;
+        }
     }
 
-    snprintf(&buffer[info_offset + frame.getPayloadLen() * 3],
-            BUFFER_SIZE - 2,
-            "\n\"%s\"\n", frame.payload);
+    info_len = snprintf(p_buffer, buffer_remain-1, "\n\"%s\"\n", frame.payload);
+    buffer_remain -= info_len;
 
+    p_buffer += info_len;
+//    *p_buffer = '\0';
+
+    return p_buffer - buffer;
+}
+
+#ifdef ENABLE_TRACE
+static const int BUFFER_RESERVE = 120;
+static const int BUFFER_SIZE = DATALINK_MTU * 4 + BUFFER_RESERVE;
+char buffer[BUFFER_SIZE];
+#endif
+
+std::string libfcn_v2::frame2log(FcnFrame& frame){
+#ifdef ENABLE_TRACE
+
+
+    frame2strbuf(frame, buffer, BUFFER_SIZE);
     //TODO: cutoff
 //    buffer[info_offset + frame.payload_len * 3 + frame.payload_len + 3] = '\0';
 

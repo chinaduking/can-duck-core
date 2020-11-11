@@ -10,6 +10,27 @@ using namespace libfcn_v2;
 using namespace utils;
 
 namespace frame_device_test{
+    TEST(DataLinkLayer, fram2log) {
+
+        char* src_test_buffer = (char*)"12345 12345";
+
+        uint16_t src_buffer_len = strlen(src_test_buffer) + 1;
+
+        FcnFrame src_frame;
+//        ESharedPtr<DataLinkFrame> src_frame(new DataLinkFrame());
+
+        src_frame.src_id  = 0x03;
+        src_frame.dest_id = 0x05;
+        src_frame.op_code = 0x01;
+        src_frame.msg_id  = 0x07;
+        src_frame.setPayloadLen(src_buffer_len);
+        memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
+
+        cout << frame2log(src_frame) << endl;
+
+
+    }
+
     TEST(DataLinkLayer, SerialFrameDev) {
 
         HostSerial serial(0);
@@ -28,6 +49,8 @@ namespace frame_device_test{
         src_frame.msg_id  = 0x07;
         src_frame.setPayloadLen(src_buffer_len);
         memcpy(src_frame.payload, src_test_buffer, src_buffer_len);
+
+        cout << frame2log(src_frame) << endl;
 
         FcnFrame dest_frame;
 
@@ -55,7 +78,7 @@ namespace frame_device_test{
             frame_dev.pushTxQueue(&src_frame);
             frame_dev.pushTxQueue(&src_frame);
             cout << "send x2..." << endl;
-            sleep(1);
+            perciseSleep(1);
         }
         recv.join();
         send.join();

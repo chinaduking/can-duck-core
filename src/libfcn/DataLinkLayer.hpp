@@ -10,11 +10,11 @@
 
 #include "DefaultAllocate.h"
 
-#include "utils/CppUtils.hpp"
 #include "utils/ESharedPtr.hpp"
 #include "utils/vector_s.hpp"
 #include "utils/queue_s.hpp"
 #include "utils/LLComDevice.hpp"
+#include "utils/CppUtils.hpp"
 
 namespace libfcn_v2{
     /* IDs */
@@ -127,6 +127,8 @@ namespace libfcn_v2{
 #pragma pack(0)
 
     std::string frame2log(FcnFrame& frame);
+
+    uint32_t frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size);
 
     typedef FcnFrame* FramePtr;
 //    typedef utils::ESharedPtr<DataLinkFrame> FramePtr;

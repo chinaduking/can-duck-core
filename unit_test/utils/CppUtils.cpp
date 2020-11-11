@@ -9,6 +9,10 @@
 using namespace utils;
 using namespace std;
 
+TEST(CppUtils, assert){
+    USER_ASSERT(1==0);
+}
+
 TEST(CppUtils, existInVector) {
     std::vector<int> x(3);
     x[0] = 1;
