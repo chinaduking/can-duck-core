@@ -13,7 +13,6 @@
  * @author  TODO_name, TODO_organization
  * @date    TODO_dd_mmm_yyyy
  */
-
 class ClassTemplate{
 public:
     /* ------ Public Declarations ------  */
