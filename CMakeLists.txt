@@ -14,17 +14,17 @@ else()
 endif()
 
 #------------Set Compile Flags-------------------
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops -fpic \
-#-Wall -Wno-sign-compare -Wno-unused-private-field -Wno-writable-strings \
-#-Werror=return-type  -Wno-unused-variable\
-# -pthread -ffast-math")
-#
-#set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops -fpic -pthread -Wno-sign-compare -Werror=return-type -ffast-math")
-# TODO: windows or unix?
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops")
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops")
-
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -funroll-loops -fpic \
+    -Wall -Wno-sign-compare -Wno-unused-private-field -Wno-writable-strings \
+    -Werror=return-type  -Wno-unused-variable\
+     -pthread -ffast-math")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -std=c99 -funroll-loops")
+endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
