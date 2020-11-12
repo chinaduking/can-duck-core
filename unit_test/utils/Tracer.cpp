@@ -17,19 +17,19 @@ TEST(Tracer, basic){
 //    tracer.addByteIODeviece(&stdio_wrapper);
     tracer.addByteIODeviece(&file_wrapper);
 
-    tracer.setFilter(Tracer::lVerbose);
-    tracer.printf(Tracer::lVerbose, "hello world!!  %d", 2020);
-    tracer.printf(Tracer::lInfo, "hello world!!  %d", 2020);
-    tracer.printf(Tracer::lDebug, "hello world!!");
-    tracer.printf(Tracer::lWarning, "hello world!! %d", 2020);
-    tracer.printf(Tracer::lError, "hello world!!");
-    tracer.printf(Tracer::lFatal, "hello world!!");
+    tracer.setFilter(LogLvl::lVerbose);
+    tracer.printf(LogLvl::lVerbose, "hello world!!  %d", 2020);
+    tracer.printf(LogLvl::lInfo, "hello world!!  %d", 2020);
+    tracer.printf(LogLvl::lDebug, "hello world!!");
+    tracer.printf(LogLvl::lWarning, "hello world!! %d", 2020);
+    tracer.printf(LogLvl::lError, "hello world!!");
+    tracer.printf(LogLvl::lFatal, "hello world!!");
 }
 
 
 TEST(Tracer, MACRO){
     FileIODviceWrapper file_wrapper("log.txt");
-    getDefaultTracer()->setFilter(Tracer::lVerbose);
+    getTracer()->setFilter(LogLvl::lVerbose);
 
 
     LOGV("hello world!!  %d", 2020);

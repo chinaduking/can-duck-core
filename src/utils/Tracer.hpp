@@ -94,6 +94,8 @@ namespace utils{
 
 utils::Tracer* getTracer();
 
+typedef utils::Tracer::Level LogLvl;
+
 #ifdef ENABLE_TRACE
     #define LOGV(...) getTracer()->printf(utils::Tracer::lVerbose, __VA_ARGS__)
     #define LOGI(...) getTracer()->printf(utils::Tracer::lInfo,    __VA_ARGS__)
