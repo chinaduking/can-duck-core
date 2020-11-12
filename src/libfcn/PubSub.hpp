@@ -224,10 +224,11 @@ namespace libfcn_v2 {
         /* ---------- Constructors ---------  */
         explicit PublisherManager(NetworkLayer* network)
             : ctx_network_layer(network),
+
+              pub_ctrl_rules(MAX_PUB_CTRL_RULES),
               shared_buffers(MAX_LOCAL_NODE_NUM),
-              pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
-              pub_ctrl_rules(MAX_PUB_CTRL_RULES)
-              { }
+              pub_sub_channels(MAX_LOCAL_NODE_NUM*2)
+        { }
 
 
         /* ----------- Destructor ----------  */
