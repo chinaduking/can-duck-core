@@ -154,13 +154,13 @@ int HostSerial::open(std::string port_name_,
     DCB dcb;
     CString PortSpecifier = port_name_.c_str();
 
-    HANDLE hPort = CreateFile(
-            PortSpecifier,
-            GENERIC_WRITE,
+    hPort = CreateFile(
+            ("\\\\.\\"+port_name_).c_str(),
+            GENERIC_READ  | GENERIC_WRITE,
             0,
             NULL,
             OPEN_EXISTING,
-            0,
+            FILE_FLAG_OVERLAPPED,
             NULL
     );
 
@@ -175,6 +175,18 @@ int HostSerial::open(std::string port_name_,
 
     if (!SetCommState(hPort,&dcb)){
         return -2;
+    }
+
+    // Set timeouts
+    COMMTIMEOUTS timeout = { 0 };
+    timeout.ReadIntervalTimeout = 50;
+    timeout.ReadTotalTimeoutConstant = 50;
+    timeout.ReadTotalTimeoutMultiplier = 50;
+    timeout.WriteTotalTimeoutConstant = 50;
+    timeout.WriteTotalTimeoutMultiplier = 10;
+
+    if (!SetCommTimeouts(hPort, &timeout)){
+        return -3;
     }
 
     is_open = true;
@@ -230,7 +242,6 @@ HostSerial::~HostSerial() {
     close();
 }
 
-
 int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){
         LOGE("HostSerial::read: port is closed!");
@@ -266,7 +277,11 @@ int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     return res;
 #else  //WIN32
     DWORD byteswritten;
+
+
     CString data_str = data; //TODO: build from *data
+
+    WriteABuffer()
     WriteFile(hPort,data_str,len,&byteswritten,NULL);
     return byteswritten;
 #endif  //WIN32
