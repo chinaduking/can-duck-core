@@ -10,7 +10,7 @@
 
 #ifdef SYSTYPE_FULL_OS
     /* 如果是OS，包含iostream，以便调用cout<<endl进行跨平台的强制终端输出。*/
-    #include <iostream>
+//    #include <iostream>
 
     /* 默认可通过stdout进行输出*/
     #include "utils/os_only/HostIODeviceWrapper.hpp"
@@ -43,6 +43,8 @@ static char* level_name[] = {
         (char*) ">>!!!F"
 };
 
+/* 颜色
+ * 注意为了性能原因，以下字符串需等长。不等长的用空格补全*/
 #define ANSI_COLOR_RED     (char*) "\x1b[31m"
 #define ANSI_COLOR_GREEN   (char*) "\x1b[32m"
 #define ANSI_COLOR_YELLOW  (char*) "\x1b[33m"
@@ -60,20 +62,21 @@ static char* level_color[] = {
         ANSI_COLOR_RED,         //ERROR
         ANSI_COLOR_MAGENTA      //FATAL
 };
-
-Tracer* defaultTracer = nullptr;
-
-Tracer* getDefaultTracer(){
-    if(defaultTracer == nullptr){
-        defaultTracer = new Tracer(true);
-    }
-
-    return defaultTracer;
+#ifdef ENABLE_TRACE
+Tracer defaultTracer(true);
+#endif //ENABLE_TRACE
+Tracer* getTracer(){
+#ifdef ENABLE_TRACE
+    return &defaultTracer;
+#else //ENABLE_TRACE
+    return nullptr;
+#endif //ENABLE_TRACE
 }
 
 Tracer::Tracer(bool enable_color)
     : enable_color(enable_color),
-      device(MAX_BINDING_OUTPUT_DEVICE)
+      device(MAX_BINDING_OUTPUT_DEVICE),
+      frm_buf_queue(FMT_BUF_QUEUE_SZ)
 {
     tag[0] = 0;
 
@@ -118,18 +121,15 @@ void Tracer::batchWrite(const uint8_t *data, uint32_t len) {
 
 char trace_buffer[TRACE_BUFFER_SIZE];
 
+//TODO:
+
 int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     MUTEX_LOCKGUARD;
     int ret = 0;
 
 #ifdef ENABLE_TRACE
-    if(filter_level == lNone || device.size() == 0){
-        return 0;
-    }
-
-    if(level < filter_level || level > lFatal){
-        return 0;
-    }
+    if(filter_level == lNone || device.size() == 0){ return 0;}
+    if(level < filter_level || level > lFatal){ return 0; }
 
     char* str_tmp;
 #ifdef SYSTYPE_FULL_OS
@@ -143,7 +143,6 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     if(enable_color){
         str_tmp = level_color[(uint8_t)level];
         batchWrite((uint8_t*)str_tmp, color_str_len);
-        //device->write(reinterpret_cast<const uint8_t *>(str_tmp), strlen(str_tmp) + 1);
     }
 
     /* Info
@@ -151,8 +150,8 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
      * */
     ret = snprintf(trace_buffer,TRACE_BUFFER_SIZE - 3,
                           "%s  "  /* Level */
-                          "%lu "  /* Timestamp */
-                          "(+%lu us) "  /* Timestamp Diff */
+                          "%llu "  /* Timestamp */
+                          "(+%lluus) "  /* Timestamp Diff */
                         , level_name[(uint8_t)level]
                         , timestamp
                         , (uint64_t)(timestamp - timestamp_last)
@@ -170,7 +169,6 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
         batchWrite((uint8_t*)trace_buffer, ret + 1);
     }
 
-
     /* Content */
     ret = vsnprintf(trace_buffer,TRACE_BUFFER_SIZE - 3 , format, arg_ptr);
 
@@ -186,12 +184,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
         batchWrite((uint8_t*)str_tmp, color_str_len);
     }
 
-    /* 进行跨平台的强制终端输出。*/
-#ifdef SYSTYPE_FULL_OS
-    std::cout << std::endl;
-#else
     batchWrite((uint8_t*)"\n", 1);
-#endif
 
 #endif //ENABLE_TRACE
     return ret;

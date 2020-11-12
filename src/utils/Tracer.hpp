@@ -7,6 +7,7 @@
 
 #include "LLComDevice.hpp"
 #include "vector_s.hpp"
+#include "queue_s.hpp"
 #include <string>
 
 namespace utils{
@@ -27,6 +28,13 @@ namespace utils{
 
     class Tracer{
     public:
+        static const int FMT_BUF_SZ = 512;
+#ifdef SYSTYPE_FULL_OS
+        static const int FMT_BUF_QUEUE_SZ = 32;
+#else
+        static const int FMT_BUF_QUEUE_SZ = 8;
+#endif
+
         //TODO: no enum class !
         enum Level : uint8_t{
             lNone = 0,
@@ -49,6 +57,20 @@ namespace utils{
         int vprintf(Level level, char *format, va_list arg_ptr);
         int printf(Level level, char* fmt, ...);
 
+        struct FmtBuf{
+            uint8_t  level{0};
+            uint16_t idx {0};
+
+            uint8_t  buf  [FMT_BUF_SZ];
+            uint32_t size_limit{ FMT_BUF_SZ };
+
+            uint8_t* fmt_ptr{0};
+            uint32_t fmt_len{0};
+        };
+        //TODO: zero copy format to buffer use external method
+        FmtBuf* fmtBufAlloc(Level level);
+        void fmtBufPrint(FmtBuf* buf);
+
     private:
         void batchWrite(const uint8_t *data, uint32_t len);
 
@@ -57,6 +79,9 @@ namespace utils{
         vector_s<LLByteDevice*> device;
 
         char tag[64];
+
+        ObjPool<FmtBuf, FMT_BUF_QUEUE_SZ> frm_buf_poll;
+        utils::queue_s<FmtBuf*> frm_buf_queue;
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex update_mutex;
@@ -67,15 +92,15 @@ namespace utils{
 
 }
 
-utils::Tracer* getDefaultTracer();
+utils::Tracer* getTracer();
 
 #ifdef ENABLE_TRACE
-    #define LOGV(...) getDefaultTracer()->printf(utils::Tracer::lVerbose, __VA_ARGS__)
-    #define LOGI(...) getDefaultTracer()->printf(utils::Tracer::lInfo,    __VA_ARGS__)
-    #define LOGD(...) getDefaultTracer()->printf(utils::Tracer::lDebug,   __VA_ARGS__)
-    #define LOGW(...) getDefaultTracer()->printf(utils::Tracer::lWarning, __VA_ARGS__)
-    #define LOGE(...) getDefaultTracer()->printf(utils::Tracer::lError,   __VA_ARGS__)
-    #define LOGF(...) getDefaultTracer()->printf(utils::Tracer::lFatal,   __VA_ARGS__)
+    #define LOGV(...) getTracer()->printf(utils::Tracer::lVerbose, __VA_ARGS__)
+    #define LOGI(...) getTracer()->printf(utils::Tracer::lInfo,    __VA_ARGS__)
+    #define LOGD(...) getTracer()->printf(utils::Tracer::lDebug,   __VA_ARGS__)
+    #define LOGW(...) getTracer()->printf(utils::Tracer::lWarning, __VA_ARGS__)
+    #define LOGE(...) getTracer()->printf(utils::Tracer::lError,   __VA_ARGS__)
+    #define LOGF(...) getTracer()->printf(utils::Tracer::lFatal,   __VA_ARGS__)
 #else
     #define LOGI(...) do{}while(0)
     #define LOGV(...) do{}while(0)

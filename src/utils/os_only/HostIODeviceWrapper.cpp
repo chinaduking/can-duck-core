@@ -13,6 +13,7 @@ using namespace utils;
 /*stdout wrapper*/
 int32_t StdoutIODviceWrapper::write(const uint8_t *data, uint32_t len){
     printf("%s", data);
+    fflush(stdout);
     return 0;
 }
 

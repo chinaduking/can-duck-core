@@ -232,7 +232,10 @@ HostSerial::~HostSerial() {
 
 
 int32_t HostSerial::read(uint8_t *data, uint32_t len) {
-    if(!is_open){ return 0; }
+    if(!is_open){
+        LOGE("HostSerial::read: port is closed!");
+        return 0;
+    }
 #ifndef WIN32
     int res = (int32_t)::read(posix_serial_fd, data, len);
     return res;
@@ -253,9 +256,14 @@ int32_t HostSerial::read(uint8_t *data, uint32_t len) {
 
 
 int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
-    if(!is_open){ return 0; }
+    if(!is_open){
+        LOGE("HostSerial::write: port is closed!");
+        return 0;
+    }
 #ifndef WIN32
-    return (int32_t)::write(posix_serial_fd, data, len);
+    int res = (int32_t)::write(posix_serial_fd, data, len);
+//    std::fflush(posix_serial_fd);
+    return res;
 #else  //WIN32
     DWORD byteswritten;
     CString data_str = data; //TODO: build from *data
