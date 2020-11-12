@@ -4,15 +4,16 @@
 #ifndef NAMESPACE_CLASSNAME_HPP
 #define NAMESPACE_CLASSNAME_HPP
 
+/* --------------------------------------------------------- */
 /**
- * TODO_one_line_description_of_class.
- *
- * TODO_longer_description_of_class_meant_for_users._Developer_details_should_
- * be_put_in_the_.cpp_implementation
- *
- * @author  TODO_name, TODO_organization
- * @date    TODO_dd_mmm_yyyy
- */
+* @brief TODO_one_line_description_of_class.
+*
+* TODO_longer_description_of_class_meant_for_users._Developer_details_should_
+* be_put_in_the_.cpp_implementation
+*
+* @author  TODO_name, TODO_organization
+* @date    TODO_dd_mmm_yyyy
+*/
 class ClassTemplate{
 public:
     /* ------ Public Declarations ------  */
@@ -20,7 +21,7 @@ public:
         char* msg { nullptr };
     };
 
-    /* ------ Constructors ------  */
+    /* ---------- Constructors ---------  */
     /**
      * \~english
      * TODO_describe_ctor.
@@ -30,13 +31,15 @@ public:
     ClassTemplate() {
     }
 
-    /* ------ Destructor ------  */
+    /* ----------- Destructor ----------  */
     virtual ~ClassTemplate() {
     }
 
     /* --------- Public Methods --------  */
 
-    /** TODO_describe_accessor.
+    /**
+     * @brief TODO_describe_accessor.
+     * @details TODO_describe_accessor
      * @param param_a TODO_describe_input_param.
      * @return TODO_describe_return value. */
     int publicMethodA(int param_a);

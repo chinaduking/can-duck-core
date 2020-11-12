@@ -19,33 +19,54 @@ namespace libfcn_v2 {
     class NetworkLayer;
     struct SubscribeCallback;
 
+    /* --------------------------------------------------------- */
 
-    /* ---------------------------------------------------------
-     * 发布-订阅消息通道实例。
+    /**
      *
-     * 一个每一个消息频道应被分配一个全网唯一地址；
+     * @brief 发布-订阅消息通道实例
+     *
+     * @details 一个每一个消息频道应被分配一个全网唯一地址；
      * 且同一通道内的消息对应唯一的字典进行消息解析。
-     * --------------------------------------------------------- */
+     *
+     * @author  sdong
+     * @date    2020/10/15
+     *
+     */
     class PubSubChannel{
     public:
+        /* ------ Public Declarations ------  */
         typedef SubscribeCallback* callbacl_ptr_t;
 
-        PubSubChannel(SerDesDict* obj_dict_shm, void* buffer,
+        /* ---------- Constructors ---------  */
+
+        /**
+         * @brief 发布-订阅消息通道实例
+         *
+         * @param serdes_dict 指向序列化字典的类型对象。同一地址的通道，采用同一字典类型对象。
+         * @param buffer 存储数据的深度为1的缓冲区。由序列化字典类型对象创建的缓冲区。
+         * @param is_source 是否自己是源
+         */
+        PubSubChannel(SerDesDict* serdes_dict, void* buffer,
                       bool is_source= true)
             :
-            serdes_dict(obj_dict_shm),
+            serdes_dict(serdes_dict),
             buffer(buffer),
             callback_ptr_list(serdes_dict->dictSize())
             {
             USER_ASSERT(buffer != nullptr);
         }
 
+        /* ----------- Destructor ----------  */
         ~PubSubChannel() = default;
 
 
-        /* ---------------------------------------------------------
-         * 向通道中发布一个消息
-         * ---------------------------------------------------------*/
+        /* --------- Public Methods --------  */
+
+        /**
+         * @brief 向通道中发布一个消息
+         *
+         * @param msg
+         */
         template<typename Msg>
         void publish(Msg&& msg){
             uint16_t src_id = 0, dest_id = 0;
@@ -82,23 +103,26 @@ namespace libfcn_v2 {
             return serdes_dict->deserialize(msg, buffer);
         }
 
+
+        /* ------- Public Variables --------  */
+
         SerDesDict* serdes_dict{nullptr};
 
         void* const buffer {nullptr};
 
-
         utils::Vector<callbacl_ptr_t> callback_ptr_list;
-//        /* 将回调函数指针映射到int8整形时，基址偏移量
-//         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
-//         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
-//        uint16_t*  callback_mapped_ptr_base;
-//
-//        /* 将回调函数指针映射到int8整形后的指针数组 */
-//        uint8_t** callback_mapped_ptr_list;
-//
-//        /* 上述数组长度 */
-//        uint8_t* callback_mapped_ptr_num;
+#if 0
+        /* 将回调函数指针映射到int8整形时，基址偏移量
+         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
+         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
+        uint16_t*  callback_mapped_ptr_base;
 
+        /* 将回调函数指针映射到int8整形后的指针数组 */
+        uint8_t** callback_mapped_ptr_list;
+
+        /* 上述数组长度 */
+        uint8_t* callback_mapped_ptr_num;
+#endif
         FcnFrame frame_tmp;
 
         libfcn_v2::NetworkLayer *network_layer{nullptr};
@@ -114,25 +138,32 @@ namespace libfcn_v2 {
     };
 
 
-
-    /* ---------------------------------------------------------
-     * 订阅实时消息的回调
-     * ---------------------------------------------------------*/
+    /* --------------------------------------------------------- */
+    /**
+     * @brief 订阅实时消息的回调
+     *
+     * @author  sdong
+     * @date    2020/11/13
+     */
     struct SubscribeCallback{
+        /* ------ Public Declarations ------  */
         typedef void (*Callback)(void* p_this, PubSubChannel* channel);
 
+        /* ---------- Constructors ---------  */
         SubscribeCallback() = default;
 
         SubscribeCallback(Callback cb, void* p_this=nullptr):
                 cb(cb), p_this(p_this)
         {}
 
+        /* --------- Public Methods --------  */
         inline void call(PubSubChannel* channel){
             if(cb != nullptr){
                 (*cb)(p_this, channel);
             }
         }
 
+        /* ------- Public Variables --------  */
         Callback cb {nullptr};
         void* p_this {nullptr};
     };
@@ -141,9 +172,13 @@ namespace libfcn_v2 {
                 PubSubChannel* channel)
 
 
-    /* ---------------------------------------------------------
-     * 构造一个数据帧
-     * ---------------------------------------------------------*/
+    /* --------------------------------------------------------- */
+    /**
+     * @brief 构造一个数据帧
+     *
+     * @author  sdong
+     * @date    2020/10/15
+     */
     void singleWriteFrameBuilder(
             FcnFrame* result_frame,
             uint16_t src_id,
@@ -153,7 +188,14 @@ namespace libfcn_v2 {
             uint8_t* p_data, uint16_t len);
 
 
-    /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+    /* --------------------------------------------------------- */
+
+    /**
+     * @brief 将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
+     *
+     * @author  sdong
+     * @date    2020/10/15
+     */
     obj_size_t RtoDictSingleWrite(SerDesDict* dict,
                                   void* buffer,
                                   obj_idx_t index,
@@ -165,25 +207,34 @@ namespace libfcn_v2 {
 
 
 
+    /* --------------------------------------------------------- */
 
-    /* ---------------------------------------------------------
-    * 网络处理。
-    * 不论本地有几个节点，节点均共享一个该实例（单例模式）
-    * 但为了降低耦合度，这里不实现单例模式，由上层实现。
-    * ---------------------------------------------------------*/
     #define MAX_PUB_CTRL_RULES 10  //TODO: LINKED LIST
 
+    /**
+     * @brief 发布订阅管理器，管理所有通道实例，进行本地和网络转发处理
+     *
+     * @details 不论本地有几个节点，节点均共享一个该实例（单例模式）
+     *      但为了降低耦合度，这里不实现单例模式，由上层实现。
+     * @author  sdong
+     * @date    2020/10/15
+     */
     class PublisherManager{
     public:
-        PublisherManager(NetworkLayer* network)
+        /* ---------- Constructors ---------  */
+        explicit PublisherManager(NetworkLayer* network)
             : ctx_network_layer(network),
               shared_buffers(MAX_LOCAL_NODE_NUM),
               pub_sub_channels(MAX_LOCAL_NODE_NUM*2),
               pub_ctrl_rules(MAX_PUB_CTRL_RULES)
               { }
 
+
+        /* ----------- Destructor ----------  */
         ~PublisherManager() = default;
 
+
+        /* --------- Public Methods --------  */
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address);
 
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
@@ -192,9 +243,12 @@ namespace libfcn_v2 {
         void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
 
+        /* ------ Public Declarations ------  */
         struct PubCtrlRule{
+            /* ---------- Constructors ---------  */
             PubCtrlRule() : data_link_dev(MAX_COM_PORT_NUM){}
 
+            /* --------- Public Variables --------  */
             /* 发送频率。-1代表直接转发不过滤 */
             int16_t freq_hz     { -1 };
 
@@ -215,37 +269,41 @@ namespace libfcn_v2 {
             utils::Vector<FrameIODevice*> data_link_dev;
 
         private:
+            /* ------ Private Declarations ------  */
+            friend class PublisherManager;
+
+            /* ------- Private Variables --------  */
             uint32_t freq_divier{0};
             uint32_t freq_divier_cnt{0};
 
             uint32_t send_busy_cnt {0};
-            friend class PublisherManager;
 
         };
 
+
+        /* --------- Public Methods --------  */
         void addPubCtrlRule(PubCtrlRule& rule);
 
         void update();
 
 
     protected:
-        /* ------ Private Methods ------  */
+        /* ------ Protected Declarations ------  */
+        struct SharedBuffer{
+            int    id {-1};
+            void*  buffer {nullptr};
+        };
 
-        /* ------ Private Declaration ------  */
 
-        /* ------ Private Data ------  */
+        /* --------- Protected Methods --------  */
+
+        /* ------- Protected Variables --------  */
 
         NetworkLayer* const ctx_network_layer{nullptr};
 
         uint16_t poll_freq_hz{1000};
 
         utils::Vector<PubCtrlRule> pub_ctrl_rules;
-
-
-        struct SharedBuffer{
-            int    id {-1};
-            void*  buffer {nullptr};
-        };
 
         utils::Vector<SharedBuffer> shared_buffers;
 

@@ -25,7 +25,7 @@
 ## 2. 克隆仓库并运行第一个测试
 ### 前置需求
 - Windows
-  - Windows 10  
+  - Windows 10
   - CLion 2020
   - Visual Studio 2019 Community  
   - Git vckpg CMake
@@ -35,8 +35,8 @@
         提示：您可能需要将系统编码格式改为UTF-8以消除编译错误
 
 - Linux 
-  - CLion 2020
-  - git clang
+  - CLion 2020 
+  - git clang  
   - GTest
 
 - MacOSX
