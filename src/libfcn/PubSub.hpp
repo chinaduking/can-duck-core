@@ -119,20 +119,26 @@ namespace libfcn_v2 {
      * 订阅实时消息的回调
      * ---------------------------------------------------------*/
     struct SubscribeCallback{
-        typedef void (*Callback)(void* ctx_obj,
-                                 int ev_code, FcnFrame* frame);
+        typedef void (*Callback)(void* p_this, PubSubChannel* channel);
 
         SubscribeCallback() = default;
 
-        SubscribeCallback(Callback cb, void* ctx_obj=nullptr):
-                cb(cb), ctx_obj(ctx_obj)
+        SubscribeCallback(Callback cb, void* p_this=nullptr):
+                cb(cb), p_this(p_this)
         {}
 
-        void call(int index);
+        inline void call(PubSubChannel* channel){
+            if(cb != nullptr){
+                (*cb)(p_this, channel);
+            }
+        }
 
         Callback cb {nullptr};
-        void* ctx_obj {nullptr};
+        void* p_this {nullptr};
     };
+
+    #define FCN_SUB_CALLBACK(fname) void fname(void* p_this, \
+                PubSubChannel* channel)
 
 
     /* ---------------------------------------------------------

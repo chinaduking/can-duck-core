@@ -32,7 +32,7 @@ namespace libfcn_v2{
                 cb(cb), p_this(ctx_obj)
         {}
 
-        inline void call(ParamServerClient*  client, int ev_code){
+        inline void call(ParamServerClient* client, int ev_code){
             if(cb != nullptr){
                 (*cb)(p_this, ev_code, client);
             }
