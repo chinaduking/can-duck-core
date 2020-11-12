@@ -28,7 +28,7 @@ namespace utils{
         static std::vector<uint32_t> defaultBaudRates;
 
         HostSerial() = default;
-        HostSerial(int id = 0,
+        HostSerial(int id,
                    uint32_t baud = B921600,
                    uint16_t read_timeout_ms = 0) : LLByteDevice(){
             open(id, baud, read_timeout_ms);

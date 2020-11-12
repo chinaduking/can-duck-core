@@ -12,7 +12,9 @@ using namespace std;
 
 
 TEST(serial, recv){
-    HostSerial serial(0, B921600);
+//    HostSerial serial(0, B921600);
+    HostSerial serial;
+    serial.open("COM1", B921600);
 
     if(serial.isOpen()){
         cout << "serial is open!" << endl;
@@ -28,7 +30,9 @@ TEST(serial, recv){
 }
 
 TEST(serial, loop){
-    HostSerial serial(0, B921600);
+    HostSerial serial;
+    serial.open("COM4", 115200);
+//    HostSerial serial(0, B921600);
 
     if(serial.isOpen()){
         cout << "serial is open!" << endl;
@@ -46,14 +50,15 @@ TEST(serial, loop){
         }
     });
 
-    for(auto i = 0; i < 10; i++){
+    for(auto i = 0; i < 10;){
         char* s = "hello world.";
 
-        serial.write((uint8_t *)s, strlen(s) + 1);
-        perciseSleep(1);
+        auto len =  serial.write((uint8_t *)s, strlen(s) + 1);
+        cout << "write " << len << " byte "  << endl;
+//        perciseSleep(1);
     }
 
-    t.join();
+//    t.join();
 }
 
 
