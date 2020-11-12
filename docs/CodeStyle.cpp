@@ -21,7 +21,12 @@ public:
     };
 
     /* ------ Constructors ------  */
-    /** TODO_describe_ctor. */
+    /**
+     * \~english
+     * TODO_describe_ctor.
+     *
+     * \~chinese 这是一个类的模板
+     * */
     ClassTemplate() {
     }
 
