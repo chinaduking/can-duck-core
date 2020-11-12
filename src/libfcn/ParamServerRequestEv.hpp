@@ -27,12 +27,6 @@ namespace libfcn_v2{
 
         RequestCallback() = default;
 
-        RequestCallback operator=(const RequestCallback& other){
-            RequestCallback(other.cb, other.p_this);
-            this->ctx_client = other.ctx_client;
-            return *this;
-        }
-
         RequestCallback(Callback cb,
                         void* ctx_obj=nullptr):
                 cb(cb), p_this(ctx_obj), ctx_client(ctx_client)
@@ -45,8 +39,8 @@ namespace libfcn_v2{
         }
 
         ParamServerClient*  ctx_client{nullptr};
-        Callback const cb {nullptr};
-        void* const p_this {nullptr};
+        Callback cb {nullptr};
+        void* p_this {nullptr};
     };
 
     #define FCN_REQUEST_CALLBACK(fname) void fname(void* p_this, \

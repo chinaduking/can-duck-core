@@ -49,12 +49,14 @@ namespace libfcn_v2 {
                           uint16_t server_addr,
                           uint16_t client_addr,
                           uint16_t port_id,
+                          SerDesDict* serdes_dict,
                           void* buffer) :
 
                 server_addr(server_addr),
                 client_addr(client_addr),
                 ctx_network_layer(ctx_network_layer),
                 port_id(port_id)              //TODO: noport, broadcast!
+                ,serdes_dict(serdes_dict)
                 ,buffer(buffer)
 
 #ifdef USE_REQUEST_EVLOOP

@@ -244,7 +244,7 @@ HostSerial::~HostSerial() {
 
 int32_t HostSerial::read(uint8_t *data, uint32_t len) {
     if(!is_open){
-        LOGE("HostSerial::read: port is closed!");
+        LOGF("HostSerial::read: port is closed!");
         return 0;
     }
 #ifndef WIN32
@@ -268,7 +268,7 @@ int32_t HostSerial::read(uint8_t *data, uint32_t len) {
 
 int32_t HostSerial::write(const uint8_t *data, uint32_t len) {
     if(!is_open){
-        LOGE("HostSerial::write: port is closed!");
+        LOGF("HostSerial::write: port is closed!");
         return 0;
     }
 #ifndef WIN32

@@ -104,7 +104,8 @@ namespace libfcn_v2 {
                 return false;
             }
             auto obj = getObjBaseByIndex(index);
-            utils::memcpy(data, (uint8_t*)p_buffer + obj->buffer_offset,
+            utils::memcpy((uint8_t*)p_buffer + obj->buffer_offset,
+                          data,
                           obj->data_size);
             return true;
         }

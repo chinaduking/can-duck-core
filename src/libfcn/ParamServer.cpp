@@ -198,7 +198,9 @@ ParamServerClient* ParamServerManager::bindClientToServer(
 
     if(client == nullptr){
         client = new ParamServerClient(ctx_network_layer, server_addr, client_addr,
-                                       port_id, prototype.createBuffer());
+                                       port_id,
+                                       &prototype,
+                                       prototype.createBuffer());
 
         CreatedClient cli = {
                 .address = client_addr,

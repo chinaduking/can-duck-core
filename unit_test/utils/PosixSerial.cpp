@@ -30,9 +30,9 @@ TEST(serial, recv){
 }
 
 TEST(serial, loop){
-    HostSerial serial;
-    serial.open("COM4", 115200);
-//    HostSerial serial(0, B921600);
+//    HostSerial serial;
+//    serial.open("COM4", 115200);
+    HostSerial serial(0, B921600);
 
     if(serial.isOpen()){
         cout << "serial is open!" << endl;

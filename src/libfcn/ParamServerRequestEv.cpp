@@ -93,9 +93,9 @@ void ParamServerRequestEv::onRecv(FcnFrame &frame) {
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
         if(context_client->updateData(frame.msg_id, frame.payload)){
-            callback.call(2);
-        } else{
             callback.call(1);
+        } else{
+            callback.call(3);
         }
     }
 

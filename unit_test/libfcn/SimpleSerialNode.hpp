@@ -29,6 +29,12 @@ namespace network_test{
                     network_layer->recvPolling();
                 }
             });
+
+            send_thread = std::make_shared<std::thread>([&](){
+                for (int __i = 0 ; __i < 1; ){
+                    network_layer->sendPolling();
+                }
+            });
         }
 
         void join(){
@@ -42,6 +48,7 @@ namespace network_test{
         libfcn_v2::NetworkLayer *const network_layer;
 
         std::shared_ptr<std::thread> recv_thread  {nullptr};
+        std::shared_ptr<std::thread> send_thread  {nullptr};
     };
 
 }

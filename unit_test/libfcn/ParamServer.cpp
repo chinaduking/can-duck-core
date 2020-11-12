@@ -29,7 +29,7 @@ namespace network_test {
     }
 
 
-    TEST(NetworkLayer, SvoServoNode) {
+    TEST(ParamServer, Server) {
         int local_addr = SERVO_ADDR;
 
         Node fcn_node(0);
@@ -60,14 +60,14 @@ namespace network_test {
 
     FCN_REQUEST_CALLBACK(angle_rd_callback){
         if(ev_code == 2){
-            LOGW("Read angle timeout");
+            LOGE("Read angle timeout");
             return;
         }
 
         if(ev_code == 1){
             auto angle = ctx_client->readBuffer(test_ServoPubSubDict.angle).data;
 
-            LOGD("read angle done: 0x%X", angle);
+            LOGW("read angle done: 0x%X", angle);
         }
     }
 
@@ -76,12 +76,12 @@ namespace network_test {
             LOGW("Write mode done!");
         }
         else{
-            LOGW("Write mode failed!");
+            LOGE("Write mode failed!");
         }
     }
 
 
-    TEST(NetworkLayer, SvoHostNode) {
+    TEST(ParamServer, Client) {
         Node fcn_node(1);
 
         int servo_addr = SERVO_ADDR;
@@ -109,7 +109,7 @@ namespace network_test {
             servo_client->writeAsync(mode_msg,
                                      RequestCallback(mode_wr_callback));
 
-            perciseSleep(0.1);
+            perciseSleep(1);
         }
 
         fcn_node.join();
