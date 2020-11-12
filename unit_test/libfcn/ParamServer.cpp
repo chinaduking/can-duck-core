@@ -97,17 +97,14 @@ namespace network_test {
             LOGD("request.. " );
 
 
-            servo_client->readAsync(test_ServoPubSubDict.angle,
-                                    RequestCallback(angle_rd_callback));
+            servo_client->readAsync(test_ServoPubSubDict.angle, angle_rd_callback);
 
-            servo_client->readAsync(test_ServoPubSubDict.angle,
-                                    RequestCallback(angle_rd_callback));
+            servo_client->readAsync(test_ServoPubSubDict.angle, angle_rd_callback);
 
             auto mode_msg = test_ServoPubSubDict.mode;
             mode_msg << 0x22;
 
-            servo_client->writeAsync(mode_msg,
-                                     RequestCallback(mode_wr_callback));
+            servo_client->writeAsync(mode_msg, mode_wr_callback);
 
             perciseSleep(1);
         }

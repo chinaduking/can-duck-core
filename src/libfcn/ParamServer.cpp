@@ -131,14 +131,10 @@ obj_size_t ParamServer::onReadReq(FcnFrame* frame,
 }
 
 void ParamServerClient::onReadAck(FcnFrame* frame){
-//   TODO:
-//    event_loop->notify(frame);
      ev_loop.notify(*frame);
 }
 
 void ParamServerClient::onWriteAck(FcnFrame* frame){
-//   TODO:
-//    event_loop->notify(frame);
     ev_loop.notify(*frame);
 }
 

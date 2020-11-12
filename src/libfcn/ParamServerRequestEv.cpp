@@ -75,15 +75,14 @@ void ParamServerRequestEv::onTimeout() {
 }
 
 void ParamServerRequestEv::onRecv(FcnFrame &frame) {
-//    if(context_client->serdes_dict == nullptr){
-//        return;
-//    }
+
     if(frame.op_code != ack_op_code){
         LOGE("frame.op_code != ack_op_code, %X  & %X, check evloop!",
              frame.op_code, ack_op_code);
         return;
     }
 
+    //TODO: define ev code!
     if(frame.msg_id != cached_req.msg_id){
         LOGE("frame.msg_id != cached_req.msg_id, %X  & %X, check evloop!",
              frame.msg_id, cached_req.msg_id);

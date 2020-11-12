@@ -29,22 +29,11 @@ uint64_t globalTimeSourceMS();
 
 namespace libfcn_v2 {
 
-    /*参数表任务状态：包括读、写*/
-    enum class SvoClientStat : uint8_t {
-        Idle = 0,   /*初始状态/无任务状态*/
-        Pendding,   /*正在进行读写*/
-        Ok,         /*读写成功*/
-        Rejected,   /*访问被拒绝（可能原因：服务器上的元信息和数据包不匹配、没有权限）*/
-        Timeout,    /*访问超时（可能原因：网络层通信失败）*/
-        Unknown     /*未知错误*/
-    };
-
     class ParamServerManager;
     class NetworkLayer;
 
     class ParamServerClient{
     public:
-        //TODO: 传入SerDesDict，在回调中实现类型安全的反序列化
         ParamServerClient(NetworkLayer* ctx_network_layer,
                           uint16_t server_addr,
                           uint16_t client_addr,
@@ -80,7 +69,8 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void readAsync(Msg&& msg,
-                       RequestCallback&& callback= RequestCallback(),
+                       RequestCallback::Callback callback_func = nullptr,
+                       void* callback_ctx_obj = nullptr,
                        uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
@@ -95,13 +85,16 @@ namespace libfcn_v2 {
             #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
-                    this,
-                    frame,
-                    (uint8_t)OpCode::ParamServer_ReadAck,
-                    timeout_ms, retry,
-                    std::move(callback))
+            int res = ev_loop.addTask(
+                    std::make_unique<ParamServerRequestEv>(
+                        this,
+                        frame,
+                        (uint8_t)OpCode::ParamServer_ReadAck,
+                        timeout_ms, retry,
+                        RequestCallback(callback_func, callback_ctx_obj)
+                    )
                 );
+
             if(res == -1){
                 LOGW("evloop can't add more task!");
             }
@@ -111,7 +104,8 @@ namespace libfcn_v2 {
 
         template<typename Msg>
         void writeAsync(Msg&& msg,
-                        RequestCallback&& callback= RequestCallback(),
+                        RequestCallback::Callback callback_func = nullptr,
+                        void* callback_ctx_obj = nullptr,
                         uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
@@ -126,13 +120,15 @@ namespace libfcn_v2 {
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
-            int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
-                    this,
-                    frame,
-                    (uint8_t)OpCode::ParamServer_WriteAck,
-                    timeout_ms, retry,
-                    std::move(callback))
-            );
+            int res = ev_loop.addTask(
+                    std::make_unique<ParamServerRequestEv>(
+                        this,
+                        frame,
+                        (uint8_t)OpCode::ParamServer_WriteAck,
+                        timeout_ms, retry,
+                        RequestCallback(callback_func, callback_ctx_obj)
+                    )
+                );
             if(res == -1){
                 LOGW("evloop can't add more task!");
             }
