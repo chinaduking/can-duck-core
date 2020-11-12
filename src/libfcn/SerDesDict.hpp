@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include "utils/CppUtils.hpp"
-#include "utils/vector_s.hpp"
+#include "utils/Vector.hpp"
 #include "utils/BitLUT8.hpp"
 
 
@@ -123,7 +123,7 @@ namespace libfcn_v2 {
 
 
         SerDesDictValHandle* const p_first_val;
-        utils::vector_s<mapped_ptr_t> val_offset_key_table;
+        utils::Vector<mapped_ptr_t> val_offset_key_table;
     };
 
     /*非阻塞式任务的回调函数

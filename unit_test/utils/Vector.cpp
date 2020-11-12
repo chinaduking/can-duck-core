@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/24.
 //
 
-#include "utils/vector_s.hpp"
+#include "utils/Vector.hpp"
 #include <gtest/gtest.h>
 #include <string>
 #include <iostream>
@@ -11,7 +11,7 @@ using namespace utils;
 using namespace std;
 
 TEST(vector_s, push_pop) {
-    vector_s<int> vec(10);
+    Vector<int> vec(10);
     for(int i = 0; i < 10; i ++){
         vec.push_back(i);
     }
@@ -28,7 +28,7 @@ TEST(vector_s, push_pop) {
 
 
 TEST(vector_s, range_for) {
-    vector_s<int> s(10);
+    Vector<int> s(10);
     for(int i = 0; i < 7; i ++){
         s.push_back(i);
     }

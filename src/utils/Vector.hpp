@@ -12,16 +12,16 @@
 namespace utils{
 
     template<typename T, typename Allocator=DefaultAllocator>
-    class vector_s{
+    class Vector{
     public:
-        explicit vector_s(uint32_t capicity_): member_cnt(0), capicity_
+        explicit Vector(uint32_t capicity_): member_cnt(0), capicity_
         (capicity_) {
             array = new T[capicity_];
 //          array = Allocator::allocate(capicity_*sizeof(T));
             USER_ASSERT(array != nullptr);
         }
 
-        ~vector_s() {
+        ~Vector() {
 
             delete [] array;
 
@@ -73,8 +73,8 @@ namespace utils{
         /* 迭代器方法，支持range-based for loop */
         class iterator{
         public:
-            explicit iterator(const vector_s* static_set) : static_set(static_set),
-                                                            index(0){}
+            explicit iterator(const Vector* static_set) : static_set(static_set),
+                                                          index(0){}
             ~iterator() = default;
 
             iterator operator++() {
@@ -91,7 +91,7 @@ namespace utils{
             }
 
         private:
-            const vector_s* static_set;
+            const Vector* static_set;
             uint64_t index;
 
         };

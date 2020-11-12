@@ -11,8 +11,8 @@
 #include "DefaultAllocate.h"
 
 #include "utils/ESharedPtr.hpp"
-#include "utils/vector_s.hpp"
-#include "utils/queue_s.hpp"
+#include "utils/Vector.hpp"
+#include "utils/RingBuf.hpp"
 #include "utils/LLComDevice.hpp"
 #include "utils/CppUtils.hpp"
 
@@ -219,7 +219,7 @@ namespace libfcn_v2{
         virtual bool popTxQueue(FramePtr frame) = 0;
 
     private:
-        utils::queue_s<FcnFrame> tx_frame_queue;
+        utils::RingBuf<FcnFrame> tx_frame_queue;
 
         FramePtr sending_frame{nullptr};
 
@@ -238,15 +238,15 @@ namespace libfcn_v2{
     class ByteStreamParser {
     public:
         explicit ByteStreamParser(int max_buf = DATALINK_MTU + 20);
-        explicit ByteStreamParser(utils::vector_s<uint8_t>& header_,
+        explicit ByteStreamParser(utils::Vector<uint8_t>& header_,
                                   int max_buf = DATALINK_MTU + 20);
         ~ByteStreamParser() = default;
 
-        void setHeader(utils::vector_s<uint8_t>& header_);
+        void setHeader(utils::Vector<uint8_t>& header_);
         int8_t rxParseUpdate(uint8_t recv_byte, FramePtr recv_frame);
 
     private:
-        utils::vector_s<uint8_t> header;
+        utils::Vector<uint8_t> header;
 
         enum class State : uint8_t {
             HEADER0 = 0,
@@ -288,7 +288,7 @@ namespace libfcn_v2{
         }
 
         ByteFrameIODevice(LLByteDevice* ll_byte_dev,
-                          utils::vector_s<uint8_t>& header,
+                          utils::Vector<uint8_t>& header,
                           int frame_buffer_sz=8):
                 ByteFrameIODevice(ll_byte_dev, frame_buffer_sz){
             parser.setHeader(header);
@@ -305,7 +305,7 @@ namespace libfcn_v2{
         bool popTxQueue(FramePtr send_frame) override;
 
         LLByteDevice* const ll_byte_dev;
-        utils::vector_s<uint8_t> header;
+        utils::Vector<uint8_t> header;
         ByteStreamParser parser;
 
         enum class SendState{

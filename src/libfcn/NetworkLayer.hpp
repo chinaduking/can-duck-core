@@ -5,7 +5,7 @@
 #ifndef LIBFCN_V2_NETWORKLAYER_HPP
 #define LIBFCN_V2_NETWORKLAYER_HPP
 
-#include "utils/vector_s.hpp"
+#include "utils/Vector.hpp"
 #include "DataLinkLayer.hpp"
 #include "PubSub.hpp"
 #include "ParamServer.hpp"
@@ -35,7 +35,7 @@ namespace libfcn_v2{
         //LargeDataHandler large_data_handler;
 
     private:
-        utils::vector_s<FrameIODevice*> data_link_dev;
+        utils::Vector<FrameIODevice*> data_link_dev;
         void recvProtocolDispatcher(FcnFrame* frame, uint16_t recv_port_id);
     };
 }

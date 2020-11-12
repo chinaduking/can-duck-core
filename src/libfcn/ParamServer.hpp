@@ -10,7 +10,7 @@
 
 #include "utils/BitLUT8.hpp"
 #include "utils/Tracer.hpp"
-#include "utils/vector_s.hpp"
+#include "utils/Vector.hpp"
 #include "utils/CppUtils.hpp"
 
 #include "DataLinkLayer.hpp"
@@ -300,7 +300,7 @@ namespace libfcn_v2 {
             ParamServer*  instance {nullptr};
         };
 
-        utils::vector_s<CreatedServer> created_servers;
+        utils::Vector<CreatedServer> created_servers;
 
 
         struct CreatedClient{
@@ -308,7 +308,7 @@ namespace libfcn_v2 {
             ParamServerClient*  instance {nullptr};
         };
 
-        utils::vector_s<CreatedClient> created_clients;
+        utils::Vector<CreatedClient> created_clients;
 
     };
 

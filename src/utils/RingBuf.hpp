@@ -2,8 +2,8 @@
 // Created by sdong on 2020/11/7.
 //
 
-#ifndef LIBFCN_QUEUE_S_HPP
-#define LIBFCN_QUEUE_S_HPP
+#ifndef LIBFCN_RINGBUF_HPP
+#define LIBFCN_RINGBUF_HPP
 
 #include <cstdint>
 #include "CppUtils.hpp"
@@ -12,14 +12,14 @@
 namespace utils{
 
     template<typename T_Val>
-    class queue_s{
+    class RingBuf{
     public:
-        queue_s(uint32_t capicity, bool overwrite_old=true):
+        RingBuf(uint32_t capicity, bool overwrite_old=true):
                 capicity(capicity),
                 overwrite_old(overwrite_old){
             buffer = new T_Val[capicity];
         }
-        ~queue_s(){
+        ~RingBuf(){
             delete [] buffer;
         }
 
@@ -147,4 +147,4 @@ namespace utils{
     };
 }
 
-#endif //LIBFCN_QUEUE_S_HPP
+#endif //LIBFCN_RINGBUF_HPP

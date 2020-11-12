@@ -6,7 +6,7 @@
 #define LIBFCN_V2_PUBSUB_HPP
 
 #include <cstdint>
-#include "utils/vector_s.hpp"
+#include "utils/Vector.hpp"
 #include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "OpCode.hpp"
@@ -87,7 +87,7 @@ namespace libfcn_v2 {
         void* const buffer {nullptr};
 
 
-        utils::vector_s<callbacl_ptr_t> callback_ptr_list;
+        utils::Vector<callbacl_ptr_t> callback_ptr_list;
 //        /* 将回调函数指针映射到int8整形时，基址偏移量
 //         * 采用指针形式，因为存储映射表的堆会根据添加的实例数量进行调整
 //         * 同时会更改基址的值。用指针指向堆所分配的基址，可实现同步更新*/
@@ -212,7 +212,7 @@ namespace libfcn_v2 {
             int16_t end_idx    { -1 };
 
             /* 需要转发到的端口列表 */
-            utils::vector_s<FrameIODevice*> data_link_dev;
+            utils::Vector<FrameIODevice*> data_link_dev;
 
         private:
             uint32_t freq_divier{0};
@@ -233,7 +233,7 @@ namespace libfcn_v2 {
 
         uint16_t poll_freq_hz{1000};
 
-        utils::vector_s<PubCtrlRule> pub_ctrl_rules;
+        utils::Vector<PubCtrlRule> pub_ctrl_rules;
 
 
         struct SharedBuffer{
@@ -241,9 +241,9 @@ namespace libfcn_v2 {
             void*  buffer {nullptr};
         };
 
-        utils::vector_s<SharedBuffer> shared_buffers;
+        utils::Vector<SharedBuffer> shared_buffers;
 
-        utils::vector_s<PubSubChannel*> pub_sub_channels;
+        utils::Vector<PubSubChannel*> pub_sub_channels;
 
     };
 }

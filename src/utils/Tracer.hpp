@@ -6,8 +6,8 @@
 #define LIBFCN_TRACER_HPP
 
 #include "LLComDevice.hpp"
-#include "vector_s.hpp"
-#include "queue_s.hpp"
+#include "Vector.hpp"
+#include "RingBuf.hpp"
 #include <string>
 
 namespace utils{
@@ -77,13 +77,13 @@ namespace utils{
 
         bool enable_color;
         Level filter_level {lVerbose};
-        vector_s<LLByteDevice*> device;
+        Vector<LLByteDevice*> device;
 
         char tag[64];
 
 #ifdef ENABLE_TRACE
         ObjPool<FmtBuf, FMT_BUF_QUEUE_SZ> frm_buf_poll;
-        utils::queue_s<FmtBuf*> frm_buf_queue;
+        utils::RingBuf<FmtBuf*> frm_buf_queue;
 #endif
 
 #ifdef SYSTYPE_FULL_OS

@@ -89,13 +89,13 @@ ByteStreamParser::ByteStreamParser(int max_buf)
 }
 
 ByteStreamParser::ByteStreamParser(
-        utils::vector_s<uint8_t>& header_,
+        utils::Vector<uint8_t>& header_,
         int max_buf):
         ByteStreamParser(max_buf){
     setHeader(header_);
 }
 
-void ByteStreamParser::setHeader(utils::vector_s<uint8_t>& header_){
+void ByteStreamParser::setHeader(utils::Vector<uint8_t>& header_){
     for(auto& h : header_){
         header.push_back(h);
     }

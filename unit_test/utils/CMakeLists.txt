@@ -14,7 +14,7 @@ add_executable(testCppUtils CppUtils.cpp)
 target_link_libraries(testCppUtils ${UT_DEFAULT_LIBS})
 
 
-add_executable(testVector vector_s.cpp)
+add_executable(testVector Vector.cpp)
 target_link_libraries(testVector ${UT_DEFAULT_LIBS})
 
 add_executable(testPosixSerial PosixSerial.cpp)
@@ -41,7 +41,7 @@ add_executable(testEvloop EventLoopThreading.cpp
 target_link_libraries(testEvloop fcn_v2 ${UT_DEFAULT_LIBS})
 
 
-add_executable(testQueue queue_s.cpp)
+add_executable(testQueue RingBuf.cpp)
 target_link_libraries(testQueue ${UT_DEFAULT_LIBS})
 
 add_executable(testWinSerial WinSerial.cpp)
