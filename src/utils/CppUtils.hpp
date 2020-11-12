@@ -9,6 +9,8 @@
 #ifdef SYSTYPE_FULL_OS
 #include <vector>
 #include <chrono>
+#include <cassert>
+#include <cstdio>
 #endif //SYSTYPE_FULL_OS
 
 #ifdef WIN32
@@ -130,8 +132,6 @@ namespace utils{
 
 
 #ifdef SYSTYPE_FULL_OS
-    #include <cassert>
-    #include <cstdio>
 #ifndef Release
     #define USER_ASSERT(t) if(!(t)){ printf("Asserr failed: %s at %s:%d\n\r", #t, __FILE__, __LINE__);   exit(-1); }
 #endif //Release
