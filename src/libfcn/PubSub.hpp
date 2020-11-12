@@ -229,6 +229,12 @@ namespace libfcn_v2 {
 
 
     protected:
+        /* ------ Private Methods ------  */
+
+        /* ------ Private Declaration ------  */
+
+        /* ------ Private Data ------  */
+
         NetworkLayer* const ctx_network_layer{nullptr};
 
         uint16_t poll_freq_hz{1000};

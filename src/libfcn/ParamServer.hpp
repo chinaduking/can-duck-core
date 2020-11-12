@@ -244,22 +244,23 @@ namespace libfcn_v2 {
 //        uint16_t callback_offset[dict_size];
 
     private:
+        /* ------ Private Declaration ------  */
         friend class ParamServerManager;
 
-
-        uint16_t server_addr { 0 };
-
-        utils::BitLUT8 wr_access_table;
-
-        void* buffer{nullptr};
-
-        SerDesDict* const serdes_dict{nullptr};
-
-
-        /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
+        /* ------ Private Methods ------  */
         obj_size_t onWriteReq(FcnFrame* frame, uint16_t port_id);
 
         obj_size_t onReadReq(FcnFrame* frame, uint16_t port_id);
+
+
+        /* ------ Private Data ------  */
+        uint16_t server_addr { 0 };
+
+        void* const buffer{nullptr};
+
+        utils::BitLUT8 wr_access_table;
+
+        SerDesDict* const serdes_dict{nullptr};
 
         NetworkLayer* const ctx_network_layer{nullptr};
     };
