@@ -1,3 +1,5 @@
+![](docs/img/libfcn.png)
+
 # LIBFCN 2 - Flexible Controller Network
 
 
