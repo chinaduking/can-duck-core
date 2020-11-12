@@ -65,7 +65,7 @@ namespace network_test {
         }
 
         if(ev_code == 1){
-            auto angle = ctx_client->readBuffer(test_ServoPubSubDict.angle).data;
+            auto angle = client->readBuffer(test_ServoPubSubDict.angle).data;
 
             LOGW("read angle done: 0x%X", angle);
         }

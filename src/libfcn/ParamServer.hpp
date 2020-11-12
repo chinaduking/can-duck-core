@@ -92,8 +92,7 @@ namespace libfcn_v2 {
             frame.setPayloadLen(1);
             frame.payload[0] =  msg.data_size;
 
-            callback.ctx_client = this;
-#ifndef USE_REQUEST_EVLOOP
+            #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
             int res = ev_loop.addTask(std::make_unique<ParamServerRequestEv>(
@@ -123,9 +122,6 @@ namespace libfcn_v2 {
             frame.msg_id = msg.index;
             frame.setPayloadLen(msg.data_size);
             utils::memcpy(frame.payload, &msg.data, msg.data_size);
-
-
-            callback.ctx_client = this;
 
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);

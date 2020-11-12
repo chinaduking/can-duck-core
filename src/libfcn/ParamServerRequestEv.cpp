@@ -71,7 +71,7 @@ void ParamServerRequestEv::evTimeoutCallback() {
 void ParamServerRequestEv::onTimeout() {
     LOGW("request timeout: server = 0x%X, msg_id=0x%X",
          cached_req.dest_id, cached_req.msg_id);
-    callback.call(2);
+    callback.call(context_client, 2);
 }
 
 void ParamServerRequestEv::onRecv(FcnFrame &frame) {
@@ -93,13 +93,13 @@ void ParamServerRequestEv::onRecv(FcnFrame &frame) {
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
         if(context_client->updateData(frame.msg_id, frame.payload)){
-            callback.call(1);
+            callback.call(context_client, 1);
         } else{
-            callback.call(3);
+            callback.call(context_client, 3);
         }
     }
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
-        callback.call(frame.payload[0]);
+        callback.call(context_client, frame.payload[0]);
     }
 }
