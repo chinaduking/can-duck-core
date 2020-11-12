@@ -29,7 +29,7 @@ TEST(Tracer, basic){
 
 TEST(Tracer, MACRO){
     FileIODviceWrapper file_wrapper("log.txt");
-    getTracer()->setFilter(LogLvl::lVerbose);
+    getTracer().setFilter(LogLvl::lVerbose);
 
 
     LOGV("hello world!!  %d", 2020);

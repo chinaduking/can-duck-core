@@ -65,12 +65,8 @@ static char* level_color[] = {
 #ifdef ENABLE_TRACE
 Tracer defaultTracer(true);
 #endif //ENABLE_TRACE
-Tracer* getTracer(){
-#ifdef ENABLE_TRACE
-    return &defaultTracer;
-#else //ENABLE_TRACE
-    return nullptr;
-#endif //ENABLE_TRACE
+Tracer& getTracer(){
+    return defaultTracer;
 }
 
 Tracer::Tracer(bool enable_color)

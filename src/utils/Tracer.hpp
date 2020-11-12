@@ -29,6 +29,7 @@ namespace utils{
     class Tracer{
     public:
         static const int FMT_BUF_SZ = 512;
+
 #ifdef SYSTYPE_FULL_OS
         static const int FMT_BUF_QUEUE_SZ = 32;
 #else
@@ -80,8 +81,10 @@ namespace utils{
 
         char tag[64];
 
+#ifdef ENABLE_TRACE
         ObjPool<FmtBuf, FMT_BUF_QUEUE_SZ> frm_buf_poll;
         utils::queue_s<FmtBuf*> frm_buf_queue;
+#endif
 
 #ifdef SYSTYPE_FULL_OS
         std::mutex update_mutex;
@@ -89,20 +92,19 @@ namespace utils{
 
         uint64_t timestamp_last{0};
     };
-
 }
 
-utils::Tracer* getTracer();
+utils::Tracer& getTracer();
 
 typedef utils::Tracer::Level LogLvl;
 
 #ifdef ENABLE_TRACE
-    #define LOGV(...) getTracer()->printf(utils::Tracer::lVerbose, __VA_ARGS__)
-    #define LOGI(...) getTracer()->printf(utils::Tracer::lInfo,    __VA_ARGS__)
-    #define LOGD(...) getTracer()->printf(utils::Tracer::lDebug,   __VA_ARGS__)
-    #define LOGW(...) getTracer()->printf(utils::Tracer::lWarning, __VA_ARGS__)
-    #define LOGE(...) getTracer()->printf(utils::Tracer::lError,   __VA_ARGS__)
-    #define LOGF(...) getTracer()->printf(utils::Tracer::lFatal,   __VA_ARGS__)
+    #define LOGV(...) getTracer().printf(utils::Tracer::lVerbose, __VA_ARGS__)
+    #define LOGI(...) getTracer().printf(utils::Tracer::lInfo,    __VA_ARGS__)
+    #define LOGD(...) getTracer().printf(utils::Tracer::lDebug,   __VA_ARGS__)
+    #define LOGW(...) getTracer().printf(utils::Tracer::lWarning, __VA_ARGS__)
+    #define LOGE(...) getTracer().printf(utils::Tracer::lError,   __VA_ARGS__)
+    #define LOGF(...) getTracer().printf(utils::Tracer::lFatal,   __VA_ARGS__)
 #else
     #define LOGI(...) do{}while(0)
     #define LOGV(...) do{}while(0)
