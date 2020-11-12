@@ -48,13 +48,14 @@ namespace libfcn_v2 {
         ParamServerClient(NetworkLayer* ctx_network_layer,
                           uint16_t server_addr,
                           uint16_t client_addr,
-                          uint16_t port_id) :
+                          uint16_t port_id,
+                          void* buffer) :
 
                 server_addr(server_addr),
                 client_addr(client_addr),
                 ctx_network_layer(ctx_network_layer),
                 port_id(port_id)              //TODO: noport, broadcast!
-
+                ,buffer(buffer)
 
 #ifdef USE_REQUEST_EVLOOP
 
@@ -70,21 +71,15 @@ namespace libfcn_v2 {
         ~ParamServerClient() = default;
 
         template<typename Prototype>
-        static Prototype readBuffer(Prototype&& msg, FcnFrame* frame){
-            USER_ASSERT(frame!= nullptr);
-            USER_ASSERT(frame->msg_id == msg.index);
-            USER_ASSERT(frame->getPayloadLen() == sizeof(msg.data));
-
-            Prototype res = msg;
-            utils::memcpy(&res.data, frame->payload, sizeof(res.data));
-
-            return res;
+        Prototype readBuffer(Prototype&& msg){
+            USER_ASSERT(buffer!= nullptr);
+            return serdes_dict->deserialize(msg, buffer);
         }
 
         template<typename Msg>
-        void readUnblocking(Msg&& msg,
-                            RequestCallback&& callback=RequestCallback(),
-                            uint16_t timeout_ms=300, int retry=3){
+        void readAsync(Msg&& msg,
+                       RequestCallback&& callback= RequestCallback(),
+                       uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
             FcnFrame frame;
@@ -95,6 +90,7 @@ namespace libfcn_v2 {
             frame.setPayloadLen(1);
             frame.payload[0] =  msg.data_size;
 
+            callback.ctx_client = this;
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
@@ -113,9 +109,9 @@ namespace libfcn_v2 {
 
 
         template<typename Msg>
-        void writeUnblocking(Msg&& msg,
-                             RequestCallback&& callback=RequestCallback(),
-                             uint16_t timeout_ms=300, int retry=3){
+        void writeAsync(Msg&& msg,
+                        RequestCallback&& callback= RequestCallback(),
+                        uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
             FcnFrame frame;
@@ -125,6 +121,9 @@ namespace libfcn_v2 {
             frame.msg_id = msg.index;
             frame.setPayloadLen(msg.data_size);
             utils::memcpy(frame.payload, &msg.data, msg.data_size);
+
+
+            callback.ctx_client = this;
 
 #ifndef USE_REQUEST_EVLOOP
             networkSendFrame(port_id, &frame);
@@ -145,12 +144,12 @@ namespace libfcn_v2 {
 
 #ifdef SYSTYPE_FULL_OS
 //        template<typename Msg>
-//        typename Msg::data readBlocking(Msg&& item){}
+//        typename Msg::data readSync(Msg&& item){}
 //
 //
 //
 //        template<typename Msg>
-//        typename Msg::data writeBlocking(Msg&& item,
+//        typename Msg::data writeSync(Msg&& item,
 //                             FcnCallbackInterface* callback=nullptr){
 //
 //        }
@@ -174,9 +173,15 @@ namespace libfcn_v2 {
 
         void onWriteAck(FcnFrame* frame);
 
+        bool updateData(uint16_t index, uint8_t* data){
+            return serdes_dict->deserialize(index, data, buffer);
+        }
+
+
 #ifdef USE_REQUEST_EVLOOP
        FcnEvLoop ev_loop;
 #endif
+        void* const buffer{nullptr};
     };
 
 
@@ -284,9 +289,11 @@ namespace libfcn_v2 {
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
         ParamServer* createServer(SerDesDict& prototype, uint16_t address);
 
-        ParamServerClient* bindClientToServer(uint16_t server_addr,
-                                              uint16_t client_addr,
-                                              uint16_t port_id);
+        ParamServerClient* bindClientToServer(
+                SerDesDict& prototype,
+                uint16_t server_addr,
+                  uint16_t client_addr,
+                  uint16_t port_id);
 
         int handleRecv(FcnFrame* frame, uint16_t recv_port_id);
 

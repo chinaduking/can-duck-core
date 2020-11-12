@@ -58,22 +58,20 @@ namespace network_test {
         fcn_node.join();
     }
 
-
-    void angle_rd_callback(void* obj_ptr, int ev_code, FcnFrame* frame){
+    FCN_REQUEST_CALLBACK(angle_rd_callback){
         if(ev_code == 2){
             LOGW("Read angle timeout");
             return;
         }
 
         if(ev_code == 1){
-            auto angle = ParamServerClient::readBuffer(
-                    test_ServoPubSubDict.angle, frame).data;
+            auto angle = ctx_client->readBuffer(test_ServoPubSubDict.angle).data;
 
             LOGD("read angle done: 0x%X", angle);
         }
     }
 
-    void mode_wr_callback(void* obj_ptr, int ev_code, FcnFrame* frame){
+    FCN_REQUEST_CALLBACK(mode_wr_callback){
         if(ev_code == 1){
             LOGW("Write mode done!");
         }
@@ -81,6 +79,7 @@ namespace network_test {
             LOGW("Write mode failed!");
         }
     }
+
 
     TEST(NetworkLayer, SvoHostNode) {
         Node fcn_node(1);
@@ -92,23 +91,23 @@ namespace network_test {
 
 
         auto servo_client = fcn_node.network_layer->param_server_manager
-                .bindClientToServer(servo_addr, local_addr, 0);
+                .bindClientToServer(test_ServoPubSubDict, servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
             LOGD("request.. " );
 
 
-            servo_client->readUnblocking(test_ServoPubSubDict.angle,
-                                         RequestCallback(angle_rd_callback));
+            servo_client->readAsync(test_ServoPubSubDict.angle,
+                                    RequestCallback(angle_rd_callback));
 
-            servo_client->readUnblocking(test_ServoPubSubDict.angle,
-                                         RequestCallback(angle_rd_callback));
+            servo_client->readAsync(test_ServoPubSubDict.angle,
+                                    RequestCallback(angle_rd_callback));
 
             auto mode_msg = test_ServoPubSubDict.mode;
             mode_msg << 0x22;
 
-            servo_client->writeUnblocking(mode_msg,
-                                          RequestCallback(mode_wr_callback));
+            servo_client->writeAsync(mode_msg,
+                                     RequestCallback(mode_wr_callback));
 
             perciseSleep(0.1);
         }

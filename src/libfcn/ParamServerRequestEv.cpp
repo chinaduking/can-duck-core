@@ -68,18 +68,10 @@ void ParamServerRequestEv::evTimeoutCallback() {
     evExit();
 }
 
-
-void RequestCallback::call(int ev_code, FcnFrame *frame){
-    if(cb != nullptr){
-        (*cb)(ctx_obj, ev_code ,frame);
-    }
-}
-
-
 void ParamServerRequestEv::onTimeout() {
     LOGW("request timeout: server = 0x%X, msg_id=0x%X",
          cached_req.dest_id, cached_req.msg_id);
-    callback.call(2, nullptr);
+    callback.call(2);
 }
 
 void ParamServerRequestEv::onRecv(FcnFrame &frame) {
@@ -100,10 +92,14 @@ void ParamServerRequestEv::onRecv(FcnFrame &frame) {
 
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
-        callback.call(1, &frame);
+        if(context_client->updateData(frame.msg_id, frame.payload)){
+            callback.call(2);
+        } else{
+            callback.call(1);
+        }
     }
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_WriteAck){
-        callback.call(1, nullptr);
+        callback.call(frame.payload[0]);
     }
 }

@@ -186,6 +186,7 @@ int Tracer::vprintf(Level level, char *format,  va_list arg_ptr) {
     return ret;
 }
 
+//TODO: __func__
 int Tracer::printf(Level level, char *format, ...) {
 
     va_list arg_ptr;

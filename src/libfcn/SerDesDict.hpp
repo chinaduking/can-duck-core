@@ -99,6 +99,16 @@ namespace libfcn_v2 {
             return res;
         }
 
+        bool deserialize(int16_t index, uint8_t* data, void* p_buffer){
+            if(index >= dictSize() || p_buffer == nullptr || data == nullptr){
+                return false;
+            }
+            auto obj = getObjBaseByIndex(index);
+            utils::memcpy(data, (uint8_t*)p_buffer + obj->buffer_offset,
+                          obj->data_size);
+            return true;
+        }
+
         template<typename Prototype>
         void serialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);

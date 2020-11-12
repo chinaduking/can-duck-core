@@ -22,20 +22,35 @@ namespace libfcn_v2{
     class ParamServerClient;
 
     struct RequestCallback{
-        typedef void (*Callback)(void* ctx_obj,
-                                 int ev_code, FcnFrame* frame);
+        typedef void (*Callback)(void* p_this,
+                                 int ev_code, ParamServerClient* ctx_client);
 
         RequestCallback() = default;
 
-        RequestCallback(Callback cb, void* ctx_obj=nullptr):
-                cb(cb), ctx_obj(ctx_obj)
+        RequestCallback operator=(const RequestCallback& other){
+            RequestCallback(other.cb, other.p_this);
+            this->ctx_client = other.ctx_client;
+            return *this;
+        }
+
+        RequestCallback(Callback cb,
+                        void* ctx_obj=nullptr):
+                cb(cb), p_this(ctx_obj), ctx_client(ctx_client)
         {}
 
-        void call(int ev_code, FcnFrame* frame);
+        inline void call(int ev_code){
+            if(cb != nullptr){
+                (*cb)(p_this, ev_code, ctx_client);
+            }
+        }
 
-        Callback cb {nullptr};
-        void* ctx_obj {nullptr};
+        ParamServerClient*  ctx_client{nullptr};
+        Callback const cb {nullptr};
+        void* const p_this {nullptr};
     };
+
+    #define FCN_REQUEST_CALLBACK(fname) void fname(void* p_this, \
+            int ev_code, ParamServerClient* ctx_client)
 
     /*
      * 抽象的数据请求过程。用于用户自定义请求的形式。

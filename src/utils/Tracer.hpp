@@ -99,12 +99,12 @@ utils::Tracer& getTracer();
 typedef utils::Tracer::Level LogLvl;
 
 #ifdef ENABLE_TRACE
-    #define LOGV(...) getTracer().printf(utils::Tracer::lVerbose, __VA_ARGS__)
-    #define LOGI(...) getTracer().printf(utils::Tracer::lInfo,    __VA_ARGS__)
-    #define LOGD(...) getTracer().printf(utils::Tracer::lDebug,   __VA_ARGS__)
-    #define LOGW(...) getTracer().printf(utils::Tracer::lWarning, __VA_ARGS__)
-    #define LOGE(...) getTracer().printf(utils::Tracer::lError,   __VA_ARGS__)
-    #define LOGF(...) getTracer().printf(utils::Tracer::lFatal,   __VA_ARGS__)
+    #define LOGV(...) getTracer().printf(LogLvl::lVerbose, __VA_ARGS__)
+    #define LOGI(...) getTracer().printf(LogLvl::lInfo,    __VA_ARGS__)
+    #define LOGD(...) getTracer().printf(LogLvl::lDebug,   __VA_ARGS__)
+    #define LOGW(...) getTracer().printf(LogLvl::lWarning, __VA_ARGS__)
+    #define LOGE(...) getTracer().printf(LogLvl::lError,   __VA_ARGS__)
+    #define LOGF(...) getTracer().printf(LogLvl::lFatal,   __VA_ARGS__)
 #else
     #define LOGI(...) do{}while(0)
     #define LOGV(...) do{}while(0)
