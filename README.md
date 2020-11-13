@@ -44,22 +44,16 @@
   - CLion 2020 (可选)
   - STM32CubeIDE
   - Visual Studio 2019 Community  
-  - Git vckpg CMake doxygen(1.8.15+) Python3
+  - Git / vckpg / CMake / doxygen(1.8.15+) / Python3
   - GTest (从vckpg安装)
   - FT232 VCom Driver  
   <br>
 *提示：您可能需要将Windows的系统编码格式改为UTF-8以消除编译错误*
-
-- Linux 
+  <br>
+- Linux & MacOSX
   - CLion 2020  (可选)
   - STM32CubeIDE
-  - Git vckpg CMake doxygen(1.8.15+) Python3
-  - GTest
-
-- MacOSX
-  - CLion 2020  (可选)
-  - STM32CubeIDE
-  - Git vckpg CMake doxygen(1.8.15+) Python3
+  - Git / vckpg / CMake / doxygen(1.8.15+) / Python3
   - GTest
 
 ### 2.2 通过命令行编译运行测试用例
