@@ -1,10 +1,5 @@
-
 ![](docs/img/logo_mid.png)
-
-
 # LIBFCN 2.0 - Flexible Controller Network<br>灵活的控制器网络 
-
--------------
 
 
 ##1. 特性
