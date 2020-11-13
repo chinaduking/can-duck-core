@@ -28,14 +28,40 @@ namespace libfcn_v2 {
      * @details 一个每一个消息频道应被分配一个全网唯一地址；
      * 且同一通道内的消息对应唯一的字典进行消息解析。
      *
+     * 通道有两种模式：单主（一对多通信）和多主（多对多通信）。
+     *
+     * 单主模式：
+     *
+     *   单主有一个主节点（master node）和一个或多个从节点（slave node）。单主通道的地址等于
+     * 主节点自身地址（Node ID）。单主通道上，主节点输出的数据包，源地址即为通道地址，同时采用
+     * 1个bit的标志位置位，标识该数据包为源。单主通道的数据发送无需目标地址，因为任何订阅此通
+     * 道的节点，均可接收到该数据包。当从节点向主节点发送数据，从节点需将目标ID指定为主节点ID，
+     * （即通道ID）以便和指定主节点通信。源ID默认为0xFF，因为任何匹配ID的主节点均能接收到数据
+     * 包。从节点之间不能互相同步主节点的状态表。
+     *
+     *   组播模式，不区分主从节点。全部节点发送数据包时，只需标明这一公用通道的ID。
+     *
+     * 为了目前的兼容性，ID暂定如下：
+     * 单主通道主节点发送的数据包，源ID=通道ID，目标ID暂无；
+     * 单主通道从节点发送的数据包，源ID=通道ID，目标ID暂无；
+     * 多主通道发送的数据包，源ID=通道ID，目标ID暂无；
+     *
+     *
      * @author  sdong
      * @date    2020/10/15
      *
      */
     class PubSubChannel{
     public:
+
         /* ------ Public Declarations ------  */
         typedef SubscribeCallback* callbacl_ptr_t;
+
+        enum class Type : uint8_t {
+            SingleSourceMaster = 0,
+            SingleSourceSlave,
+            MultiSource
+        };
 
         /* ---------- Constructors ---------  */
 
@@ -47,11 +73,12 @@ namespace libfcn_v2 {
          * @param is_source 是否自己是源
          */
         PubSubChannel(SerDesDict* serdes_dict, void* buffer,
-                      bool is_source= true)
+                      Type type)
             :
             serdes_dict(serdes_dict),
             buffer(buffer),
-            callback_ptr_list(serdes_dict->dictSize())
+            callback_ptr_list(serdes_dict->dictSize()),
+            type(type)
             {
             USER_ASSERT(buffer != nullptr);
         }
@@ -110,6 +137,7 @@ namespace libfcn_v2 {
 
         void* const buffer {nullptr};
 
+
         utils::Vector<callbacl_ptr_t> callback_ptr_list;
 #if 0
         /* 将回调函数指针映射到int8整形时，基址偏移量
@@ -130,8 +158,7 @@ namespace libfcn_v2 {
         void networkPublish(FcnFrame* frame);
 
 
-        /* 是否为 "多源通道"。TODO: const */
-        bool is_multi_source{false};
+        Type type;
 
         /* 通道ID TODO: const */
         int channel_addr{0};
