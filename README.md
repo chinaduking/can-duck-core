@@ -38,6 +38,7 @@
 
 ## 2. 克隆仓库并运行第一个测试
 ### 2.1 前置需求
+
 - Windows
   - Windows 10
   - CLion 2020 (可选)
@@ -46,6 +47,7 @@
   - Git vckpg CMake doxygen(1.8.15+) Python3
   - GTest (从vckpg安装)
   - FT232 VCom Driver  
+
 
 
     提示：您可能需要将windows的系统编码格式改为UTF-8以消除编译错误
