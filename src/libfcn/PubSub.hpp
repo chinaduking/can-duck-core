@@ -219,10 +219,10 @@ namespace libfcn_v2 {
      * @author  sdong
      * @date    2020/10/15
      */
-    class PublisherManager{
+    class PubSubManager{
     public:
         /* ---------- Constructors ---------  */
-        explicit PublisherManager(NetworkLayer* network)
+        explicit PubSubManager(NetworkLayer* network)
             : ctx_network_layer(network),
 
               pub_ctrl_rules(MAX_PUB_CTRL_RULES),
@@ -232,7 +232,7 @@ namespace libfcn_v2 {
 
 
         /* ----------- Destructor ----------  */
-        ~PublisherManager() = default;
+        ~PubSubManager() = default;
 
 
         /* --------- Public Methods --------  */
@@ -271,7 +271,7 @@ namespace libfcn_v2 {
 
         private:
             /* ------ Private Declarations ------  */
-            friend class PublisherManager;
+            friend class PubSubManager;
 
             /* ------- Private Variables --------  */
             uint32_t freq_divier{0};

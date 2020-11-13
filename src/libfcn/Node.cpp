@@ -38,7 +38,7 @@ Node::Node() {
 #endif //SYSTYPE_FULL_OS
 }
 
-PublisherManager* Node::getPublisherManager(){
+PubSubManager* Node::getPublisherManager(){
     return &network_layer->pub_sub_manager;
 }
 

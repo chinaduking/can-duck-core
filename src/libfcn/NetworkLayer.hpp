@@ -30,7 +30,7 @@ namespace libfcn_v2{
         void recvPolling();
         void sendPolling();
 
-        PublisherManager   pub_sub_manager;
+        PubSubManager   pub_sub_manager;
         ParamServerManager param_server_manager;
         //LargeDataHandler large_data_handler;
 

@@ -32,7 +32,7 @@ namespace libfcn_v2{
 
         int addPort(FrameIODevice* device);
 
-        PublisherManager* getPublisherManager();
+        PubSubManager* getPublisherManager();
         ParamServerManager* getParamServerManager();
 
 #ifdef SYSTYPE_FULL_OS

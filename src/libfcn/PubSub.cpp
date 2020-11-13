@@ -102,7 +102,7 @@ void PubSubChannel::networkPublish(FcnFrame *frame) {
  */
 
 
-void PublisherManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
+void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
     PubSubChannel* channel = nullptr;
 
     for(auto& ch : pub_sub_channels){
@@ -141,7 +141,7 @@ void PublisherManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
 }
 
-PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t address){
+PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address){
     void* buffer = nullptr;
     for(auto & sh_b : shared_buffers){
         if(sh_b.id == address){
@@ -170,8 +170,8 @@ PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t a
 }
 
 //TODO: impl this!!
-PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t address,
-                             void* static_buffer){
+PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address,
+                                            void* static_buffer){
     auto channel = new PubSubChannel(&prototype, static_buffer);
     channel->network_layer = ctx_network_layer;
     channel->channel_addr = address;
@@ -179,13 +179,13 @@ PubSubChannel* PublisherManager::createChannel(SerDesDict& prototype, uint16_t a
 }
 
 
-void PublisherManager::addPubCtrlRule(PubCtrlRule& rule){
+void PubSubManager::addPubCtrlRule(PubCtrlRule& rule){
     pub_ctrl_rules.push_back(rule);
 }
 
 FcnFrame frame_tmp;
 
-void PublisherManager::update(){
+void PubSubManager::update(){
 
     for(auto & pub_ctrl_rule : pub_ctrl_rules){
         pub_ctrl_rule.freq_divier_cnt ++;
