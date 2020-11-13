@@ -141,7 +141,8 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
 }
 
-PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address){
+PubSubChannel* PubSubManager::createChannel(
+        SerDesDict& prototype, uint16_t address, ChannelType type){
     void* buffer = nullptr;
     for(auto & sh_b : shared_buffers){
         if(sh_b.id == address){
@@ -159,7 +160,7 @@ PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t addr
         shared_buffers.push_back(sh_b);
     }
 
-    auto channel = new PubSubChannel(&prototype, buffer);
+    auto channel = new PubSubChannel(&prototype, buffer, type);
     channel->network_layer = ctx_network_layer;
     channel->channel_addr = address;
 
@@ -169,14 +170,14 @@ PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t addr
     return channel;
 }
 
-//TODO: impl this!!
-PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address,
-                                            void* static_buffer){
-    auto channel = new PubSubChannel(&prototype, static_buffer);
-    channel->network_layer = ctx_network_layer;
-    channel->channel_addr = address;
-    return channel;
-}
+////TODO: impl this!!
+//PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address,
+//                                            void* static_buffer){
+//    auto channel = new PubSubChannel(&prototype, static_buffer);
+//    channel->network_layer = ctx_network_layer;
+//    channel->channel_addr = address;
+//    return channel;
+//}
 
 
 void PubSubManager::addPubCtrlRule(PubCtrlRule& rule){

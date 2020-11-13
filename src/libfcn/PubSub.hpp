@@ -18,8 +18,36 @@ namespace libfcn_v2 {
      * ---------------------------------------------------------*/
     class NetworkLayer;
     struct SubscribeCallback;
-
+    class PubSubManager;
     /* --------------------------------------------------------- */
+    enum class ChannelType : uint8_t {
+        SingleSourceMaster = 0,
+        SingleSourceSlave,
+        MultiSource
+    };
+
+    /**
+     * @berif 发布者
+     *
+     * @details 主要持有：
+     *  本地共享的订阅者列表指针
+     */
+    class Publisher{
+
+    };
+
+    /**
+     * @berif 订阅者
+     *
+     * @details 主要持有：
+     *  数据缓冲区及反序列化字典：单主主节点输入数据；单主从节点输入数据（主节点上为输出）；多主输入输出数据
+     *  回调列表
+     *  指令计数表
+     *
+     */
+    class Subscriber{
+
+    };
 
     /**
      *
@@ -41,10 +69,10 @@ namespace libfcn_v2 {
      *
      *   组播模式，不区分主从节点。全部节点发送数据包时，只需标明这一公用通道的ID。
      *
-     * 为了目前的兼容性，ID暂定如下：
-     * 单主通道主节点发送的数据包，源ID=通道ID，目标ID暂无；
-     * 单主通道从节点发送的数据包，源ID=通道ID，目标ID暂无；
-     * 多主通道发送的数据包，源ID=通道ID，目标ID暂无；
+     * 为了目前的兼容性和安全性，ID暂定如下：
+     * 单主通道主节点发送的数据包，源ID=通道ID，目标ID=0
+     * 单主通道从节点发送的数据包，源ID=通道ID，目标ID=1
+     * 多主通道发送的数据包，源ID=通道ID，目标ID=2
      *
      *
      * @author  sdong
@@ -57,11 +85,6 @@ namespace libfcn_v2 {
         /* ------ Public Declarations ------  */
         typedef SubscribeCallback* callbacl_ptr_t;
 
-        enum class Type : uint8_t {
-            SingleSourceMaster = 0,
-            SingleSourceSlave,
-            MultiSource
-        };
 
         /* ---------- Constructors ---------  */
 
@@ -72,9 +95,11 @@ namespace libfcn_v2 {
          * @param buffer 存储数据的深度为1的缓冲区。由序列化字典类型对象创建的缓冲区。
          * @param is_source 是否自己是源
          */
-        PubSubChannel(SerDesDict* serdes_dict, void* buffer,
-                      Type type)
+        PubSubChannel(PubSubManager* ps_manager,
+                      SerDesDict* serdes_dict, void* buffer,
+                      ChannelType type)
             :
+            ps_manager(ps_manager),
             serdes_dict(serdes_dict),
             buffer(buffer),
             callback_ptr_list(serdes_dict->dictSize()),
@@ -96,15 +121,14 @@ namespace libfcn_v2 {
          */
         template<typename Msg>
         void publish(Msg&& msg){
-            uint16_t src_id = 0, dest_id = 0;
-
-            if(!is_multi_source){
-                src_id = channel_addr;
-                dest_id = 0;
-            } else{
-                src_id = 0;
-                dest_id = channel_addr;
+            if(type == ChannelType::SingleSourceMaster){
+//                ps_manager
             }
+
+
+            uint16_t src_id = 0, dest_id = 0;
+            src_id = 0;
+            dest_id = channel_addr;
 
             /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
             serdes_dict->serialize(msg, buffer);
@@ -130,13 +154,14 @@ namespace libfcn_v2 {
             return serdes_dict->deserialize(msg, buffer);
         }
 
+        void networkPublish(FcnFrame* frame);
+
 
         /* ------- Public Variables --------  */
 
-        SerDesDict* serdes_dict{nullptr};
+        SerDesDict* const serdes_dict{nullptr};
 
         void* const buffer {nullptr};
-
 
         utils::Vector<callbacl_ptr_t> callback_ptr_list;
 #if 0
@@ -153,14 +178,11 @@ namespace libfcn_v2 {
 #endif
         FcnFrame frame_tmp;
 
-        libfcn_v2::NetworkLayer *network_layer{nullptr};
-
-        void networkPublish(FcnFrame* frame);
+        PubSubManager* const ps_manager{nullptr};
 
 
-        Type type;
+        ChannelType const type;
 
-        /* 通道ID TODO: const */
         int channel_addr{0};
     };
 
@@ -263,10 +285,11 @@ namespace libfcn_v2 {
 
 
         /* --------- Public Methods --------  */
-        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address);
-
         PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
-                                     void* static_buffer);
+                                     ChannelType type);
+
+//        PubSubChannel* createChannel(SerDesDict& prototype, uint16_t address,
+//                                     void* static_buffer);
 
         void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
