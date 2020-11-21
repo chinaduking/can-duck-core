@@ -291,7 +291,7 @@ namespace libfcn_v2 {
         void* p_this {nullptr};
     };
 
-    #define FCN_SUB_CALLBACK(fname) void fname(void* p_this, \
+    #define FCN_SUBSCRIBE_CALLBACK(fname) void fname(void* p_this, \
                     Subscriber* subscriber)
 
     /* --------------------------------------------------------- */
@@ -319,13 +319,21 @@ namespace libfcn_v2 {
                 serdes_dict(&serdes_dict),
                 buffer(buffer),
                 ps_manager(ps_manager),
-                callback_table(serdes_dict.dictSize())
-                { }
+                callback_table(serdes_dict.dictSize()) {
+                    callback_table.resize(serdes_dict.dictSize());
+                }
 
         /* ----------- Destructor ----------  */
         ~Subscriber() = default;
 
         /* --------- Public Methods --------  */
+        void subscribe(SerDesDictValHandle& handle,
+                       SubscribeCallback::Callback cb_func,
+                       void* p_this = nullptr){
+            callback_table[handle.index].cb = cb_func;
+            callback_table[handle.index].p_this = p_this;
+        }
+
         template<typename Prototype>
         Prototype readBuffer(Prototype&& msg){
             USER_ASSERT(buffer!= nullptr);

@@ -39,7 +39,11 @@ namespace fcnmsg{
         };
 
         inline void* createBuffer() override{
-            return new ServoPubMsgIn_C::Buffer;
+            auto buffer = new Buffer();
+
+            utils::memset(buffer, 0, sizeof(Buffer));
+
+            return buffer;
         }
     };
 #pragma pack(0)
@@ -84,7 +88,11 @@ namespace fcnmsg{
         };
 
         inline void* createBuffer() override{
-            return new ServoPubMsgOut_C::Buffer;
+            auto buffer = new Buffer();
+
+            utils::memset(buffer, 0, sizeof(Buffer));
+
+            return buffer;
         }
     };
 #pragma pack(0)

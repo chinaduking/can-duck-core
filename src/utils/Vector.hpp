@@ -68,6 +68,10 @@ namespace utils{
                 size = capicity_;
             }
             member_cnt = size;
+
+            for(auto& it : (*this)){
+                it = T();
+            }
         }
 
         /* 迭代器方法，支持range-based for loop */

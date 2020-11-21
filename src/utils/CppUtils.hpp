@@ -137,6 +137,12 @@ namespace utils{
             "!Assert failed: %s at %s:%d\n\r", #t, __FILE__, __LINE__); \
             exit(-1);                                \
             }
+
+    #define USER_IASSERT(t, info) if(!(t)){ fprintf(stderr, \
+            "!Assert failed: %s at %s:%d\n\r", #t, __FILE__, __LINE__); \
+            fprintf(stderr,  "    ---> reason: %s\n\r",info);                                    \
+            exit(-1);                                \
+            }
 #endif //Release
 #else //SYSTYPE_FULL_OS
 //TODO: assert

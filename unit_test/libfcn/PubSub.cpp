@@ -128,32 +128,33 @@ using namespace fcnmsg;
 
 namespace pubsub_test {
 
-#define SERVO_ADDR 0x02
+    #define SERVO_ADDR 0x02
+
+    FCN_SUBSCRIBE_CALLBACK(servo_speed_cb) {
+        LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoPubMsgOut.speed).data);
+    }
 
     TEST(Pubsub, IntraProc) {
         int local_addr = SERVO_ADDR;
+        PubSubManager ps_manager(nullptr);
 
-        Tracer tracer(true);
+
+//        auto servo_sub = ps_manager.makeSubscriber(ServoPubMsgIn, local_addr, local_addr);
+
+        auto servo_sub_local = ps_manager.makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
+//        auto servo_sub_local2 = ps_manager.makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
 
 
-        Node fcn_node(0);
+        servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
+        servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
+        servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
 
-        FcnFrame frame_tmp;
+        auto servo_pub = ps_manager.makeMasterPublisher(ServoPubMsgOut, local_addr);
 
-        auto servo_pub = fcn_node.network_layer->pub_sub_manager
-                .makeMasterPublisher(ServoPubMsgOut, local_addr);
-
-        auto servo_sub = fcn_node.network_layer->pub_sub_manager
-                .makeSubscriber(ServoPubMsgIn, local_addr, local_addr);
-
-        auto servo_sub_local = fcn_node.network_layer->pub_sub_manager
-                .makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
-
-        fcn_node.spin();
 
         uint32_t cnt = 0;
 
-        for(int __i = 0; __i < 1; ){
+        for (int __i = 0; __i < 1;) {
             auto speed_msg = ServoPubMsgOut.speed;
             speed_msg << cnt;
             servo_pub->publish(speed_msg);
@@ -166,14 +167,6 @@ namespace pubsub_test {
             current_msg << cnt;
             servo_pub->publish(current_msg);
 
-            frame_tmp.src_id = local_addr;
-            frame_tmp.dest_id = 0x00; /*ANY*/
-
-//            cout << frame2stdstr(frame_tmp) << endl;
-//
-//            fcn_node.frame_dev->write(&frame_tmp);
-
-            //fcn_node.spin();
             perciseSleep(0.1);
 
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
@@ -181,10 +174,10 @@ namespace pubsub_test {
                  servo_sub_local->readBuffer(ServoPubMsgOut.angle).data,
                  servo_sub_local->readBuffer(ServoPubMsgOut.current).data);
 
-            cnt ++;
+            cnt++;
         }
     }
-
+}
 
 //    TEST(RTO, RtoHostNode) {
 //        Node fcn_node(0);
@@ -218,5 +211,4 @@ namespace pubsub_test {
 //
 //    }
 
-}
 #endif //0

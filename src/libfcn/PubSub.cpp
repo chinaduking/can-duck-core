@@ -144,6 +144,7 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
     }
     if(buffer == nullptr){
         buffer = serdes_dict.createBuffer();
+
         SharedBuffer sh_b = {
                 .id = id,
                 .buffer = buffer
@@ -163,8 +164,9 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
 
     for(auto& pub : created_publishers){
         /* 同一通道中，不能有多个相同的发布者（重复创建发布者） */
-        USER_ASSERT(
-            !((pub->src_id == node_id) && (pub->channel_id == channel_addr)));
+        USER_IASSERT(
+            !((pub->src_id == node_id) && (pub->channel_id == channel_addr)),
+            "duplicate publisher!");
     }
 
 
@@ -201,8 +203,9 @@ Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
 
     for(auto& sub : created_subscribers){
         /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
-        USER_ASSERT(
-                !((sub->src_id == node_id) && (sub->channel_addr == channel_addr)));
+        USER_IASSERT(
+                !((sub->src_id == node_id) && (sub->channel_addr == channel_addr)),
+                "duplicate subscriber!");
     }
 
     auto subscriber = new Subscriber(serdes_dict, buffer,
