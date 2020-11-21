@@ -9,4 +9,5 @@ using namespace libfcn_v2;
 
 namespace fcnmsg{
     ServoPubMsgIn_C  ServoPubMsgIn;
+    ServoPubMsgOut_C ServoPubMsgOut;
 }

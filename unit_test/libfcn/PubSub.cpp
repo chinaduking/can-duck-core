@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 #include "libfcn/PubSub.hpp"
-#include "test_ServoDict.hpp"
+#include "ServoPubMsg.hpp"
 using namespace libfcn_v2;
 #if 0
 namespace rto_test{
@@ -119,17 +119,18 @@ namespace rto_test{
 #include "utils/os_only/HostSerial.hpp"
 #include "utils/Tracer.hpp"
 
-#include "test_ServoDict.hpp"
+#include "ServoPubMsg.hpp"
 #include "SimpleSerialNode.hpp"
 
 using namespace libfcn_v2;
 using namespace utils;
+using namespace fcnmsg;
 
-namespace network_test {
+namespace pubsub_test {
 
 #define SERVO_ADDR 0x02
 
-    TEST(RTO, RtoServoNode) {
+    TEST(Pubsub, IntraProc) {
         int local_addr = SERVO_ADDR;
 
         Tracer tracer(true);
@@ -139,30 +140,31 @@ namespace network_test {
 
         FcnFrame frame_tmp;
 
-        auto rto_channel = fcn_node
-                .network_layer->pub_sub_manager.
-                createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
+        auto servo_pub = fcn_node.network_layer->pub_sub_manager
+                .makeMasterPublisher(ServoPubMsgOut, local_addr);
 
-        auto rto_channel_2 = fcn_node
-                .network_layer->pub_sub_manager.
-                createChannel(fcnmsg::test_ServoPubSubDict, local_addr);
+        auto servo_sub = fcn_node.network_layer->pub_sub_manager
+                .makeSubscriber(ServoPubMsgIn, local_addr, local_addr);
+
+        auto servo_sub_local = fcn_node.network_layer->pub_sub_manager
+                .makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
 
         fcn_node.spin();
 
         uint32_t cnt = 0;
 
         for(int __i = 0; __i < 1; ){
-            auto speed_msg = fcnmsg::test_ServoPubSubDict.speed;
+            auto speed_msg = ServoPubMsgOut.speed;
             speed_msg << cnt;
-            rto_channel->publish(speed_msg);
+            servo_pub->publish(speed_msg);
 
-            auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
+            auto angle_msg = ServoPubMsgOut.angle;
             angle_msg << cnt;
-            rto_channel->publish(angle_msg);
+            servo_pub->publish(angle_msg);
 
-            auto current_msg = fcnmsg::test_ServoPubSubDict.current;
+            auto current_msg = ServoPubMsgOut.current;
             current_msg << cnt;
-            rto_channel->publish(current_msg);
+            servo_pub->publish(current_msg);
 
             frame_tmp.src_id = local_addr;
             frame_tmp.dest_id = 0x00; /*ANY*/
@@ -175,47 +177,46 @@ namespace network_test {
             perciseSleep(0.1);
 
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                         rto_channel_2->readBuffer(fcnmsg::test_ServoPubSubDict.speed).data,
-                         rto_channel_2->readBuffer(fcnmsg::test_ServoPubSubDict.angle).data,
-                         rto_channel_2->readBuffer(fcnmsg::test_ServoPubSubDict.current).data
-                         );
+                 servo_sub_local->readBuffer(ServoPubMsgOut.speed).data,
+                 servo_sub_local->readBuffer(ServoPubMsgOut.angle).data,
+                 servo_sub_local->readBuffer(ServoPubMsgOut.current).data);
 
             cnt ++;
         }
     }
 
 
-    TEST(RTO, RtoHostNode) {
-        Node fcn_node(0);
-        Tracer tracer(true);
-        tracer.setFilter(Tracer::Level::lInfo);
-
-        int servo_addr = SERVO_ADDR;
-
-        auto servo_rto_channel = fcn_node
-                .network_layer->pub_sub_manager.
-                createChannel (fcnmsg::test_ServoPubSubDict, servo_addr);
-
-        fcn_node.spin();
-
-        for(int __i = 0; __i < 1; ){
-//            fcn_node.spin();
-            perciseSleep(0.1);
-
-            LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                         servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoPubSubDict.speed).data,
-
-                         servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoPubSubDict.angle).data,
-
-                         servo_rto_channel->readBuffer(
-                                 fcnmsg::test_ServoPubSubDict.current).data);
-        }
-
-        fcn_node.join();
-
-    }
+//    TEST(RTO, RtoHostNode) {
+//        Node fcn_node(0);
+//        Tracer tracer(true);
+//        tracer.setFilter(Tracer::Level::lInfo);
+//
+//        int servo_addr = SERVO_ADDR;
+//
+//        auto servo_rto_channel = fcn_node
+//                .network_layer->pub_sub_manager.
+//                createChannel (fcnmsg::test_ServoPubSubDict, servo_addr);
+//
+//        fcn_node.spin();
+//
+//        for(int __i = 0; __i < 1; ){
+////            fcn_node.spin();
+//            perciseSleep(0.1);
+//
+//            LOGW("servo: speed = %d, angle = %d, current = %d \n",
+//                         servo_rto_channel->readBuffer(
+//                                 fcnmsg::test_ServoPubSubDict.speed).data,
+//
+//                         servo_rto_channel->readBuffer(
+//                                 fcnmsg::test_ServoPubSubDict.angle).data,
+//
+//                         servo_rto_channel->readBuffer(
+//                                 fcnmsg::test_ServoPubSubDict.current).data);
+//        }
+//
+//        fcn_node.join();
+//
+//    }
 
 }
 #endif //0

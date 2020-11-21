@@ -26,40 +26,6 @@ namespace libfcn_v2 {
 
     /* --------------------------------------------------------- */
     /**
-     * @brief 订阅实时消息的回调
-     *
-     * @author  sdong
-     * @date    2020/11/13
-     */
-    struct SubscribeCallback{
-        /* ------ Public Declarations ------  */
-        typedef void (*Callback)(void* p_this, Subscriber* channel);
-
-        /* ---------- Constructors ---------  */
-        SubscribeCallback() = default;
-
-        SubscribeCallback(Callback cb, void* p_this=nullptr):
-                cb(cb), p_this(p_this)
-        {}
-
-        /* --------- Public Methods --------  */
-        inline void call(Subscriber* subscriber){
-            if(cb != nullptr){
-                (*cb)(p_this, subscriber);
-            }
-        }
-
-        /* ------- Public Variables --------  */
-        Callback cb {nullptr};
-        void* p_this {nullptr};
-    };
-
-    #define FCN_SUB_CALLBACK(fname) void fname(void* p_this, \
-                Subscriber* subscriber)
-
-
-    /* --------------------------------------------------------- */
-    /**
      * @brief 构造一个数据帧
      *
      * @author  sdong
@@ -295,6 +261,38 @@ namespace libfcn_v2 {
         utils::LinkedList<Subscriber*> local_sub_ptr;
     };
 
+    /* --------------------------------------------------------- */
+    /**
+     * @brief 订阅实时消息的回调
+     *
+     * @author  sdong
+     * @date    2020/11/13
+     */
+    struct SubscribeCallback{
+        /* ------ Public Declarations ------  */
+        typedef void (*Callback)(void* p_this, Subscriber* channel);
+
+        /* ---------- Constructors ---------  */
+        SubscribeCallback() = default;
+
+        SubscribeCallback(Callback cb, void* p_this=nullptr):
+                cb(cb), p_this(p_this)
+        {}
+
+        /* --------- Public Methods --------  */
+        inline void call(Subscriber* subscriber){
+            if(cb != nullptr){
+                (*cb)(p_this, subscriber);
+            }
+        }
+
+        /* ------- Public Variables --------  */
+        Callback cb {nullptr};
+        void* p_this {nullptr};
+    };
+
+    #define FCN_SUB_CALLBACK(fname) void fname(void* p_this, \
+                    Subscriber* subscriber)
 
     /* --------------------------------------------------------- */
 

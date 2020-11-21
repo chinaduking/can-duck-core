@@ -101,14 +101,13 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
     for(auto& sub : created_subscribers){
         if(sub->channel_addr == frame->src_id){
-            //TODO: is_multi_source && handle dest id!!
             subscriber = sub;
         }
     }
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
     if(subscriber == nullptr){
-        LOGW("RtoNetworkHandler::handleWrtie,channel == nullptr\n");
+        LOGW("PubSubManager::handleWrtie, channel == nullptr\n");
 
         return;
     }

@@ -1,22 +1,18 @@
 
 set(UT_DEFAULT_LIBS tracer GTest::gmock_main  GTest::gtest  GTest::gtest_main)
 
-add_executable(testDataObjects SerDesDict.cpp
-        test_ServoDict.cpp
+add_executable(testDataObjects SerDesDict.cpp ServoPubMsg.cpp
         )
 target_link_libraries(testDataObjects ${UT_DEFAULT_LIBS})
 
 
 
-add_executable(testRealtimeObject PubSub.cpp
-        test_ServoDict.cpp
-        )
+add_executable(testRealtimeObject PubSub.cpp ServoPubMsg.cpp)
 target_link_libraries(testRealtimeObject fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 
 add_executable(testServiceObject ParamServer.cpp
-        test_ServoDict.cpp
         )
 target_link_libraries(testServiceObject fcn_v2 ${UT_DEFAULT_LIBS})
 
