@@ -121,7 +121,7 @@ namespace utils{
             /* 最后一个，直接-1 */
             if(index == member_cnt - 1){
                 member_cnt --;
-                ~array[index]();
+                array[index].~T();
                 return;
             }
 

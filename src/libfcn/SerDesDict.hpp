@@ -110,6 +110,15 @@ namespace libfcn_v2 {
             return true;
         }
 
+//        template<typename Prototype>
+        void handleSerialize(SerDesDictValHandle& msg, void* p_buffer){
+            USER_ASSERT(p_buffer!= nullptr);
+
+            utils::memcpy((uint8_t*)p_buffer + msg.buffer_offset,
+                          msg.getDataPtr(),
+                          msg.data_size);
+        }
+
         template<typename Prototype>
         void serialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
@@ -118,6 +127,7 @@ namespace libfcn_v2 {
                           &msg.data,
                           sizeof(msg.data));
         }
+
 
         virtual void* createBuffer() = 0;
 

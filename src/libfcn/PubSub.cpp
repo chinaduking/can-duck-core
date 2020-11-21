@@ -44,12 +44,6 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
 
         utils::memcpy((uint8_t*)buffer+offset, data, data_sz);
 
-//        auto callback = p_obj->getCallbackPtr();
-//
-//        if(callback != nullptr){
-//            callback->callback(p_obj->getDataPtr(), 0);
-//        }
-//
 //        data += p_obj->data_size;
 //
 //        len -= p_obj->data_size;
@@ -88,12 +82,12 @@ void libfcn_v2::singleWriteFrameBuilder(
 
 }
 
-void PubSubChannel::networkPublish(FcnFrame *frame) {
-    if(network_layer != nullptr){
-        //TODO: by publish ctrl rules!!
-        network_layer->sendFrame(0, frame);
-    }
-}
+//void PubSubChannel::networkPublish(FcnFrame *frame) {
+//    if(network_layer != nullptr){
+//        //TODO: by publish ctrl rules!!
+//        network_layer->sendFrame(0, frame);
+//    }
+//}
 
 
 /* ---------------------------------------------------------
@@ -103,18 +97,17 @@ void PubSubChannel::networkPublish(FcnFrame *frame) {
 
 
 void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
-    PubSubChannel* channel = nullptr;
+    Subscriber* subscriber = nullptr;
 
-    for(auto& ch : pub_sub_channels){
-        if((ch->channel_addr == frame->src_id)
-            || (ch->is_multi_source && ch->channel_addr == frame->dest_id)){
+    for(auto& sub : created_subscribers){
+        if(sub->channel_addr == frame->src_id){
             //TODO: is_multi_source && handle dest id!!
-            channel = ch;
+            subscriber = sub;
         }
     }
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
-    if(channel == nullptr){
+    if(subscriber == nullptr){
         LOGW("RtoNetworkHandler::handleWrtie,channel == nullptr\n");
 
         return;
@@ -125,8 +118,8 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
     switch (opcode) {
         case OpCode::Publish:
             RtoDictSingleWrite(
-                    channel->serdes_dict,
-                    channel->buffer,
+                    subscriber->serdes_dict,
+                    subscriber->buffer,
                     frame->msg_id,
                     frame->payload, frame->getPayloadLen());
 
@@ -141,43 +134,127 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
 }
 
-PubSubChannel* PubSubManager::createChannel(
-        SerDesDict& prototype, uint16_t address, ChannelType type){
+void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
     void* buffer = nullptr;
+
     for(auto & sh_b : shared_buffers){
-        if(sh_b.id == address){
+        if(sh_b.id == id){
             buffer = sh_b.buffer;
             USER_ASSERT(buffer != nullptr);
         }
     }
     if(buffer == nullptr){
-        buffer = prototype.createBuffer();
+        buffer = serdes_dict.createBuffer();
         SharedBuffer sh_b = {
-                .id = address,
+                .id = id,
                 .buffer = buffer
         };
 
         shared_buffers.push_back(sh_b);
     }
 
-    auto channel = new PubSubChannel(&prototype, buffer, type);
-    channel->network_layer = ctx_network_layer;
-    channel->channel_addr = address;
+    return buffer;
 
-
-    pub_sub_channels.push_back(channel);
-
-    return channel;
 }
 
-////TODO: impl this!!
-//PubSubChannel* PubSubManager::createChannel(SerDesDict& prototype, uint16_t address,
-//                                            void* static_buffer){
-//    auto channel = new PubSubChannel(&prototype, static_buffer);
-//    channel->network_layer = ctx_network_layer;
-//    channel->channel_addr = address;
-//    return channel;
-//}
+Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
+                                                 uint16_t channel_addr,
+                                                 uint16_t node_id){
+    auto buffer = getSharedBuffer(serdes_dict, channel_addr);
+
+    for(auto& pub : created_publishers){
+        /* 同一通道中，不能有多个相同的发布者（重复创建发布者） */
+        USER_ASSERT(
+            !((pub->src_id == node_id) && (pub->channel_id == channel_addr)));
+    }
+
+
+    auto publisher = new Publisher(serdes_dict, buffer,
+                                   channel_addr, node_id, this);
+
+    created_publishers.push(publisher);
+
+    for(auto& sub : created_subscribers){
+        if(sub->channel_addr == publisher->channel_id){
+            publisher->regLocalSubscriber(sub);
+        }
+    }
+
+    return publisher;
+}
+
+
+Publisher* PubSubManager::makeMasterPublisher(SerDesDict& serdes_dict,
+                                              uint16_t node_id){
+    uint16_t channel_addr = node_id;
+    return bindPublisherToChannel(serdes_dict, channel_addr, node_id);
+}
+
+Publisher* PubSubManager::makeSlavePublisher(SerDesDict& serdes_dict,
+                              uint16_t master_id, uint16_t node_id){
+    uint16_t channel_addr = master_id;
+    return bindPublisherToChannel(serdes_dict, channel_addr, node_id);
+}
+
+Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
+                                           uint16_t channel_addr, uint16_t node_id) {
+    auto buffer = getSharedBuffer(serdes_dict, channel_addr);
+
+    for(auto& sub : created_subscribers){
+        /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
+        USER_ASSERT(
+                !((sub->src_id == node_id) && (sub->channel_addr == channel_addr)));
+    }
+
+    auto subscriber = new Subscriber(serdes_dict, buffer,
+                                   channel_addr, node_id, this);
+
+    created_subscribers.push(subscriber);
+
+    for(auto& pub: created_publishers){
+        if(pub->channel_id == subscriber->channel_addr){
+            pub->regLocalSubscriber(subscriber);
+        }
+    }
+
+    return subscriber;
+}
+
+
+void Publisher::publish(SerDesDictValHandle &msg) {
+    USER_ASSERT(ps_manager != nullptr);
+
+
+    /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
+    serdes_dict->handleSerialize(msg, buffer);
+
+    /* 进行本地发布的回调*/
+    for(auto& sub: local_sub_ptr){
+        sub->notify(msg.index);
+    }
+
+    /* 再进行网络发布：
+     * TODO：根据发布管理进行分频*/
+    singleWriteFrameBuilder(
+            &trans_frame_tmp,
+            src_id,
+            channel_id,
+            static_cast<uint8_t>(OpCode::Publish),
+            msg.index,
+            (uint8_t *)msg.getDataPtr(), msg.data_size);
+
+//    networkPublish(&trans_frame_tmp);
+}
+
+void Publisher::regLocalSubscriber(Subscriber *subscriber) {
+    /* 同一个NodeID的订阅者只能订阅同一个发布者一次。 */
+    for(auto& sub : local_sub_ptr){
+        if(sub->src_id == subscriber->src_id){
+            return;
+        }
+    }
+    local_sub_ptr.push(subscriber);
+}
 
 
 void PubSubManager::addPubCtrlRule(PubCtrlRule& rule){
