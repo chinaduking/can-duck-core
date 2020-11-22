@@ -176,7 +176,7 @@ namespace pubsub_test {
 
 
     TEST(PubSub, Network){
-        Node fcn_node(0);
+        Node fcn_node(1);
 
         auto servo_pub = fcn_node.getPubSubManager().
                 makeMasterPublisher(ServoPubMsgOut, SERVO_ADDR);
