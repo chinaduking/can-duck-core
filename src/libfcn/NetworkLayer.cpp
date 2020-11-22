@@ -19,10 +19,11 @@ int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {
 
 int NetworkLayer::sendFrame(uint16_t port_id, FcnFrame *frame) {
 
-    LOGI("NetworkLayer::popTxQueue:\n\r%s",
+    LOGI("NetworkLayer::sendFrame:\n\r%s",
          frame2stdstr(*frame).c_str());
 
     if(port_id >= data_link_dev.size()){
+        LOGE("NetworkLayer::sendFrame: invalid port:%d", port_id);
         return -1;
     }
 

@@ -227,7 +227,7 @@ Publisher & Publisher::addPort(int port) {
     return *this;
 }
 
-void Publisher::publish(SerDesDictValHandle &msg) {
+void Publisher::publish(SerDesDictValHandle &msg, bool local_only) {
     USER_ASSERT(ps_manager != nullptr);
 
     /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
@@ -238,11 +238,11 @@ void Publisher::publish(SerDesDictValHandle &msg) {
         sub->notify(msg.index);
     }
 
-    if(network_pub_ports.size() == 0){
+    /* 再进行网络发布：*/
+    if(network_pub_ports.size() == 0 || local_only){
         return;
     }
 
-    /* 再进行网络发布：*/
     singleWriteFrameBuilder(
             &trans_frame_tmp,
             src_id,
@@ -253,7 +253,6 @@ void Publisher::publish(SerDesDictValHandle &msg) {
 
     for(auto port : network_pub_ports){
         ps_manager->network_layer->sendFrame(port, &trans_frame_tmp);
-
     }
 }
 

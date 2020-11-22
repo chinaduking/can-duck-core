@@ -182,7 +182,7 @@ namespace libfcn_v2 {
          *
          * @param msg
          */
-        void publish(SerDesDictValHandle& msg);
+        void publish(SerDesDictValHandle& msg, bool local_only=false);
 
         /**
          * @brief 注册本地发布者

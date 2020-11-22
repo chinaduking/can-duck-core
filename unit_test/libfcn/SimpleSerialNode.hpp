@@ -42,6 +42,10 @@ public:
         }
     }
 
+    PubSubManager& getPubSubManager(){
+        return network_layer->pub_sub_manager;
+    }
+
     utils::HostSerial* serial;
     libfcn_v2::ByteFrameIODevice* frame_dev;
     libfcn_v2::NetworkLayer *const network_layer;

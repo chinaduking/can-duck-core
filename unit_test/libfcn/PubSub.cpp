@@ -175,11 +175,43 @@ namespace pubsub_test {
     }
 
 
-    TEST(PubSub, Host) {
+    TEST(PubSub, Network){
+        Node fcn_node(0);
+
+        auto servo_pub = fcn_node.getPubSubManager().
+                makeMasterPublisher(ServoPubMsgOut, SERVO_ADDR);
+        servo_pub->addPort(0).addPort(1);
+
+        fcn_node.spin();
+
+        uint32_t cnt = 0;
+
+        for (int __i = 0; __i < 1;) {
+            auto speed_msg = ServoPubMsgOut.speed;
+            speed_msg << cnt;
+            servo_pub->publish(speed_msg);
+
+            auto angle_msg = ServoPubMsgOut.angle;
+            angle_msg << cnt;
+            servo_pub->publish(angle_msg);
+
+            auto current_msg = ServoPubMsgOut.current;
+            current_msg << cnt;
+            servo_pub->publish(current_msg);
+
+            perciseSleep(0.1);
+
+            cnt++;
+        }
+    }
+
+
+    TEST(PubSub, NetworkHost) {
         Node fcn_node(0);
 
         auto servo_sub = fcn_node.network_layer->pub_sub_manager
                 .makeSubscriber(ServoPubMsgOut, SERVO_ADDR, HOST_ADDR);
+
 
         fcn_node.spin();
 
