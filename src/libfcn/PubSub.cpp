@@ -150,7 +150,7 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
                 .buffer = buffer
         };
 
-        shared_buffers.push_back(sh_b);
+        shared_buffers.push(sh_b);
     }
 
     return buffer;
@@ -222,10 +222,13 @@ Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
     return subscriber;
 }
 
+Publisher & Publisher::addPort(int port) {
+    network_pub_ports.push(port);
+    return *this;
+}
 
 void Publisher::publish(SerDesDictValHandle &msg) {
     USER_ASSERT(ps_manager != nullptr);
-
 
     /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
     serdes_dict->handleSerialize(msg, buffer);
@@ -235,8 +238,11 @@ void Publisher::publish(SerDesDictValHandle &msg) {
         sub->notify(msg.index);
     }
 
-    /* 再进行网络发布：
-     * TODO：根据发布管理进行分频*/
+    if(network_pub_ports.size() == 0){
+        return;
+    }
+
+    /* 再进行网络发布：*/
     singleWriteFrameBuilder(
             &trans_frame_tmp,
             src_id,
@@ -245,7 +251,10 @@ void Publisher::publish(SerDesDictValHandle &msg) {
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-//    networkPublish(&trans_frame_tmp);
+    for(auto port : network_pub_ports){
+        ps_manager->network_layer->sendFrame(port, &trans_frame_tmp);
+
+    }
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {
@@ -255,58 +264,7 @@ void Publisher::regLocalSubscriber(Subscriber *subscriber) {
             return;
         }
     }
+
+
     local_sub_ptr.push(subscriber);
-}
-
-
-void PubSubManager::addPubCtrlRule(PubCtrlRule& rule){
-    pub_ctrl_rules.push_back(rule);
-}
-
-FcnFrame frame_tmp;
-
-void PubSubManager::update(){
-
-    for(auto & pub_ctrl_rule : pub_ctrl_rules){
-        pub_ctrl_rule.freq_divier_cnt ++;
-        //TODO: ">=" ??
-        if(pub_ctrl_rule.freq_divier_cnt > pub_ctrl_rule.freq_divier){
-
-            //TODO..
-            if(pub_ctrl_rule.end_idx == -1){
-                /* Single Write */
-//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
-//                                            pub_ctrl_rule.start_or_single_idx,
-//                                            pub_ctrl_rule.start_or_single_idx,
-//                                            pub_ctrl_rule.src_address,
-//                                            pub_ctrl_rule.dest_address,
-//                                            static_cast<uint8_t>(OpCode::RTO_PUB));
-            }else{
-                /* Continuous Write */
-//                singleWriteFrameBuilder(&frame_tmp, pub_ctrl_rule.dict,
-//                                            pub_ctrl_rule.start_or_single_idx,
-//                                            pub_ctrl_rule.end_idx,
-//                                            pub_ctrl_rule.src_address,
-//                                            pub_ctrl_rule.dest_address,
-//                                            static_cast<uint8_t>(OpCode::RTO_PUB));
-            }
-
-            frame_tmp.src_id = pub_ctrl_rule.src_address;
-            frame_tmp.dest_id = pub_ctrl_rule.dest_address;
-
-            for(auto & port : pub_ctrl_rule.data_link_dev){
-                /*
-                 * 一般write采用非阻塞模式。
-                 * 对于RTO，如果本次写入失败，则直接放弃，但同时记录该信息以便下次调整频率。
-                 * */
-                bool is_busy = port->pushTxQueue(&frame_tmp);
-
-                if(is_busy){
-                    pub_ctrl_rule.send_busy_cnt ++;
-                }
-            }
-
-
-        }
-    }
 }

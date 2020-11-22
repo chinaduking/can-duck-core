@@ -10,47 +10,44 @@
 #include "utils/os_only/HostSerial.hpp"
 #include "utils/Tracer.hpp"
 
-namespace network_test{
-    libfcn_v2::NetworkLayer gNetworkLayer;
+libfcn_v2::NetworkLayer gNetworkLayer;
 
-    class Node {
-    public:
-        Node(int sid) :
-                network_layer(&gNetworkLayer) {
+class Node {
+public:
+    Node(int sid) :
+            network_layer(&gNetworkLayer) {
 
-            serial = new utils::HostSerial(sid);
-            frame_dev = new libfcn_v2::ByteFrameIODevice(serial);
-            network_layer->addDataLinkDevice(frame_dev);
-        }
+        serial = new utils::HostSerial(sid);
+        frame_dev = new libfcn_v2::ByteFrameIODevice(serial);
+        network_layer->addDataLinkDevice(frame_dev);
+    }
 
-        void spin() {
-            recv_thread = std::make_shared<std::thread>([&](){
-                for (int __i = 0 ; __i < 1; ){
-                    network_layer->recvPolling();
-                }
-            });
-
-            send_thread = std::make_shared<std::thread>([&](){
-                for (int __i = 0 ; __i < 1; ){
-                    network_layer->sendPolling();
-                }
-            });
-        }
-
-        void join(){
-            if(recv_thread != nullptr){
-                recv_thread->join();
+    void spin() {
+        recv_thread = std::make_shared<std::thread>([&](){
+            for (int __i = 0 ; __i < 1; ){
+                network_layer->recvPolling();
             }
+        });
+
+        send_thread = std::make_shared<std::thread>([&](){
+            for (int __i = 0 ; __i < 1; ){
+                network_layer->sendPolling();
+            }
+        });
+    }
+
+    void join(){
+        if(recv_thread != nullptr){
+            recv_thread->join();
         }
+    }
 
-        utils::HostSerial* serial;
-        libfcn_v2::ByteFrameIODevice* frame_dev;
-        libfcn_v2::NetworkLayer *const network_layer;
+    utils::HostSerial* serial;
+    libfcn_v2::ByteFrameIODevice* frame_dev;
+    libfcn_v2::NetworkLayer *const network_layer;
 
-        std::shared_ptr<std::thread> recv_thread  {nullptr};
-        std::shared_ptr<std::thread> send_thread  {nullptr};
-    };
-
-}
+    std::shared_ptr<std::thread> recv_thread  {nullptr};
+    std::shared_ptr<std::thread> send_thread  {nullptr};
+};
 
 #endif //LIBFCN_V2_SIMPLESERIALNODE_HPP

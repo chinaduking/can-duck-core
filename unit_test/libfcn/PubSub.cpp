@@ -129,27 +129,23 @@ using namespace fcnmsg;
 namespace pubsub_test {
 
     #define SERVO_ADDR 0x02
+    #define DCS_ADDR   0x04
+    #define HOST_ADDR  0x05
 
     FCN_SUBSCRIBE_CALLBACK(servo_speed_cb) {
         LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoPubMsgOut.speed).data);
     }
 
-    TEST(Pubsub, IntraProc) {
-        int local_addr = SERVO_ADDR;
+    TEST(PubSub, IntraProc) {
         PubSubManager ps_manager(nullptr);
+//        auto servo_sub = ps_manager.makeSubscriber(ServoPubMsgIn, SERVO_ADDR, local_addr);
 
-
-//        auto servo_sub = ps_manager.makeSubscriber(ServoPubMsgIn, local_addr, local_addr);
-
-        auto servo_sub_local = ps_manager.makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
-//        auto servo_sub_local2 = ps_manager.makeSubscriber(ServoPubMsgOut, local_addr, 0x04);
-
+        auto servo_sub_local = ps_manager.makeSubscriber(ServoPubMsgOut, SERVO_ADDR, DCS_ADDR);
+//        auto servo_sub_local2 = ps_manager.makeSubscriber(ServoPubMsgOut, SERVO_ADDR, DCS_ADDR);
 
         servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
-        servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
-        servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
 
-        auto servo_pub = ps_manager.makeMasterPublisher(ServoPubMsgOut, local_addr);
+        auto servo_pub = ps_manager.makeMasterPublisher(ServoPubMsgOut, SERVO_ADDR);
 
 
         uint32_t cnt = 0;
@@ -177,38 +173,28 @@ namespace pubsub_test {
             cnt++;
         }
     }
-}
 
-//    TEST(RTO, RtoHostNode) {
-//        Node fcn_node(0);
-//        Tracer tracer(true);
-//        tracer.setFilter(Tracer::Level::lInfo);
-//
-//        int servo_addr = SERVO_ADDR;
-//
-//        auto servo_rto_channel = fcn_node
-//                .network_layer->pub_sub_manager.
-//                createChannel (fcnmsg::test_ServoPubSubDict, servo_addr);
-//
-//        fcn_node.spin();
-//
-//        for(int __i = 0; __i < 1; ){
-////            fcn_node.spin();
-//            perciseSleep(0.1);
-//
-//            LOGW("servo: speed = %d, angle = %d, current = %d \n",
-//                         servo_rto_channel->readBuffer(
-//                                 fcnmsg::test_ServoPubSubDict.speed).data,
-//
-//                         servo_rto_channel->readBuffer(
-//                                 fcnmsg::test_ServoPubSubDict.angle).data,
-//
-//                         servo_rto_channel->readBuffer(
-//                                 fcnmsg::test_ServoPubSubDict.current).data);
-//        }
-//
-//        fcn_node.join();
-//
-//    }
+
+    TEST(PubSub, Host) {
+        Node fcn_node(0);
+
+        auto servo_sub = fcn_node.network_layer->pub_sub_manager
+                .makeSubscriber(ServoPubMsgOut, SERVO_ADDR, HOST_ADDR);
+
+        fcn_node.spin();
+
+        for(int __i = 0; __i < 1; ){
+            perciseSleep(0.1);
+
+            LOGW("servo: speed = %d, angle = %d, current = %d \n",
+                 servo_sub->readBuffer(ServoPubMsgOut.speed).data,
+                 servo_sub->readBuffer(ServoPubMsgOut.angle).data,
+                 servo_sub->readBuffer(ServoPubMsgOut.current).data);
+        }
+
+        fcn_node.join();
+
+    }
+}
 
 #endif //0

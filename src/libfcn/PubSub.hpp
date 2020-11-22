@@ -57,44 +57,6 @@ namespace libfcn_v2 {
                               obj_idx_t index,
                               uint8_t *data, obj_size_t len);
 
-    /* ------ Public Declarations ------  */
-    struct PubCtrlRule{
-        /* ---------- Constructors ---------  */
-        PubCtrlRule() : data_link_dev(MAX_COM_PORT_NUM){}
-
-        /* --------- Public Variables --------  */
-        /* 发送频率。-1代表直接转发不过滤 */
-        int16_t freq_hz     { -1 };
-
-        /* 源地址。-1代表任意地址 */
-        int16_t src_address {  -1  };
-
-        /* 目标地址。-1代表任意地址 */
-        int16_t dest_address{  -1  };
-
-        /*
-         * end_idx != -1 : start_idx
-         * end_idx == -1 : single_idx
-         **/
-        obj_idx_t start_or_single_idx  {0};
-        int16_t end_idx    { -1 };
-
-        /* 需要转发到的端口列表 */
-        utils::Vector<FrameIODevice*> data_link_dev;
-
-    private:
-        /* ------ Private Declarations ------  */
-        friend class PubSubManager;
-
-        /* ------- Private Variables --------  */
-        uint32_t freq_divier{0};
-        uint32_t freq_divier_cnt{0};
-
-        uint32_t send_busy_cnt {0};
-
-    };
-
-
     /* --------------------------------------------------------- */
 
     #define MAX_PUB_CTRL_RULES 10  //TODO: LINKED LIST
@@ -111,10 +73,7 @@ namespace libfcn_v2 {
     public:
         /* ---------- Constructors ---------  */
         explicit PubSubManager(NetworkLayer* network)
-            : ctx_network_layer(network),
-
-              pub_ctrl_rules(MAX_PUB_CTRL_RULES),
-              shared_buffers(MAX_LOCAL_NODE_NUM)
+            : network_layer(network)
         { }
 
 
@@ -133,15 +92,10 @@ namespace libfcn_v2 {
                                    uint16_t channel_addr,
                                    uint16_t node_id);
 
-
         void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
-
-        /* --------- Public Methods --------  */
-        void addPubCtrlRule(PubCtrlRule& rule);
-
-        void update();
-
+        /* ------- Public Variables --------  */
+        NetworkLayer* const network_layer{nullptr};
 
     protected:
         /* ------ Protected Declarations ------  */
@@ -155,13 +109,10 @@ namespace libfcn_v2 {
 
         /* ------- Protected Variables --------  */
 
-        NetworkLayer* const ctx_network_layer{nullptr};
 
         uint16_t poll_freq_hz{1000};
 
-        utils::Vector<PubCtrlRule> pub_ctrl_rules;
-
-        utils::Vector<SharedBuffer> shared_buffers;
+        utils::LinkedList<SharedBuffer> shared_buffers;
 
         utils::LinkedList<Publisher *> created_publishers;
 
@@ -174,8 +125,6 @@ namespace libfcn_v2 {
 
         void* getSharedBuffer(SerDesDict& serdes_dict, int id);
     };
-
-
 
     /* --------------------------------------------------------- */
 
@@ -242,6 +191,7 @@ namespace libfcn_v2 {
          */
         void regLocalSubscriber(Subscriber* subscriber);
 
+        Publisher& addPort(int port);
 
         /* ------- Public Variables --------  */
         const uint16_t channel_id { 0 };
@@ -259,6 +209,8 @@ namespace libfcn_v2 {
         FcnFrame trans_frame_tmp;
 
         utils::LinkedList<Subscriber*> local_sub_ptr;
+        utils::LinkedList<int> network_pub_ports;
+
     };
 
     /* --------------------------------------------------------- */
