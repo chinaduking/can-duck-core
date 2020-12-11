@@ -48,8 +48,8 @@ namespace libfcn_v2 {
             utils::memset(&data, 0, sizeof(T));
         }
 
-        void operator<<(T input) { data = input; }
-        void operator>>(T &input) { input = data; }
+        inline void operator<<(T input) { data = input; }
+        inline void operator>>(T &input) { input = data; }
 
         T data;
     };
@@ -87,7 +87,7 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        Prototype deserialize(Prototype&& msg, void* p_buffer){
+        inline Prototype deserialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             Prototype res = msg;
@@ -99,7 +99,7 @@ namespace libfcn_v2 {
             return res;
         }
 
-        bool deserialize(int16_t index, uint8_t* data, void* p_buffer){
+        inline bool deserialize(int16_t index, uint8_t* data, void* p_buffer){
             if(index >= dictSize() || p_buffer == nullptr || data == nullptr){
                 return false;
             }
@@ -111,7 +111,7 @@ namespace libfcn_v2 {
         }
 
 //        template<typename Prototype>
-        void handleSerialize(SerDesDictValHandle& msg, void* p_buffer){
+        inline void handleSerialize(SerDesDictValHandle& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             utils::memcpy((uint8_t*)p_buffer + msg.buffer_offset,
@@ -120,7 +120,7 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        void serialize(Prototype&& msg, void* p_buffer){
+        inline void serialize(Prototype&& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             utils::memcpy((uint8_t*)p_buffer + msg.buffer_offset,

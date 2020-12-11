@@ -287,7 +287,7 @@ namespace libfcn_v2 {
         }
 
         template<typename Prototype>
-        Prototype readBuffer(Prototype&& msg){
+        inline Prototype readBuffer(Prototype&& msg){
             USER_ASSERT(buffer!= nullptr);
             return serdes_dict->deserialize(msg, buffer);
         }
