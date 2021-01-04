@@ -5,6 +5,8 @@ project(libfcn)
 # export CC=/usr/bin/clang
 # export CXX=/usr/bin/clang++
 
+message("---> CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
+
 #------------Set Build / Debug Mode ---------------
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -84,3 +86,14 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 add_subdirectory(example_apps/example/)
 add_subdirectory(example_apps/apps/SerialLogViewer)
+
+
+# find_package(Qt5Core REQUIRED)
+# find_package(Qt5Gui REQUIRED)
+# find_package(Qt5Widgets REQUIRED)
+# find_package(Qt5PrintSupport REQUIRED)
+
+
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTORCC ON)
