@@ -3,7 +3,11 @@
 //
 #include "utils/os_only/HostSerial.hpp"
 #include <cstring>
+#include <cstdio>
 #include <iostream>
+#include <thread>
+#include "utils/CppUtils.hpp"
+
 using namespace utils;
 using namespace std;
 int main( int argc, char *argv[]){
@@ -46,6 +50,18 @@ int main( int argc, char *argv[]){
 
     HostSerial serial(sid, B921600);
 
+    thread kb_thread([&](){
+        string kb_input_line;
+
+        while(1){
+            while (!utils::kbhit()) {
+                utils::perciseSleep(0.05);
+            }
+            char c = getchar();
+            serial.write((const uint8_t*)&c, 1);
+        }
+    });
+
 
     uint8_t line_wrap = 20;
     uint8_t line_wrap_cnt = 0;
@@ -67,8 +83,6 @@ int main( int argc, char *argv[]){
             }
             line_wrap_cnt ++;
         }
-
-
 
         fflush(stdout);
     }

@@ -89,6 +89,40 @@ namespace utils{
         nanosleep(time_d * 10e6);
         #endif // WIN32
     }
+
+
+    #include <stdio.h>
+    #include <sys/ioctl.h> // For FIONREAD
+    #include <termios.h>
+    #include <stdbool.h>
+
+    /**
+     * 检测是否有按键按下。不等待回车即可立即返回键盘输入，包括ESC等特殊字符
+     * https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
+     * while (!utils::kbhit()) {
+     *    utils::perciseSleep(0.05);
+     * }
+     * c = getchar();
+     */
+    inline int kbhit(void) {
+        static bool initflag = false;
+        static const int STDIN = 0;
+
+        if (!initflag) {
+            // Use termios to turn off line buffering
+            struct termios term;
+            tcgetattr(STDIN, &term);
+            term.c_lflag &= ~ICANON;
+            tcsetattr(STDIN, TCSANOW, &term);
+            setbuf(stdin, NULL);
+            initflag = true;
+        }
+
+        int nbbytes;
+        ioctl(STDIN, FIONREAD, &nbbytes);  // 0 is STDIN
+        return nbbytes;
+    }
+
 #endif //SYSTYPE_FULL_OS
 
 
