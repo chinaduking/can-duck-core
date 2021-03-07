@@ -12,8 +12,7 @@ target_link_libraries(testRealtimeObject fcn_v2 ${UT_DEFAULT_LIBS})
 
 
 
-add_executable(testServiceObject ParamServer.cpp
-        )
+add_executable(testServiceObject ParamServer.cpp  ServoPubMsg.cpp)
 target_link_libraries(testServiceObject fcn_v2 ${UT_DEFAULT_LIBS})
 
 

@@ -42,7 +42,7 @@ public:
         }
     }
 
-    PubSubManager& getPubSubManager(){
+    libfcn_v2::PubSubManager& getPubSubManager(){
         return network_layer->pub_sub_manager;
     }
 
