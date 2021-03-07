@@ -89,7 +89,6 @@ namespace network_test {
 
         fcn_node.spin();
 
-
         auto servo_client = fcn_node.network_layer->param_server_manager
                 .bindClientToServer(ServoSrvMsg, servo_addr, local_addr, 0);
 

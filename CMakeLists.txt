@@ -85,7 +85,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 
 add_subdirectory(example_apps/example/)
-add_subdirectory(example_apps/apps/SerialLogViewer)
+add_subdirectory(example_apps/apps/SerialTerminal)
 
 
 # find_package(Qt5Core REQUIRED)

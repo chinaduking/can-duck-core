@@ -17,11 +17,11 @@ int main( int argc, char *argv[]){
 
     if(argc >= 2){
         if(strcmp(argv[1], "s") == 0){
-            cout << "logview: ascii char string mode " << endl;
+            cout << "sterm: ascii char string mode " << endl;
             mode = 0;
         }
         else if(strcmp(argv[1], "h") == 0){
-            cout << "logview: hex mode " << endl;
+            cout << "sterm: hex mode " << endl;
 
             mode = 1;
         } else{
@@ -29,7 +29,7 @@ int main( int argc, char *argv[]){
             exit(-1);
         }
     }else{
-        cout << "logview: hex mode (defualt)" << endl;
+        cout << "sterm: hex mode (defualt)" << endl;
     }
 
     int sid = 0;
