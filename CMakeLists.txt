@@ -72,6 +72,23 @@ message("----> CMAKE_SYSTEM_PROCESSOR is: " ${CMAKE_SYSTEM_PROCESSOR})
 add_definitions(-DSYSTYPE_FULL_OS)
 
 find_package(GTest CONFIG REQUIRED)
+
+
+#---------------------------------------------
+#------------  Find Qt  -------------------
+#---------------------------------------------
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
+
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+
+
 #------------Add Submodule---------------
 
 
