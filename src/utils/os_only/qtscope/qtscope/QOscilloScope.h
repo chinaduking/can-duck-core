@@ -4,19 +4,19 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui { class QOscilloScope; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class QOscilloScope : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    QOscilloScope(QWidget *parent = nullptr);
+    ~QOscilloScope();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::QOscilloScope *ui;
 
     void resizeEvent(QResizeEvent*) override;
 };

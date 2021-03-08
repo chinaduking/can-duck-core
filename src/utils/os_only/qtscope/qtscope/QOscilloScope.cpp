@@ -1,24 +1,26 @@
-#include "mainwindow.h"
+#include "QOscilloScope.h"
 #include "./ui_mainwindow.h"
 
 #include "utils/Tracer.hpp"
 
-MainWindow::MainWindow(QWidget *parent)
+QOscilloScope::QOscilloScope(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::QOscilloScope)
 {
     ui->setupUi(this);
+    setWindowTitle(QApplication::translate(
+            "QOscilloScope",
+            "Elegant OscilloScope       (by S. Dong)", Q_NULLPTR));
 }
 
-MainWindow::~MainWindow()
+QOscilloScope::~QOscilloScope()
 {
     delete ui;
 }
 
-void MainWindow::resizeEvent(QResizeEvent * event) {
+void QOscilloScope::resizeEvent(QResizeEvent * event) {
     float ratio = 0.618;
     ui->scope_widget->resize(event->size().width(), event->size().height() * ratio);
-    //ui->scope_properties->resize(event->size().width(), event->size().height() * (1.0f-ratio));
 
     int bound = 0;
     ui->scope_properties->setGeometry(

@@ -36,9 +36,9 @@ find_package(Qt5PrintSupport REQUIRED)
 add_executable(qtscope
     main.cpp
     qcustomplot.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
+    QOscilloScope.cpp
+    QOscilloScope.h
+    QOscilloScope.ui
 )
 
 target_link_libraries(qtscope PRIVATE tracer Qt5::Widgets Qt5::PrintSupport)
