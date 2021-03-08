@@ -24,23 +24,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+#find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+#find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+#
 
-if(ANDROID)
-  add_library(qtscope SHARED
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
+
+add_executable(qtscope
     main.cpp
+    qcustomplot.cpp
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-  )
-else()
-  add_executable(qtscope
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-  )
-endif()
+)
 
-target_link_libraries(qtscope PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(qtscope PRIVATE tracer Qt5::Widgets Qt5::PrintSupport)
