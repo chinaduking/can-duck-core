@@ -10,7 +10,7 @@ QOscilloScope::QOscilloScope(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle(QApplication::translate(
             "QOscilloScope",
-            "Elegant OscilloScope       (by S. Dong)", Q_NULLPTR));
+            "Elegant Oscilloscope       (by S. Dong)", Q_NULLPTR));
 }
 
 QOscilloScope::~QOscilloScope()
@@ -29,5 +29,5 @@ void QOscilloScope::resizeEvent(QResizeEvent * event) {
             event->size().width() - bound * 2,              //w
             event->size().height() * (1.0f-ratio) - bound * 2//h
             );
-    //LOGD("resize!");
+    LOGV("scope resized!");
 }

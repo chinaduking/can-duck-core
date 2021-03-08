@@ -132,6 +132,14 @@ namespace pubsub_test {
     #define DCS_ADDR   0x04
     #define HOST_ADDR  0x05
 
+    //op code      5 [0-31]
+    //node id      7 [0-127]
+    //tx/rx        1 [0/1]     |   req node id  7 [0-127]
+    //msg_id       8 [0-255]   |   msg_id       8 [0-255]
+    //data[1]      8           |
+    //vector      [d1,d2, ..., dn]
+
+
     FCN_SUBSCRIBE_CALLBACK(servo_speed_cb) {
         LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoPubMsgOut.speed).data);
     }
