@@ -1,5 +1,5 @@
 #include "QOscilloScope.h"
-#include "./ui_mainwindow.h"
+#include "./ui_QOscilloScope.h"
 
 #include "utils/Tracer.hpp"
 
