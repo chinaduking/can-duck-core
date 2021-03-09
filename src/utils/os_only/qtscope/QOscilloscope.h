@@ -83,11 +83,16 @@ private:
 
     bool data_notified {false};
 
-    std::thread* data_upd_check_th = nullptr;
-
     int timerId;
 
-    std::vector<QColor> plot_theme;
+    struct Theme{
+        QColor background;
+        QColor axis;
+        QVector<QColor> plots;
+    };
+
+    QVector<Theme> themes;
+    int theme_index{1};
 
 
 protected:

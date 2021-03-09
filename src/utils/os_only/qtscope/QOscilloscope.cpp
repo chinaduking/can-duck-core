@@ -20,10 +20,24 @@ QOscilloscope::QOscilloscope(QWidget *parent)
     /*使能openGl在视网膜显示器造成尺度不对*/
     // ui->scope_widget->setOpenGl(true, 1);
 
-    plot_theme.push_back(Qt::yellow);
-    plot_theme.push_back(Qt::cyan);
-    plot_theme.push_back(Qt::magenta);
-    plot_theme.push_back(Qt::green);
+    Theme theme_dark;
+    theme_dark.background = QColor::fromRgb(160,160,160);
+    theme_dark.axis = Qt::white;
+    theme_dark.plots.push_back(Qt::yellow);
+    theme_dark.plots.push_back(Qt::cyan);
+    theme_dark.plots.push_back(Qt::magenta);
+    theme_dark.plots.push_back(Qt::green);
+    themes.push_back(theme_dark);
+
+    Theme theme_light;
+    theme_light.background = Qt::white;
+    theme_dark.axis = Qt::black;
+    theme_light.plots.push_back(QColor::fromRgb(220, 180, 180));
+    theme_light.plots.push_back(QColor::fromRgb(160, 160, 255));
+    theme_light.plots.push_back(Qt::black);
+    theme_light.plots.push_back(Qt::green);
+    themes.push_back(theme_light);
+
 }
 
 void QOscilloscope::timerEvent(QTimerEvent *event)
@@ -73,13 +87,13 @@ void QOscilloscope::scopeUpdate(){
         g_cnt = w->graphCount();
     }
 
-    QBrush brush;
-    brush.setColor(QColor::fromRgb(160,160,160));
+    QBrush brush(themes[theme_index].background);
+//    brush.setColor();
     w->setBackground(brush);
 //        w->xAxis->setLabelColor(Qt::white);
-    w->xAxis->setTickLabelColor(Qt::white);
+    w->xAxis->setTickLabelColor(themes[theme_index].axis);
 //        w->xAxis->setLabelColor(Qt::white);
-    w->yAxis->setTickLabelColor(Qt::white);
+    w->yAxis->setTickLabelColor(themes[theme_index].axis);
 
 
     int index = 0;
@@ -100,7 +114,7 @@ void QOscilloscope::scopeUpdate(){
 //            g->addData(index_buf[index_buf.size()-1],
 //                       data_buf[data_buf.size()-1]);
 
-            pen.setColor(plot_theme[index]);
+            pen.setColor(themes[theme_index].plots[index]);
             g->setPen(pen);
 
             g->setData(index_buf, data_buf, true);
