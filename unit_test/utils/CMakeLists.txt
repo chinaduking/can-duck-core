@@ -7,7 +7,7 @@ add_executable(testTracer Tracer.cpp)
 target_link_libraries(testTracer ${UT_DEFAULT_LIBS})
 
 
-add_executable(testArray Array.cpp WinSerial.cpp)
+add_executable(testArray Array.cpp WinSerial.cpp os_only/qtscope/QOscilloscope.cpp)
 target_link_libraries(testArray ${UT_DEFAULT_LIBS})
 
 add_executable(testCppUtils CppUtils.cpp)
@@ -46,3 +46,5 @@ target_link_libraries(testQueue ${UT_DEFAULT_LIBS})
 
 add_executable(testWinSerial WinSerial.cpp)
 
+add_executable(testQOscilloscope os_only/qtscope/QOscilloscope.cpp )
+target_link_libraries(testQOscilloscope ${UT_DEFAULT_LIBS} qtscope Qt5::Widgets Qt5::PrintSupport  Qt5::Gui Qt5::Core)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QOscilloScope</class>
- <widget class="QMainWindow" name="QOscilloScope">
+ <class>QOscilloscope</class>
+ <widget class="QMainWindow" name="QOscilloscope">
   <property name="geometry">
    <rect>
     <x>0</x>
