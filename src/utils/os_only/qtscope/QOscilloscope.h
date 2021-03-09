@@ -16,7 +16,7 @@ public:
     ScopeChannelHandle(QOscilloscope* widget, int index, std::string tag="")
         :  tag(tag), index(index), widget(widget){
         time_stamp_buf.reserve(BUFFER_DEPTH);
-        val_buf.reserve(BUFFER_DEPTH);
+        data_buf.reserve(BUFFER_DEPTH);
     }
 
     void addData(double data);
@@ -32,7 +32,7 @@ public:
 
     QVector<double> index_buf;
     QVector<double> time_stamp_buf;
-    QVector<double> val_buf;
+    QVector<double> data_buf;
     static constexpr int BUFFER_DEPTH = 20000; //20k buffer
 
 
@@ -78,12 +78,21 @@ private:
 
     void paintEvent(QPaintEvent*) override;
 
+    void scopeUpdate();
+
     std::map<std::string,
         std::shared_ptr<ScopeChannelHandle>> data_handles;
 
     bool data_notified {false};
 
     std::thread* data_upd_check_th = nullptr;
+
+    int timerId;
+
+
+protected:
+    void timerEvent(QTimerEvent *event);
+
 
 };
 

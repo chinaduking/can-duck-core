@@ -12,20 +12,19 @@ QOscilloscope::QOscilloscope(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(QApplication::translate(
-"QOscilloscope",
+    "QOscilloscope",
     "Elegant Oscilloscope       (by S. Dong)", Q_NULLPTR));
 
 
-    data_upd_check_th = new std::thread([&](){
-        while (1){
-            if(data_notified){
-                data_notified = false;
-                ui->scope_widget->repaint();
-                LOGV("data_upd_check_th: cope_widget->repaint");
-            }
-            utils::perciseSleep(0.02); //50Hz update max
-        }
-    });
+    timerId = startTimer(100);
+}
+
+void QOscilloscope::timerEvent(QTimerEvent *event)
+{
+    if(data_notified){
+        data_notified = false;
+        scopeUpdate();
+    }
 }
 
 QOscilloscope::~QOscilloscope()
@@ -49,30 +48,83 @@ void QOscilloscope::resizeEvent(QResizeEvent * event) {
 //    ui->scope_widget->update();
 }
 
+
 void QOscilloscope::paintEvent(QPaintEvent* event) {
-    LOGV("paintEvent");
+    scopeUpdate();
 }
+
+void QOscilloscope::scopeUpdate(){
+    LOGV("paintEvent");
+
+    auto w = ui->scope_widget;
+    auto g_cnt = w->graphCount();
+
+    while(g_cnt != data_handles.size()){
+        if(g_cnt > data_handles.size()){
+            /*remove last one*/
+            w->removeGraph(g_cnt-1);
+            LOGD("remove a graph..");
+        }else if(g_cnt < data_handles.size()){
+            w->addGraph();
+            LOGD("add a graph..");
+        }
+        g_cnt = w->graphCount();
+    }
+
+    int index = 0;
+    for(auto ch : data_handles){
+        QString name(ch.first.c_str());
+
+        auto g = w->graph(index);
+
+        g->setName(name);
+
+
+        QPen pen;
+        pen.setWidth(2);
+        pen.setColor(Qt::red);
+        g->setPen(pen);
+        g->setData(ch.second->index_buf, ch.second->data_buf);
+
+
+        index ++;
+    }
+    w->rescaleAxes();
+
+    w->legend->setVisible(true);
+
+
+
+    ui->scope_widget->repaint();
+    w->replot();
+}
+
 
 void ScopeChannelHandle::addData(double data){
     std::lock_guard<std::mutex> lk(data_update_mutex);
 
     time_stamp_buf.push_back(utils::getCurrentTimeUs());
-    val_buf.push_back(data);
+    data_buf.push_back(data);
     index_buf.push_back(data_cnt);
 
     data_cnt += 1;
 
-    if(time_stamp_buf.size() != val_buf.size()){
+    if(time_stamp_buf.size() != data_buf.size()){
         time_stamp_buf.clear();
-        val_buf.clear();
+        data_buf.clear();
     }
 
     if(time_stamp_buf.size() > 200){
         time_stamp_buf.pop_front();
     }
 
-    if(val_buf.size() > 200){
-        val_buf.pop_front();
+    if(data_buf.size() > 200){
+        data_buf.pop_front();
+    }
+
+
+    if(index_buf.size() > 200){
+        index_buf.pop_front();
     }
 
     widget->dataNotify();
