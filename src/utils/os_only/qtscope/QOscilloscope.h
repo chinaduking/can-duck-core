@@ -76,8 +76,6 @@ private:
 
     void resizeEvent(QResizeEvent*) override;
 
-    void paintEvent(QPaintEvent*) override;
-
     void scopeUpdate();
 
     std::map<std::string,
@@ -88,6 +86,8 @@ private:
     std::thread* data_upd_check_th = nullptr;
 
     int timerId;
+
+    std::vector<QColor> plot_theme;
 
 
 protected:

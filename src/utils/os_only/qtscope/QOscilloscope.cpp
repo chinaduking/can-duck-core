@@ -1,5 +1,5 @@
 #include "QOscilloscope.h"
-#include "./ui_QOscilloScope.h"
+#include "./ui_QOscilloscope.h"
 
 #include "utils/Tracer.hpp"
 #include "utils/CppUtils.hpp"
@@ -16,7 +16,14 @@ QOscilloscope::QOscilloscope(QWidget *parent)
     "Elegant Oscilloscope       (by S. Dong)", Q_NULLPTR));
 
 
-    timerId = startTimer(100);
+    timerId = startTimer(50);
+    /*使能openGl在视网膜显示器造成尺度不对*/
+    // ui->scope_widget->setOpenGl(true, 1);
+
+    plot_theme.push_back(Qt::yellow);
+    plot_theme.push_back(Qt::cyan);
+    plot_theme.push_back(Qt::magenta);
+    plot_theme.push_back(Qt::green);
 }
 
 void QOscilloscope::timerEvent(QTimerEvent *event)
@@ -48,13 +55,8 @@ void QOscilloscope::resizeEvent(QResizeEvent * event) {
 //    ui->scope_widget->update();
 }
 
-
-void QOscilloscope::paintEvent(QPaintEvent* event) {
-    scopeUpdate();
-}
-
 void QOscilloscope::scopeUpdate(){
-    LOGV("paintEvent");
+    LOGV("paintEvent 0");
 
     auto w = ui->scope_widget;
     auto g_cnt = w->graphCount();
@@ -71,6 +73,15 @@ void QOscilloscope::scopeUpdate(){
         g_cnt = w->graphCount();
     }
 
+    QBrush brush;
+    brush.setColor(QColor::fromRgb(160,160,160));
+    w->setBackground(brush);
+//        w->xAxis->setLabelColor(Qt::white);
+    w->xAxis->setTickLabelColor(Qt::white);
+//        w->xAxis->setLabelColor(Qt::white);
+    w->yAxis->setTickLabelColor(Qt::white);
+
+
     int index = 0;
     for(auto ch : data_handles){
         QString name(ch.first.c_str());
@@ -79,24 +90,34 @@ void QOscilloscope::scopeUpdate(){
 
         g->setName(name);
 
-
         QPen pen;
-        pen.setWidth(2);
-        pen.setColor(Qt::red);
-        g->setPen(pen);
-        g->setData(ch.second->index_buf, ch.second->data_buf);
+        pen.setWidth(1);
 
+        if(ch.second->index_buf.size() > 10){
+            auto index_buf = ch.second->index_buf;
+            auto data_buf = ch.second->data_buf;
 
+//            g->addData(index_buf[index_buf.size()-1],
+//                       data_buf[data_buf.size()-1]);
+
+            pen.setColor(plot_theme[index]);
+            g->setPen(pen);
+
+            g->setData(index_buf, data_buf, true);
+
+            w->xAxis->setRange(ch.second->index_buf[0], index_buf[index_buf.size()-1]);
+            w->yAxis->setRange(-5, 5);
+        }
+
+//        g->setData(ch.second->index_buf, ch.second->data_buf, true);
         index ++;
     }
-    w->rescaleAxes();
 
-    w->legend->setVisible(true);
+    LOGV("paintEvent 1");
 
+    w->replot(QCustomPlot::rpQueuedReplot);
 
-
-    ui->scope_widget->repaint();
-    w->replot();
+    LOGV("paintEvent 2");
 }
 
 
@@ -114,16 +135,16 @@ void ScopeChannelHandle::addData(double data){
         data_buf.clear();
     }
 
-    if(time_stamp_buf.size() > 200){
+    if(time_stamp_buf.size() > 500){
         time_stamp_buf.pop_front();
     }
 
-    if(data_buf.size() > 200){
+    if(data_buf.size() > 500){
         data_buf.pop_front();
     }
 
 
-    if(index_buf.size() > 200){
+    if(index_buf.size() > 500){
         index_buf.pop_front();
     }
 

@@ -33,12 +33,14 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5PrintSupport REQUIRED)
 
+add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+
 add_executable(qtscopeTest
         main.cpp
         qcustomplot.cpp
         QOscilloscope.cpp
         QOscilloscope.h
-        QOscilloScope.ui
+        QOscilloscope.ui
 )
 
 target_link_libraries(qtscopeTest PRIVATE tracer Qt5::Widgets Qt5::PrintSupport)
@@ -48,7 +50,7 @@ add_library(qtscope
         qcustomplot.cpp
         QOscilloscope.cpp
         QOscilloscope.h
-        QOscilloScope.ui)
+        QOscilloscope.ui)
 
 target_link_libraries(qtscope tracer Qt5::Widgets Qt5::PrintSupport  Qt5::Gui Qt5::Core)
 

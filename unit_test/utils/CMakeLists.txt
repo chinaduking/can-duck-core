@@ -1,3 +1,6 @@
+find_package(GTest CONFIG REQUIRED)
+
+
 set(UT_DEFAULT_LIBS tracer GTest::gmock_main  GTest::gtest  GTest::gtest_main)
 
 include_directories(${PROJECT_SOURCE_DIR}/unit_test)
@@ -7,7 +10,7 @@ add_executable(testTracer Tracer.cpp)
 target_link_libraries(testTracer ${UT_DEFAULT_LIBS})
 
 
-add_executable(testArray Array.cpp WinSerial.cpp os_only/qtscope/QOscilloscope.cpp)
+add_executable(testArray Array.cpp WinSerial.cpp)
 target_link_libraries(testArray ${UT_DEFAULT_LIBS})
 
 add_executable(testCppUtils CppUtils.cpp)
@@ -45,6 +48,12 @@ add_executable(testQueue RingBuf.cpp)
 target_link_libraries(testQueue ${UT_DEFAULT_LIBS})
 
 add_executable(testWinSerial WinSerial.cpp)
+
+
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
 
 add_executable(testQOscilloscope os_only/qtscope/QOscilloscope.cpp )
 target_link_libraries(testQOscilloscope ${UT_DEFAULT_LIBS} qtscope Qt5::Widgets Qt5::PrintSupport  Qt5::Gui Qt5::Core)

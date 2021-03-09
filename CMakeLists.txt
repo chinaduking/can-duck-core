@@ -29,8 +29,8 @@ else()
 endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3")
@@ -71,8 +71,12 @@ message("----> CMAKE_SYSTEM_PROCESSOR is: " ${CMAKE_SYSTEM_PROCESSOR})
 
 add_definitions(-DSYSTYPE_FULL_OS)
 
+
+
+#if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
 find_package(GTest CONFIG REQUIRED)
 
+#endif()
 
 #---------------------------------------------
 #------------  Find Qt  -------------------
@@ -97,13 +101,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/libfcn)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)
-add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 
 add_subdirectory(example_apps/example/)
 add_subdirectory(example_apps/apps/SerialTerminal)
 add_subdirectory(src/utils/os_only/qtscope)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)
+add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
 
 # find_package(Qt5Core REQUIRED)
 # find_package(Qt5Gui REQUIRED)
