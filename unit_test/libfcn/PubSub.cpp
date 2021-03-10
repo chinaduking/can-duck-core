@@ -132,6 +132,12 @@ namespace pubsub_test {
     #define DCS_ADDR   0x04
     #define HOST_ADDR  0x05
 
+
+    //Fast Pub(11 bit CAN ID)  | position/current/pos
+    //Node ID 4bit
+    //MSG  ID 7bit
+    //data 0-8
+
     //op code      5 [0-31]
     //node id      7 [0-127]
     //tx/rx        1 [0/1]     |   req node id  7 [0-127]

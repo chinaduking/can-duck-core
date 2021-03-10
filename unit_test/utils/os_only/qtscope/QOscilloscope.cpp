@@ -34,7 +34,7 @@ int main(){
             h3->addData(sin(cnt*cnt));
 
 //            LOGD("added data");
-            utils::perciseSleep(0.01);
+            utils::perciseSleep(0.005);
             cnt += 0.1;
             if(cnt > M_PI * 2){
                 cnt = 0;
