@@ -82,8 +82,8 @@ namespace libfcn_v2 {
 
 
         /* --------- Public Methods --------  */
-        Publisher* makeMasterPublisher(SerDesDict& serdes_dict,
-                                       uint16_t node_id);
+        Publisher* makePublisher(SerDesDict& serdes_dict,
+                                 uint16_t node_id, bool is_owner= true, bool is_fast_tx= true);
 
         Publisher* makeSlavePublisher(SerDesDict& serdes_dict,
                                        uint16_t master_id, uint16_t node_id);

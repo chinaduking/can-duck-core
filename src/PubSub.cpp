@@ -185,8 +185,8 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
 }
 
 
-Publisher* PubSubManager::makeMasterPublisher(SerDesDict& serdes_dict,
-                                              uint16_t node_id){
+Publisher* PubSubManager::makePublisher(SerDesDict& serdes_dict,
+                                        uint16_t node_id, bool is_owner, bool is_fast_tx){
     uint16_t channel_addr = node_id;
     return bindPublisherToChannel(serdes_dict, channel_addr, node_id);
 }

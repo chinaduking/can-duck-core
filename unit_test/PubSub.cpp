@@ -159,7 +159,7 @@ namespace pubsub_test {
 
         servo_sub_local->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
 
-        auto servo_pub = ps_manager.makeMasterPublisher(ServoPubMsgOut, SERVO_ADDR);
+        auto servo_pub = ps_manager.makePublisher(ServoPubMsgOut, SERVO_ADDR);
 
 
         uint32_t cnt = 0;
@@ -193,7 +193,7 @@ namespace pubsub_test {
         Node fcn_node(1);
 
         auto servo_pub = fcn_node.getPubSubManager().
-                makeMasterPublisher(ServoPubMsgOut, SERVO_ADDR);
+                makePublisher(ServoPubMsgOut, SERVO_ADDR);
         servo_pub->addPort(0).addPort(1);
 
         fcn_node.spin();
