@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-project(libfcn)
+project(libfcn-core)
 
 #------------Set Compiler-------------------
 # export CC=/usr/bin/clang
@@ -79,43 +79,16 @@ find_package(GTest CONFIG REQUIRED)
 #endif()
 
 #---------------------------------------------
-#------------  Find Qt  -------------------
+#------------  Find emlib  -------------------
 #---------------------------------------------
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
+set(emlib_DIR  ${PROJECT_SOURCE_DIR}/../../local_deps/lib/emlib/)
 
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-
-
+find_package(emlib REQUIRED)
+message("emlib :"  ${emlib_LIBS}  ", " ${emlib_INCLUDES})
+include_directories(${emlib_INCLUDES})
 
 #------------Add Submodule---------------
-
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/libfcn)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/utils)
-
-
-
-add_subdirectory(example_apps/example/)
-add_subdirectory(example_apps/apps/SerialTerminal)
-add_subdirectory(src/utils/os_only/qtscope)
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/libfcn)
-add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test/utils)
-
-# find_package(Qt5Core REQUIRED)
-# find_package(Qt5Gui REQUIRED)
-# find_package(Qt5Widgets REQUIRED)
-# find_package(Qt5PrintSupport REQUIRED)
-
-
-# set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTOUIC ON)
-# set(CMAKE_AUTORCC ON)
+add_subdirectory(${PROJECT_SOURCE_DIR}/unit_test)
