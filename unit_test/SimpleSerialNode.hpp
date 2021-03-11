@@ -2,15 +2,15 @@
 // Created by sdong on 2020/10/27.
 //
 #pragma once
-#ifndef LIBFCN_V2_SIMPLESERIALNODE_HPP
-#define LIBFCN_V2_SIMPLESERIALNODE_HPP
+#ifndef can_duck_SIMPLESERIALNODE_HPP
+#define can_duck_SIMPLESERIALNODE_HPP
 
 #include "NetworkLayer.hpp"
 
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
 
-libfcn_v2::NetworkLayer gNetworkLayer;
+can_duck::NetworkLayer gNetworkLayer;
 
 class Node {
 public:
@@ -18,7 +18,7 @@ public:
             network_layer(&gNetworkLayer) {
 
         serial = new emlib::HostSerial(sid);
-        frame_dev = new libfcn_v2::ByteFrameIODevice(serial);
+        frame_dev = new can_duck::ByteFrameIODevice(serial);
         network_layer->addDataLinkDevice(frame_dev);
     }
 
@@ -42,16 +42,16 @@ public:
         }
     }
 
-    libfcn_v2::PubSubManager& getPubSubManager(){
+    can_duck::PubSubManager& getPubSubManager(){
         return network_layer->pub_sub_manager;
     }
 
     emlib::HostSerial* serial;
-    libfcn_v2::ByteFrameIODevice* frame_dev;
-    libfcn_v2::NetworkLayer *const network_layer;
+    can_duck::ByteFrameIODevice* frame_dev;
+    can_duck::NetworkLayer *const network_layer;
 
     std::shared_ptr<std::thread> recv_thread  {nullptr};
     std::shared_ptr<std::thread> send_thread  {nullptr};
 };
 
-#endif //LIBFCN_V2_SIMPLESERIALNODE_HPP
+#endif //can_duck_SIMPLESERIALNODE_HPP

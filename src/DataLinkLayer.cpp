@@ -13,7 +13,7 @@
 #include <cstring>
 
 using namespace emlib;
-using namespace libfcn_v2;
+using namespace can_duck;
 
 
 //ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
@@ -284,7 +284,7 @@ static char* mOpCodeStr[]={
 };
 #endif
 
-uint32_t libfcn_v2::frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size){
+uint32_t can_duck::frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size){
 
     if(frame.getPayloadLen() > DATALINK_MTU){
         LOGW("frame2strbuf: too long frame!");
@@ -335,7 +335,7 @@ uint32_t libfcn_v2::frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_
 }
 
 
-std::string libfcn_v2::frame2stdstr(FcnFrame& frame){
+std::string can_duck::frame2stdstr(FcnFrame& frame){
 #ifdef ENABLE_TRACE
 
     static const int BUFFER_RESERVE = 150;

@@ -5,9 +5,9 @@
 #include "ServoPubMsg.hpp"
 
 
-using namespace libfcn_v2;
+using namespace can_duck;
 
-namespace fcnmsg{
+namespace duckmsg{
     ServoPubMsgIn_C  servo_msg_i;
     ServoPubMsgOut_C servo_msg_o;
     ServoSrvMsg_C ServoSrvMsg;

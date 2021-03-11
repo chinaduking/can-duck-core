@@ -6,7 +6,7 @@
 #include "OpCode.hpp"
 #include "NetworkLayer.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回1为成功，否则为失败

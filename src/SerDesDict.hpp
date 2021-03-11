@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/26.
 //
 
-#ifndef LIBFCN_V2_SERDESDICT_HPP
-#define LIBFCN_V2_SERDESDICT_HPP
+#ifndef can_duck_SERDESDICT_HPP
+#define can_duck_SERDESDICT_HPP
 
 #include <cstdint>
 #include "CppUtils.hpp"
@@ -11,7 +11,7 @@
 #include "BitLUT8.hpp"
 
 
-namespace libfcn_v2 {
+namespace can_duck {
 
     /* 数据长度标志位为无符号8位整形，最大255
      **/
@@ -153,4 +153,4 @@ namespace libfcn_v2 {
 
 }
 
-#endif //LIBFCN_V2_SERDESDICT_HPP
+#endif //can_duck_SERDESDICT_HPP

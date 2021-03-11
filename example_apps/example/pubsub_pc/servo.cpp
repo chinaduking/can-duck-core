@@ -5,9 +5,9 @@
 #include "utils/os_only/HostSerial.hpp"
 #include "../idl_gen/ServoPubMsg.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace utils;
-using namespace fcnmsg;
+using namespace duckmsg;
 
 int main(){
     Node node;

@@ -6,7 +6,7 @@
 #include "ParamServer.hpp"
 #include "NetworkLayer.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
 
 ObjPool<LinkedList<std::unique_ptr<int>>,

@@ -1,6 +1,6 @@
 ![](docs/img/logo_mid.png)
 
-# CAN-Duck 基于CAN总线的高层协议栈  
+# CAN-Duck: Decentralized MICROcontroller Communication stacK based on CAN bus --- 基于CAN总线的分布式微控制器通信协议栈  
 
 ## 1. 特性
 

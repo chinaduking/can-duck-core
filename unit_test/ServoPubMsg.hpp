@@ -6,17 +6,17 @@
 #ifndef TESTSERVORTODICT_HPP
 #define TESTSERVORTODICT_HPP
 
-namespace fcnmsg{
+namespace duckmsg{
 
 
 #pragma pack(2)
-    struct ServoSrvMsg_C : public libfcn_v2::SerDesDict{
+    struct ServoSrvMsg_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::DictItem<emlib::Array<uint8_t, 8>> serial_num;
-        libfcn_v2::DictItem<int16_t> mode;
-        libfcn_v2::DictItem<float> kp;
-        libfcn_v2::DictItem<float> kd;
+        can_duck::DictItem<emlib::Array<uint8_t, 8>> serial_num;
+        can_duck::DictItem<int16_t> mode;
+        can_duck::DictItem<float> kp;
+        can_duck::DictItem<float> kd;
 
 
         ServoSrvMsg_C() :
@@ -67,11 +67,11 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct ServoPubMsgIn_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsgIn_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::DictItem<int32_t> target_angle;
-        libfcn_v2::DictItem<int16_t> mode;
+        can_duck::DictItem<int32_t> target_angle;
+        can_duck::DictItem<int16_t> mode;
 
         ServoPubMsgIn_C() :
         SerDesDict(2,&target_angle)
@@ -109,12 +109,12 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct ServoPubMsgOut_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsgOut_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::DictItem<int16_t> speed;
-        libfcn_v2::DictItem<int32_t> angle;
-        libfcn_v2::DictItem<int8_t>  current;
+        can_duck::DictItem<int16_t> speed;
+        can_duck::DictItem<int32_t> angle;
+        can_duck::DictItem<int8_t>  current;
 
         ServoPubMsgOut_C() :
             SerDesDict(3, &speed)

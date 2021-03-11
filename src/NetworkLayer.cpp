@@ -6,7 +6,7 @@
 #include "OpCode.hpp"
 #include "Tracer.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
 
 int NetworkLayer::addDataLinkDevice(FrameIODevice *device) {

@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/21.
 //
 
-#ifndef LIBFCN_V2_NETWORKLAYER_HPP
-#define LIBFCN_V2_NETWORKLAYER_HPP
+#ifndef can_duck_NETWORKLAYER_HPP
+#define can_duck_NETWORKLAYER_HPP
 
 #include "DataLinkLayer.hpp"
 #include "PubSub.hpp"
@@ -12,7 +12,7 @@
 #include "Vector.hpp"
 #include "Tracer.hpp"
 
-namespace libfcn_v2{
+namespace can_duck{
     class NetworkLayer {
     public:
         NetworkLayer()
@@ -43,4 +43,4 @@ namespace libfcn_v2{
 
 
 
-#endif //LIBFCN_V2_NETWORKLAYER_HPP
+#endif //can_duck_NETWORKLAYER_HPP

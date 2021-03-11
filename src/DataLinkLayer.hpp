@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/21.
 //
 
-#ifndef LIBFCN_V2_DATALINKLAYER_HPP
-#define LIBFCN_V2_DATALINKLAYER_HPP
+#ifndef can_duck_DATALINKLAYER_HPP
+#define can_duck_DATALINKLAYER_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -16,7 +16,7 @@
 #include "LLComDevice.hpp"
 #include "CppUtils.hpp"
 
-namespace libfcn_v2{
+namespace can_duck{
     /* IDs */
     typedef uint64_t framets_t;
 
@@ -140,7 +140,7 @@ namespace libfcn_v2{
 #include <memory>
 #endif
 
-namespace libfcn_v2{
+namespace can_duck{
     /* 链路层设备抽象接口（一个硬件网络端口）
      *
      *
@@ -340,4 +340,4 @@ namespace libfcn_v2{
 
 }
 
-#endif //LIBFCN_V2_DATALINKLAYER_HPP
+#endif //can_duck_DATALINKLAYER_HPP

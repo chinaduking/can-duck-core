@@ -5,7 +5,7 @@
 #include "TestUtils.hpp"
 #include "PubSub.hpp"
 #include "ServoPubMsg.hpp"
-using namespace libfcn_v2;
+using namespace can_duck;
 
 
 
@@ -20,9 +20,9 @@ using namespace libfcn_v2;
 #include "ServoPubMsg.hpp"
 #include "SimpleSerialNode.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
-using namespace fcnmsg;
+using namespace duckmsg;
 
 namespace pubsub_test {
 
@@ -43,16 +43,16 @@ namespace pubsub_test {
         Subscriber* sub_any_to_servo;
 
         std::tie(pub_servo_to_any, sub_any_to_servo) =
-                ps_manager.bindPubChannel(servo_msg_o, servo_msg_i,
-                                  SERVO_ADDR, true);
+                ps_manager.bindMessageChannel(servo_msg_o, servo_msg_i,
+                                              SERVO_ADDR, true);
 
         /* ECU Side Init */
         Publisher*  pub_ecu_to_servo;
         Subscriber* sub_servo_to_ecu;
 
         std::tie(pub_ecu_to_servo, sub_servo_to_ecu) =
-                ps_manager.bindPubChannel(servo_msg_o, servo_msg_i,
-                                  SERVO_ADDR, false);
+                ps_manager.bindMessageChannel(servo_msg_o, servo_msg_i,
+                                              SERVO_ADDR, false);
 
         sub_servo_to_ecu->subscribe(servo_msg_o.speed, servo_speed_cb);
 
@@ -85,13 +85,17 @@ namespace pubsub_test {
         }
     }
 
-#if 0
+#if 1
     TEST(PubSub, Network){
         Node fcn_node(1);
 
-        auto servo_pub = fcn_node.getPubSubManager().
-                makePublisher(servo_msg_o, SERVO_ADDR);
-        servo_pub->addPort(0).addPort(1);
+        Publisher*  servo_pub;
+        Subscriber* servo_sub;
+
+        std::tie(servo_pub, servo_sub) = fcn_node.getPubSubManager()
+                .bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
+
+        servo_pub->addPort(0);
 
         fcn_node.spin();
 
@@ -120,8 +124,11 @@ namespace pubsub_test {
     TEST(PubSub, NetworkHost) {
         Node fcn_node(0);
 
-        auto servo_sub = fcn_node.network_layer->pub_sub_manager
-                .makeSubscriber(servo_msg_o, SERVO_ADDR, HOST_ADDR);
+        Publisher*  servo_pub;
+        Subscriber* servo_sub;
+
+        std::tie(servo_pub, servo_sub) = fcn_node.getPubSubManager()
+                .bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
 
 
         fcn_node.spin();

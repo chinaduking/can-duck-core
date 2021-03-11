@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/15.
 //
 
-#ifndef LIBFCN_V2_PUBSUB_HPP
-#define LIBFCN_V2_PUBSUB_HPP
+#ifndef can_duck_PUBSUB_HPP
+#define can_duck_PUBSUB_HPP
 
 #include <cstdint>
 #include "Vector.hpp"
@@ -13,7 +13,7 @@
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
 
-namespace libfcn_v2 {
+namespace can_duck {
     /* ---------------------------------------------------------
      * 前置声明
      * ---------------------------------------------------------*/
@@ -81,10 +81,10 @@ namespace libfcn_v2 {
         ~PubSubManager() = default;
 
 
-        std::pair<Publisher*, Subscriber*> bindPubChannel(SerDesDict& serdes_dict_tx,
-                                                  SerDesDict& serdes_dict_rx,
-                                                  uint16_t node_id,
-                                                  bool is_owner_node);
+        std::pair<Publisher*, Subscriber*> bindMessageChannel(SerDesDict& serdes_dict_tx,
+                                                              SerDesDict& serdes_dict_rx,
+                                                              uint16_t node_id,
+                                                              bool is_owner_node);
 
         /* --------- Public Methods --------  */
 //        Publisher* makePublisher(SerDesDict& serdes_dict,
@@ -323,4 +323,4 @@ namespace libfcn_v2 {
 
 
 
-#endif //LIBFCN_V2_PUBSUB_HPP
+#endif //can_duck_PUBSUB_HPP

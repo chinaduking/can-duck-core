@@ -2,10 +2,10 @@
 // Created by sdong on 2020/10/21.
 //
 
-#ifndef LIBFCN_V2_DEFAULTALLOCATE_H
-#define LIBFCN_V2_DEFAULTALLOCATE_H
+#ifndef can_duck_DEFAULTALLOCATE_H
+#define can_duck_DEFAULTALLOCATE_H
 
-namespace libfcn_v2{
+namespace can_duck{
     /*
      * 最多可在堆上创建的数据帧
      **/
@@ -44,4 +44,4 @@ namespace libfcn_v2{
     #define ENABLE_LOG
 }
 
-#endif //LIBFCN_V2_DEFAULTALLOCATE_H
+#endif //can_duck_DEFAULTALLOCATE_H

@@ -10,7 +10,7 @@
 #include "EventLoop.hpp"
 #include "ObjPool.hpp"
 
-namespace libfcn_v2{
+namespace can_duck{
 
     struct LinkedListNodeAllocator{
         static void* allocate(size_t size);

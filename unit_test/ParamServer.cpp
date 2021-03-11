@@ -8,9 +8,9 @@
 #include "ServoPubMsg.hpp"
 #include "SimpleSerialNode.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
-using namespace fcnmsg;
+using namespace duckmsg;
 
 namespace network_test {
 

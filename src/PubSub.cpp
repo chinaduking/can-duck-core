@@ -9,11 +9,11 @@
 #include "CppUtils.hpp"
 #include "Tracer.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
+obj_size_t can_duck::RtoDictSingleWrite(SerDesDict* obj_dict,
                                          void* buffer,
                                          obj_idx_t index,
                                          uint8_t *data, obj_size_t len){
@@ -38,7 +38,7 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
     return data_sz;
 }
 
-void libfcn_v2::singleWriteFrameBuilder(
+void can_duck::singleWriteFrameBuilder(
         FcnFrame* result_frame,
         uint16_t src_id,
         uint16_t dest_id,
@@ -148,10 +148,10 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint
 
 }
 
-std::pair<Publisher*, Subscriber*> PubSubManager::bindPubChannel(SerDesDict& serdes_dict_tx,
-                                          SerDesDict& serdes_dict_rx,
-                                          uint16_t node_id,
-                                          bool is_owner_node){
+std::pair<Publisher*, Subscriber*> PubSubManager::bindMessageChannel(SerDesDict& serdes_dict_tx,
+                                                                     SerDesDict& serdes_dict_rx,
+                                                                     uint16_t node_id,
+                                                                     bool is_owner_node){
     Publisher*  publisher  = nullptr;
     Subscriber* subscriber = nullptr;
 

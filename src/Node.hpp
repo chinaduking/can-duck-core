@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/31.
 //
 
-#ifndef LIBFCN_V2_NODE_HPP
-#define LIBFCN_V2_NODE_HPP
+#ifndef can_duck_NODE_HPP
+#define can_duck_NODE_HPP
 
 #include "DataLinkLayer.hpp"
 #include "PubSub.hpp"
@@ -15,7 +15,7 @@
     #include <mutex>
 #endif //SYSTYPE_FULL_OS
 
-namespace libfcn_v2{
+namespace can_duck{
 
     class NetworkLayer;
 
@@ -60,4 +60,4 @@ namespace libfcn_v2{
 
 }
 
-#endif //LIBFCN_V2_NODE_HPP
+#endif //can_duck_NODE_HPP

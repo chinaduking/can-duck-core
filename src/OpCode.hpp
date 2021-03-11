@@ -2,12 +2,12 @@
 // Created by sdong on 2020/10/22.
 //
 
-#ifndef LIBFCN_V2_OPCODE_HPP
-#define LIBFCN_V2_OPCODE_HPP
+#ifndef can_duck_OPCODE_HPP
+#define can_duck_OPCODE_HPP
 
 #include <cstdint>
 
-namespace libfcn_v2{
+namespace can_duck{
 
     enum class OpCode : uint8_t {
         /* 紧急停止 */
@@ -100,4 +100,4 @@ namespace libfcn_v2{
 
 }
 
-#endif //LIBFCN_V2_OPCODE_HPP
+#endif //can_duck_OPCODE_HPP

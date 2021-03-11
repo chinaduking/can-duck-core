@@ -6,18 +6,18 @@
 #ifndef TESTSERVORTODICT_HPP
 #define TESTSERVORTODICT_HPP
 
-namespace fcnmsg{
+namespace duckmsg{
 
 
 #pragma pack(2)
-    struct ServoPubMsgIn_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsgIn_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::SerDesDictVal<int16_t> speed;
-        libfcn_v2::SerDesDictVal<int32_t> angle;
-        libfcn_v2::SerDesDictVal<int8_t>  current;
-        libfcn_v2::SerDesDictVal<int32_t> target_angle;
-        libfcn_v2::SerDesDictVal<int16_t> mode;
+        can_duck::SerDesDictVal<int16_t> speed;
+        can_duck::SerDesDictVal<int32_t> angle;
+        can_duck::SerDesDictVal<int8_t>  current;
+        can_duck::SerDesDictVal<int32_t> target_angle;
+        can_duck::SerDesDictVal<int16_t> mode;
 
         ServoPubMsgIn_C() : SerDesDict(
             5,

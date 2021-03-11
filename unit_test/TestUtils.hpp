@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/15.
 //
 
-#ifndef LIBFCN_V2_TESTUTILS_HPP
-#define LIBFCN_V2_TESTUTILS_HPP
+#ifndef can_duck_TESTUTILS_HPP
+#define can_duck_TESTUTILS_HPP
 
 #include "gtest/gtest.h"
 #include <iostream>
@@ -22,7 +22,7 @@ using namespace std;
 
 #include "DataLinkLayer.hpp"
 
-namespace libfcn_v2{
+namespace can_duck{
     inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
     frame2){
         if(frame1.getPayloadLen() != frame2.getPayloadLen()){
@@ -59,4 +59,4 @@ namespace libfcn_v2{
 
 }
 
-#endif //LIBFCN_V2_TESTUTILS_HPP
+#endif //can_duck_TESTUTILS_HPP

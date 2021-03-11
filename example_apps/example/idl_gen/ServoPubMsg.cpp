@@ -5,8 +5,8 @@
 #include "ServoPubMsg.hpp"
 
 
-using namespace libfcn_v2;
+using namespace can_duck;
 
-namespace fcnmsg{
+namespace duckmsg{
     ServoPubMsgIn_C  ServoPubMsgIn;
 }

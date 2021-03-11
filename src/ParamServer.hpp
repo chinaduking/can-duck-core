@@ -2,8 +2,8 @@
 // Created by sdong on 2020/10/15.
 //
 
-#ifndef LIBFCN_V2_PARAMSERVER_HPP
-#define LIBFCN_V2_PARAMSERVER_HPP
+#ifndef can_duck_PARAMSERVER_HPP
+#define can_duck_PARAMSERVER_HPP
 
 #include <cstdint>
 #include <memory>
@@ -27,7 +27,7 @@
 
 uint64_t globalTimeSourceMS();
 
-namespace libfcn_v2 {
+namespace can_duck {
 
     class ParamServerManager;
     class NetworkLayer;
@@ -316,4 +316,4 @@ namespace libfcn_v2 {
 
 }
 
-#endif //LIBFCN_V2_PARAMSERVER_HPP
+#endif //can_duck_PARAMSERVER_HPP

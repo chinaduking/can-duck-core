@@ -6,7 +6,7 @@
 #include "Tracer.hpp"
 #include "HostSerial.hpp"
 
-using namespace libfcn_v2;
+using namespace can_duck;
 using namespace emlib;
 
 namespace frame_device_test{
