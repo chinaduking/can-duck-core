@@ -48,7 +48,7 @@ namespace can_duck {
      * @author  sdong
      * @date    2020/10/15
      */
-    obj_size_t RtoDictSingleWrite(SerDesDict* dict,
+    obj_size_t MsgDictSingleWrite(SerDesDict* obj_dict,
                                   void* buffer,
                                   obj_idx_t index,
                                   uint8_t *data, obj_size_t len);

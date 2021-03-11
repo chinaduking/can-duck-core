@@ -13,10 +13,10 @@ using namespace can_duck;
 using namespace emlib;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t can_duck::RtoDictSingleWrite(SerDesDict* obj_dict,
-                                         void* buffer,
-                                         obj_idx_t index,
-                                         uint8_t *data, obj_size_t len){
+obj_size_t can_duck::MsgDictSingleWrite(SerDesDict* obj_dict,
+                                        void* buffer,
+                                        obj_idx_t index,
+                                        uint8_t *data, obj_size_t len){
     USER_ASSERT(buffer != nullptr);
 
     if(index > obj_dict->dictSize()){
@@ -100,7 +100,7 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
     switch (opcode) {
         case OpCode::Publish:
-            RtoDictSingleWrite(
+            MsgDictSingleWrite(
                     subscriber->serdes_dict,
                     subscriber->buffer,
                     frame->msg_id,
