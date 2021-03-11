@@ -6,7 +6,7 @@
 #define LIBFCN_REQUESTERTASK_HPP
 
 #include "DataLinkLayer.hpp"
-#include "ObjDict.hpp"
+#include "SerDesDict.hpp"
 #include "EventLoop.hpp"
 #include "ObjPool.hpp"
 

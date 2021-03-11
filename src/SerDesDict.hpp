@@ -20,8 +20,8 @@ namespace libfcn_v2 {
     typedef uint16_t mapped_ptr_t;
 
 #pragma pack(2)
-    struct ObjDictValHandle{
-        ObjDictValHandle(obj_idx_t index, obj_size_t data_size)
+    struct hDictItem{
+        hDictItem(obj_idx_t index, obj_size_t data_size)
             : index(index), data_size(data_size){ }
 
         /* 消息索引 */
@@ -34,7 +34,7 @@ namespace libfcn_v2 {
         mapped_ptr_t buffer_offset{0};
 
         inline void* getDataPtr(){
-            return ((uint8_t*)this) + sizeof(ObjDictValHandle);
+            return ((uint8_t*)this) + sizeof(hDictItem);
         }
     };
 #pragma pack(0)
@@ -42,9 +42,9 @@ namespace libfcn_v2 {
 
 #pragma pack(2)
     template <typename T>
-    struct ObjDictVal : public ObjDictValHandle{
-        explicit ObjDictVal(obj_idx_t index):
-                ObjDictValHandle(index, sizeof(T)){
+    struct DictItem : public hDictItem{
+        explicit DictItem(obj_idx_t index):
+                hDictItem(index, sizeof(T)){
             emlib::memset(&data, 0, sizeof(T));
         }
 
@@ -56,20 +56,20 @@ namespace libfcn_v2 {
 #pragma pack(0)
 
 
-    struct ObjDict{
+    struct SerDesDict{
 
-        ObjDict(obj_idx_t dict_size,
-                ObjDictValHandle* p_first_obj):
+        SerDesDict(obj_idx_t dict_size,
+                   hDictItem* p_first_obj):
                 p_first_val(p_first_obj),
                 val_offset_key_table(dict_size) {
             val_offset_key_table.resize(dict_size);
         }
 
 
-        inline ObjDictValHandle* getObjBaseByIndex(uint16_t index){
+        inline hDictItem* getObjBaseByIndex(uint16_t index){
             USER_ASSERT(index < val_offset_key_table.size());
 
-            return(ObjDictValHandle*)(
+            return(hDictItem*)(
                     (uint8_t*)p_first_val + val_offset_key_table[index]);
         }
 
@@ -111,7 +111,7 @@ namespace libfcn_v2 {
         }
 
 //        template<typename Prototype>
-        inline void handleSerialize(ObjDictValHandle& msg, void* p_buffer){
+        inline void handleSerialize(hDictItem& msg, void* p_buffer){
             USER_ASSERT(p_buffer!= nullptr);
 
             emlib::memcpy((uint8_t*)p_buffer + msg.buffer_offset,
@@ -132,7 +132,7 @@ namespace libfcn_v2 {
         virtual void* createBuffer() = 0;
 
 
-        ObjDictValHandle* const p_first_val;
+        hDictItem* const p_first_val;
         emlib::Vector<mapped_ptr_t> val_offset_key_table;
     };
 

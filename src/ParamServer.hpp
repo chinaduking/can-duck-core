@@ -14,7 +14,7 @@
 #include "CppUtils.hpp"
 
 #include "DataLinkLayer.hpp"
-#include "ObjDict.hpp"
+#include "SerDesDict.hpp"
 #include "DefaultAllocate.h"
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
@@ -38,7 +38,7 @@ namespace libfcn_v2 {
                           uint16_t server_addr,
                           uint16_t client_addr,
                           uint16_t port_id,
-                          ObjDict* serdes_dict,
+                          SerDesDict* serdes_dict,
                           void* buffer) :
 
                 server_addr(server_addr),
@@ -157,7 +157,7 @@ namespace libfcn_v2 {
         friend class ParamServerManager;
         friend class ParamServerRequestEv;
 
-        ObjDict* const serdes_dict{nullptr};
+        SerDesDict* const serdes_dict{nullptr};
 
         int networkSendFrame(uint16_t port_id, FcnFrame* frame);
 
@@ -189,7 +189,7 @@ namespace libfcn_v2 {
     class ParamServer{
     public:
         ParamServer(NetworkLayer* ctx_network_layer,
-                    uint16_t address, ObjDict* obj_dict_shm, void* buffer):
+                    uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 server_addr(address),
                 buffer(buffer),
                 serdes_dict(obj_dict_shm),
@@ -199,7 +199,7 @@ namespace libfcn_v2 {
         ~ParamServer() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
-        void onDataChaged(ObjDictValHandle* msg,
+        void onDataChaged(hDictItem* msg,
                           TransferCallback_t* callback);
 
 
@@ -260,7 +260,7 @@ namespace libfcn_v2 {
 
         emlib::BitLUT8 wr_access_table;
 
-        ObjDict* const serdes_dict{nullptr};
+        SerDesDict* const serdes_dict{nullptr};
 
         NetworkLayer* const ctx_network_layer{nullptr};
     };
@@ -282,13 +282,13 @@ namespace libfcn_v2 {
         ~ParamServerManager() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        ParamServer* createServer(ObjDict& prototype, uint16_t address);
+        ParamServer* createServer(SerDesDict& prototype, uint16_t address);
 
         ParamServerClient* bindClientToServer(
-                ObjDict& prototype,
+                SerDesDict& prototype,
                 uint16_t server_addr,
-                uint16_t client_addr,
-                uint16_t port_id);
+                  uint16_t client_addr,
+                  uint16_t port_id);
 
         int handleRecv(FcnFrame* frame, uint16_t recv_port_id);
 

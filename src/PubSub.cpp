@@ -13,7 +13,7 @@ using namespace libfcn_v2;
 using namespace emlib;
 
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度*/
-obj_size_t libfcn_v2::RtoDictSingleWrite(ObjDict* obj_dict,
+obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
                                          void* buffer,
                                          obj_idx_t index,
                                          uint8_t *data, obj_size_t len){
@@ -118,7 +118,7 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 }
 
 
-void * PubSubManager::getSharedBuffer(ObjDict &serdes_dict, uint16_t id, uint8_t sub_id) {
+void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint8_t sub_id) {
     void* buffer = nullptr;
 
     uint32_t id_comb = (uint32_t)id<<8 | ((uint32_t)sub_id);
@@ -148,10 +148,10 @@ void * PubSubManager::getSharedBuffer(ObjDict &serdes_dict, uint16_t id, uint8_t
 
 }
 
-std::pair<Publisher*, Subscriber*> PubSubManager::bindPubChannel(ObjDict& serdes_dict_tx,
-                                                                 ObjDict& serdes_dict_rx,
-                                                                 uint16_t node_id,
-                                                                 bool is_owner_node){
+std::pair<Publisher*, Subscriber*> PubSubManager::bindPubChannel(SerDesDict& serdes_dict_tx,
+                                          SerDesDict& serdes_dict_rx,
+                                          uint16_t node_id,
+                                          bool is_owner_node){
     Publisher*  publisher  = nullptr;
     Subscriber* subscriber = nullptr;
 
@@ -170,7 +170,7 @@ std::pair<Publisher*, Subscriber*> PubSubManager::bindPubChannel(ObjDict& serdes
 
 
 
-Publisher* PubSubManager::bindPublisherToChannel(ObjDict& serdes_dict,
+Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
                                                  uint16_t node_id,
                                                  bool is_owner){
     /* 获取共享内存。*/
@@ -206,7 +206,7 @@ Publisher* PubSubManager::bindPublisherToChannel(ObjDict& serdes_dict,
     return publisher;
 }
 
-Subscriber* PubSubManager::bindSubscriberToChannel(ObjDict& serdes_dict,
+Subscriber* PubSubManager::bindSubscriberToChannel(SerDesDict& serdes_dict,
                                                    uint16_t node_id,
                                                    bool is_owner){
     auto buffer = getSharedBuffer(serdes_dict, node_id, (uint8_t)(!is_owner));
@@ -239,7 +239,7 @@ Subscriber* PubSubManager::bindSubscriberToChannel(ObjDict& serdes_dict,
 
 
 #if 0
-Publisher* PubSubManager::makePublisher(ObjDict& serdes_dict,
+Publisher* PubSubManager::makePublisher(SerDesDict& serdes_dict,
                                         uint16_t node_id,
                                         bool is_owner,
                                         bool is_fast_msg){
@@ -247,7 +247,7 @@ Publisher* PubSubManager::makePublisher(ObjDict& serdes_dict,
 }
 
 
-Subscriber * PubSubManager::makeSubscriber(ObjDict &serdes_dict,
+Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
                                            uint16_t node_id,
                                            bool is_owner,
                                            bool is_fast_msg) {
@@ -281,7 +281,7 @@ Publisher & Publisher::addPort(int port) {
     return *this;
 }
 
-void Publisher::publish(ObjDictValHandle &msg, bool local_only) {
+void Publisher::publish(hDictItem &msg, bool local_only) {
     USER_ASSERT(ps_manager != nullptr);
 
     /* 先进行本地发布，即直接将数据拷贝到共享内存中 */

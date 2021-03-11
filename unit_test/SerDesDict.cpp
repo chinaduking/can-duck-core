@@ -13,7 +13,7 @@ namespace rto_io_test{
     TEST(RealtimeObject, setget){
         int angle_idx = 10;
 
-        ObjDictVal<uint32_t> Angle(angle_idx);
+        DictItem<uint32_t> Angle(angle_idx);
 
         auto rto = Angle;
 
@@ -33,7 +33,7 @@ namespace rto_io_test{
         cout << "sizeof(libfcn_v2_test::TestRODict) = " << sizeof
                 (fcnmsg::test_ServoPubSubDict) << endl;
 
-        ASSERT_EQ(sizeof(ObjDictValHandle), 4);
+        ASSERT_EQ(sizeof(hDictItem), 4);
 
         auto angle_msg = fcnmsg::test_ServoPubSubDict.angle;
         angle_msg << 100;

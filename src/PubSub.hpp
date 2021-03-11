@@ -9,7 +9,7 @@
 #include "Vector.hpp"
 #include "LinkedList.hpp"
 #include "DataLinkLayer.hpp"
-#include "ObjDict.hpp"
+#include "SerDesDict.hpp"
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
 
@@ -48,7 +48,7 @@ namespace libfcn_v2 {
      * @author  sdong
      * @date    2020/10/15
      */
-    obj_size_t RtoDictSingleWrite(ObjDict* dict,
+    obj_size_t RtoDictSingleWrite(SerDesDict* dict,
                                   void* buffer,
                                   obj_idx_t index,
                                   uint8_t *data, obj_size_t len);
@@ -81,17 +81,17 @@ namespace libfcn_v2 {
         ~PubSubManager() = default;
 
 
-        std::pair<Publisher*, Subscriber*> bindPubChannel(ObjDict& serdes_dict_tx,
-                                                          ObjDict& serdes_dict_rx,
-                                                          uint16_t node_id,
-                                                          bool is_owner_node);
+        std::pair<Publisher*, Subscriber*> bindPubChannel(SerDesDict& serdes_dict_tx,
+                                                  SerDesDict& serdes_dict_rx,
+                                                  uint16_t node_id,
+                                                  bool is_owner_node);
 
         /* --------- Public Methods --------  */
-//        Publisher* makePublisher(ObjDict& serdes_dict,
+//        Publisher* makePublisher(SerDesDict& serdes_dict,
 //                                 uint16_t node_id,
 //                                 bool is_owner, bool is_fast_msg=true);
 //
-//        Subscriber* makeSubscriber(ObjDict& serdes_dict,
+//        Subscriber* makeSubscriber(SerDesDict& serdes_dict,
 //                                   uint16_t node_id,
 //                                   bool is_owner, bool is_fast_msg=true);
 
@@ -122,11 +122,11 @@ namespace libfcn_v2 {
         emlib::LinkedList<Subscriber*> created_subscribers;
 
 
-        Publisher* bindPublisherToChannel(ObjDict& serdes_dict, uint16_t node_id, bool is_owner);
-        Subscriber* bindSubscriberToChannel(ObjDict& serdes_dict, uint16_t node_id, bool is_owner);
+        Publisher* bindPublisherToChannel(SerDesDict& serdes_dict, uint16_t node_id, bool is_owner);
+        Subscriber* bindSubscriberToChannel(SerDesDict& serdes_dict, uint16_t node_id, bool is_owner);
 
 
-        void* getSharedBuffer(ObjDict& serdes_dict, uint16_t id, uint8_t sub_id);
+        void* getSharedBuffer(SerDesDict& serdes_dict, uint16_t id, uint8_t sub_id);
     };
 
     /* --------------------------------------------------------- */
@@ -161,9 +161,9 @@ namespace libfcn_v2 {
          * @param ps_manager PubSubManager指针。管理所有已创建的发布者、订阅者和共享内存。
          *                  不能为空。
          */
-        Publisher(ObjDict& serdes_dict,
-                  void* buffer,
-                  uint16_t node_id,
+        Publisher( SerDesDict& serdes_dict,
+                   void* buffer,
+                   uint16_t node_id,
 //                   uint16_t src_id,
                    PubSubManager* ps_manager) :
 
@@ -185,7 +185,7 @@ namespace libfcn_v2 {
          *
          * @param msg
          */
-        void publish(ObjDictValHandle& msg, bool local_only=false);
+        void publish(hDictItem& msg, bool local_only=false);
 
         /**
          * @brief 注册本地发布者
@@ -206,7 +206,7 @@ namespace libfcn_v2 {
         /* --------- Private Methods --------  */
 
         /* ------- Private Variables --------  */
-        ObjDict*    const serdes_dict {nullptr };
+        SerDesDict*    const serdes_dict { nullptr };
         void*          const buffer      { nullptr };
         PubSubManager* const ps_manager  { nullptr };
 
@@ -263,9 +263,9 @@ namespace libfcn_v2 {
      */
     class Subscriber{
     public:
-        Subscriber(ObjDict& serdes_dict,
-                   void* buffer,
-                   uint16_t channel_id,
+        Subscriber( SerDesDict& serdes_dict,
+                    void* buffer,
+                    uint16_t channel_id,
 //                    uint16_t src_id,
                     PubSubManager* ps_manager) :
 
@@ -283,7 +283,7 @@ namespace libfcn_v2 {
         ~Subscriber() = default;
 
         /* --------- Public Methods --------  */
-        void subscribe(ObjDictValHandle& handle,
+        void subscribe(hDictItem& handle,
                        SubscribeCallback::Callback cb_func,
                        void* p_this = nullptr){
             callback_table[handle.index].cb = cb_func;
@@ -311,7 +311,7 @@ namespace libfcn_v2 {
         /* --------- Private Methods --------  */
 
         /* ------- Private Variables --------  */
-        ObjDict*    const serdes_dict {nullptr };
+        SerDesDict*    const serdes_dict { nullptr };
         void*          const buffer      { nullptr };
         PubSubManager* const ps_manager  { nullptr };
 
