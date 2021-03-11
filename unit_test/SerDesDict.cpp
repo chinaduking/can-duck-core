@@ -31,18 +31,18 @@ namespace rto_io_test{
 
     TEST(RealtimeObject, Dict){
         cout << "sizeof(can_duck_test::TestRODict) = " << sizeof
-                (duckmsg::test_ServoPubSubDict) << endl;
+                (duckmsg::servo_msg_o) << endl;
 
         ASSERT_EQ(sizeof(hDictItem), 4);
 
-        auto angle_msg = duckmsg::test_ServoPubSubDict.angle;
+        auto angle_msg = duckmsg::servo_msg_o.angle;
         angle_msg << 100;
         int32_t angle = 0;
         angle_msg >> angle;
         ASSERT_EQ(angle, 100);
 
-        decltype(duckmsg::test_ServoPubSubDict)::Buffer buffer;
-        decltype(duckmsg::test_ServoPubSubDict) dict;
+        decltype(duckmsg::servo_msg_o)::Buffer buffer;
+        decltype(duckmsg::servo_msg_o) dict;
 
         dict.serialize(angle_msg, &buffer);
 
