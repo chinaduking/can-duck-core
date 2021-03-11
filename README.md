@@ -1,6 +1,6 @@
 ![](docs/img/logo_mid.png)
-# LIBFCN 2.0 - Flexible Controller Network<br>灵活的控制器网络 
 
+# CAN-Duck 基于CAN总线的高层协议栈  
 
 ## 1. 特性
 

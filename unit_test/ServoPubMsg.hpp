@@ -1,7 +1,7 @@
 //
 // Created by sdong on 2019/11/14.
 //
-#include "SerDesDict.hpp"
+#include "ObjDict.hpp"
 #include "Array.hpp"
 #ifndef TESTSERVORTODICT_HPP
 #define TESTSERVORTODICT_HPP
@@ -10,17 +10,17 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct ServoSrvMsg_C : public libfcn_v2::SerDesDict{
+    struct ServoSrvMsg_C : public libfcn_v2::ObjDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::SerDesDictVal<emlib::Array<uint8_t, 8>> serial_num;
-        libfcn_v2::SerDesDictVal<int16_t> mode;
-        libfcn_v2::SerDesDictVal<float> kp;
-        libfcn_v2::SerDesDictVal<float> kd;
+        libfcn_v2::ObjDictVal<emlib::Array<uint8_t, 8>> serial_num;
+        libfcn_v2::ObjDictVal<int16_t> mode;
+        libfcn_v2::ObjDictVal<float> kp;
+        libfcn_v2::ObjDictVal<float> kd;
 
 
         ServoSrvMsg_C() :
-                SerDesDict(4, &serial_num)
+                ObjDict(4, &serial_num)
                 , serial_num(0)
                 , mode      (1)
                 , kp        (2)
@@ -67,14 +67,14 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct ServoPubMsgIn_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsgIn_C : public libfcn_v2::ObjDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::SerDesDictVal<int32_t> target_angle;
-        libfcn_v2::SerDesDictVal<int16_t> mode;
+        libfcn_v2::ObjDictVal<int32_t> target_angle;
+        libfcn_v2::ObjDictVal<int16_t> mode;
 
         ServoPubMsgIn_C() :
-        SerDesDict(2,&target_angle)
+                ObjDict(2, &target_angle)
             , target_angle(0)
             , mode        (1)
         {
@@ -109,15 +109,15 @@ namespace fcnmsg{
 
 
 #pragma pack(2)
-    struct ServoPubMsgOut_C : public libfcn_v2::SerDesDict{
+    struct ServoPubMsgOut_C : public libfcn_v2::ObjDict{
     public:
         /*可以直接访问的元信息*/
-        libfcn_v2::SerDesDictVal<int16_t> speed;
-        libfcn_v2::SerDesDictVal<int32_t> angle;
-        libfcn_v2::SerDesDictVal<int8_t>  current;
+        libfcn_v2::ObjDictVal<int16_t> speed;
+        libfcn_v2::ObjDictVal<int32_t> angle;
+        libfcn_v2::ObjDictVal<int8_t>  current;
 
         ServoPubMsgOut_C() :
-            SerDesDict(3, &speed)
+                ObjDict(3, &speed)
 
             , speed   (0)
             , angle   (1)

@@ -152,7 +152,7 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, FcnFrame *frame) {
 }
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t address){
+ParamServer* ParamServerManager::createServer(ObjDict& prototype, uint16_t address){
     ParamServer* server = nullptr;
     for(auto & srv : created_servers){
         if(srv.address == address){
@@ -179,10 +179,10 @@ ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t ad
 
 
 ParamServerClient* ParamServerManager::bindClientToServer(
-        SerDesDict& prototype,
+        ObjDict& prototype,
         uint16_t server_addr,
-          uint16_t client_addr,
-          uint16_t port_id){ //TODO: remove port id.
+        uint16_t client_addr,
+        uint16_t port_id){ //TODO: remove port id.
     ParamServerClient* client = nullptr;
     for(auto & cli : created_clients){
         if(cli.address == client_addr){

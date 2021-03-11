@@ -1,7 +1,7 @@
 
 set(UT_DEFAULT_LIBS ${emlib_LIBS} GTest::gmock_main  GTest::gtest  GTest::gtest_main)
 
-add_executable(testDataObjects SerDesDict.cpp ServoPubMsg.cpp
+add_executable(testDataObjects ObjDict.cpp ServoPubMsg.cpp
         )
 target_link_libraries(testDataObjects ${UT_DEFAULT_LIBS})
 
