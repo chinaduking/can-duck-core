@@ -8,7 +8,7 @@
 using namespace libfcn_v2;
 
 namespace fcnmsg{
-    ServoPubMsgIn_C  ServoPubMsgIn;
-    ServoPubMsgOut_C ServoPubMsgOut;
+    ServoPubMsgIn_C  servo_msg_i;
+    ServoPubMsgOut_C servo_msg_o;
     ServoSrvMsg_C ServoSrvMsg;
 }

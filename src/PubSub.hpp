@@ -81,14 +81,19 @@ namespace libfcn_v2 {
         ~PubSubManager() = default;
 
 
-        /* --------- Public Methods --------  */
-        Publisher* makePublisher(SerDesDict& serdes_dict,
-                                 uint16_t node_id,
-                                 bool is_owner, bool is_fast_msg=true);
+        std::pair<Publisher*, Subscriber*> bindPubChannel(SerDesDict& serdes_dict_tx,
+                                                  SerDesDict& serdes_dict_rx,
+                                                  uint16_t node_id,
+                                                  bool is_owner_node);
 
-        Subscriber* makeSubscriber(SerDesDict& serdes_dict,
-                                   uint16_t node_id,
-                                   bool is_owner, bool is_fast_msg=true);
+        /* --------- Public Methods --------  */
+//        Publisher* makePublisher(SerDesDict& serdes_dict,
+//                                 uint16_t node_id,
+//                                 bool is_owner, bool is_fast_msg=true);
+//
+//        Subscriber* makeSubscriber(SerDesDict& serdes_dict,
+//                                   uint16_t node_id,
+//                                   bool is_owner, bool is_fast_msg=true);
 
         void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
@@ -98,7 +103,7 @@ namespace libfcn_v2 {
     protected:
         /* ------ Protected Declarations ------  */
         struct SharedBuffer{
-            int    id {-1};
+            int32_t    id {-1};
             void*  buffer {nullptr};
         };
 
@@ -117,9 +122,11 @@ namespace libfcn_v2 {
         emlib::LinkedList<Subscriber*> created_subscribers;
 
 
-        Publisher* bindPublisherToChannel(SerDesDict& serdes_dict, uint16_t node_id);
+        Publisher* bindPublisherToChannel(SerDesDict& serdes_dict, uint16_t node_id, bool is_owner);
+        Subscriber* bindSubscriberToChannel(SerDesDict& serdes_dict, uint16_t node_id, bool is_owner);
 
-        void* getSharedBuffer(SerDesDict& serdes_dict, int id);
+
+        void* getSharedBuffer(SerDesDict& serdes_dict, uint16_t id, uint8_t sub_id);
     };
 
     /* --------------------------------------------------------- */
@@ -192,6 +199,7 @@ namespace libfcn_v2 {
         /* ------- Public Variables --------  */
         const uint16_t node_id {0 };
 //        const uint16_t src_id     { 0 };
+        bool is_owner {false};
 
     private:
         /* ------ Private Declarations ------  */
@@ -295,6 +303,7 @@ namespace libfcn_v2 {
         /* ------- Public Variables --------  */
         const uint16_t node_id {0 };
 //        const uint16_t src_id     { 0 };
+        bool is_owner {false};
 
     private:
         /* ------ Private Declarations ------  */
@@ -307,6 +316,7 @@ namespace libfcn_v2 {
         PubSubManager* const ps_manager  { nullptr };
 
         emlib::Vector<SubscribeCallback> callback_table;
+
     };
 
 }

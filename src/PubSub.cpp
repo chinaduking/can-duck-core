@@ -17,39 +17,23 @@ obj_size_t libfcn_v2::RtoDictSingleWrite(SerDesDict* obj_dict,
                                          void* buffer,
                                          obj_idx_t index,
                                          uint8_t *data, obj_size_t len){
+    USER_ASSERT(buffer != nullptr);
 
-//    /* 不一次直接memcpy，有两个原因：
-//     * 1. 每次均检查index是否已溢出
-//     * 2. 支持未来的回调
-//     * */
-//    while (len > 0){
+    if(index > obj_dict->dictSize()){
+        /* 仅做写保护，不使程序assert failed崩溃：
+         * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
+         * 可记录错误log
+         * */
+        return 0;
+    }
 
-        USER_ASSERT(buffer != nullptr);
+    auto offset = obj_dict->getBufferDataOffest(index);
+    auto data_sz = obj_dict->getBufferDataSize(index);
 
-        if(index > obj_dict->dictSize()){
-            /* 仅做写保护，不使程序assert failed崩溃：
-             * 外界输入（index为通信接收的数据）的异常不应使程序崩溃
-             * 可记录错误log
-             * */
-            return 0;
-        }
-
-//        auto p_obj = dict->obj_dict[index];
-
-        auto offset = obj_dict->getBufferDataOffest(index);
-        auto data_sz = obj_dict->getBufferDataSize(index);
-
-        USER_ASSERT(data_sz != 0);
+    USER_ASSERT(data_sz != 0);
 
 
-        emlib::memcpy((uint8_t*)buffer+offset, data, data_sz);
-
-//        data += p_obj->data_size;
-//
-//        len -= p_obj->data_size;
-
-//        index ++;
-//    }
+    emlib::memcpy((uint8_t*)buffer+offset, data, data_sz);
 
     return data_sz;
 }
@@ -133,22 +117,29 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
 
 }
 
-void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
+
+void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint8_t sub_id) {
     void* buffer = nullptr;
 
+    uint32_t id_comb = (uint32_t)id<<8 | ((uint32_t)sub_id);
+
     for(auto & sh_b : shared_buffers){
-        if(sh_b.id == id){
+        if(sh_b.id == id_comb){
             buffer = sh_b.buffer;
-            USER_ASSERT(buffer != nullptr);
+            USER_IASSERT(buffer != nullptr,
+                         "find a matched shared buffer, but buffer is null.");
         }
     }
+
     if(buffer == nullptr){
         buffer = serdes_dict.createBuffer();
 
         SharedBuffer sh_b = {
-                .id = id,
+                .id = 0,
                 .buffer = buffer
         };
+
+        sh_b.id = id_comb;
 
         shared_buffers.push(sh_b);
     }
@@ -157,10 +148,35 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
 
 }
 
-Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
-                                                 uint16_t node_id){
-    auto buffer = getSharedBuffer(serdes_dict, node_id);
+std::pair<Publisher*, Subscriber*> PubSubManager::bindPubChannel(SerDesDict& serdes_dict_tx,
+                                          SerDesDict& serdes_dict_rx,
+                                          uint16_t node_id,
+                                          bool is_owner_node){
+    Publisher*  publisher  = nullptr;
+    Subscriber* subscriber = nullptr;
 
+    /* 所有者节点，即某一节点发布自身状态、订阅输入指令。
+     * 否则，一个节点被称为非所有者，向远程节点订阅状态，并向远程节点发布指令 */
+    if(is_owner_node){
+        publisher  = bindPublisherToChannel (serdes_dict_tx, node_id, is_owner_node);
+        subscriber = bindSubscriberToChannel(serdes_dict_rx, node_id, is_owner_node);
+    } else{
+        publisher  = bindPublisherToChannel (serdes_dict_rx, node_id, is_owner_node);
+        subscriber = bindSubscriberToChannel(serdes_dict_tx, node_id, is_owner_node);
+    }
+
+    return std::make_pair(publisher, subscriber);
+}
+
+
+
+Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
+                                                 uint16_t node_id,
+                                                 bool is_owner){
+    /* 获取共享内存。*/
+    auto buffer = getSharedBuffer(serdes_dict, node_id, (uint8_t)is_owner);
+
+#if 0
     for(auto& pub : created_publishers){
         /* 同一通道中，不能有多个相同的发布者（重复创建发布者） */
         USER_IASSERT(
@@ -168,13 +184,21 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
             "duplicate publisher!");
     }
 
+#endif
 
     auto publisher = new Publisher(serdes_dict, buffer, node_id, this);
 
+    /*记录所有者标志，避免同一ID节点自己订阅自己*/
+    publisher->is_owner = is_owner;
+
+    /* 将新发布者加入已创建发布者列表中，便于本地订阅者进行订阅 */
     created_publishers.push(publisher);
 
+    /* 将所有已经创建的订阅者注册到新创建的发布者中 */
     for(auto& sub : created_subscribers){
-        if(sub->node_id == publisher->node_id){
+        /* 主节点发布者可连接多个从节点订阅者，从节点发布者可连接只可连接一个主节点订阅者 */
+        if(sub->node_id == publisher->node_id
+            && is_owner != sub->is_owner) {
             publisher->regLocalSubscriber(sub);
         }
     }
@@ -182,7 +206,39 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
     return publisher;
 }
 
+Subscriber* PubSubManager::bindSubscriberToChannel(SerDesDict& serdes_dict,
+                                                   uint16_t node_id,
+                                                   bool is_owner){
+    auto buffer = getSharedBuffer(serdes_dict, node_id, (uint8_t)(!is_owner));
 
+#if 0  /*skip check under refactor*/
+    for(auto& sub : created_subscribers){
+        /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
+        USER_IASSERT(
+                !((sub->src_id == node_id) && (sub->node_id == channel_addr)),
+                "duplicate subscriber!");
+    }
+#endif
+    auto subscriber = new Subscriber(serdes_dict, buffer, node_id, this);
+
+    /*记录所有者标志，避免同一ID节点自己订阅自己*/
+    subscriber->is_owner = is_owner;
+
+    created_subscribers.push(subscriber);
+
+    /* 将所有已经创建的发布者注册到新创建的订阅者中 */
+    for(auto& pub: created_publishers){
+        if(pub->node_id == subscriber->node_id
+        && is_owner != pub->is_owner){
+            pub->regLocalSubscriber(subscriber);
+        }
+    }
+
+    return subscriber;
+}
+
+
+#if 0
 Publisher* PubSubManager::makePublisher(SerDesDict& serdes_dict,
                                         uint16_t node_id,
                                         bool is_owner,
@@ -209,6 +265,7 @@ Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
 
     created_subscribers.push(subscriber);
 
+    /* 将所有已经创建的发布者注册到新创建的订阅者中 */
     for(auto& pub: created_publishers){
         if(pub->node_id == subscriber->node_id){
             pub->regLocalSubscriber(subscriber);
@@ -217,6 +274,7 @@ Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
 
     return subscriber;
 }
+#endif
 
 Publisher & Publisher::addPort(int port) {
     network_pub_ports.push(port);

@@ -87,30 +87,44 @@
 * */
 
 
-//fast msg (11 bit CAN ID)
-//node id  6 bit        [1-63 & 0(anou)]
-//tx/rx    1            [0/1]
-//msg  id  3 bit    tx: [0-7]
-//is seg                [0/1] (data follow uart's protocol)
-//data 0-7
-
-//fast msg (29 bit CAN ID)
-//is msg   1 bit    [=1]
+//fast msg ext (29 bit CAN ID)
+//is seg   1 bit        [ =0]   
+//is msg   1 bit        [ =1]
 //node id  6 bit        [1-63 & 0]
-//tx/rx    1            [0/1]
-//msg  id  3 bit        [0-7] + (offset=8)
-//is seg                [0/1]   (data follows uart's protocol)
-//data empty n          [0/1]
-//data[0]
+//tx/rx    1 bit        [0/1]
+//msg  id  3 bit        [0-7] 
+//empty n  1 bit        [0/1]
+//data[0]                           
 //data[1]
+//data 2-9
+
 
 //sevice (29 bit CAN ID)
-//is msg  1  bit    [=0]
-//op code 5  bit   [ 0-31   ]
-//src id  6  bit   [ 1-63 & 0(anou) ]
-//dest id 6  bit   [1-63]
-//srv_id  11 bit   [ 0-255  ]
-//is seg           [0/1]        (data follows uart's protocol)
+//is seg  1  bit        [ =0]     
+//is msg  1  bit        [ =0]
+//src id  6  bit        [ 1-63 & 0(anou) ]
+//dest id 6  bit        [ 1-63 & 0(anou) ]
+//op code 5  bit        [ 0-31   ]   
+//srv_id  10 bit        [ 0-1023 ]
+
+
+//fast msg std (11 bit CAN ID)  (TODO..)
+//is seg                [0/1]  (if data follow uart's protocol)
+//node id  6 bit        [1-63 & 0(anou)]
+//tx/rx    1            [0/1]               
+//msg  id  3 bit    tx: [0-7]  + (offset=8)  
+//data 0-7
+
+//segmented msg (29 bit CAN ID)   (TODO..)
+//is seg     1 bit      [ =1]   
+//src id     6 bit      [ 1-63 & 0(anou) ]
+//dest id    6 bit      [ 1-63 & 0(anou) ]
+//trans id   6 bit                       
+//s/t/e      2 bit      [0/1/2]
+//data[0]    : pack_n/pack_c(down count)
+//data[1-8]  : merged:{msg_id/srv_op+srv_code, data}
+
+
 ```
 
 

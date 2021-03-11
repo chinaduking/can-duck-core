@@ -105,7 +105,7 @@ namespace fcnmsg{
     };
 #pragma pack(0)
 
-    extern ServoPubMsgIn_C ServoPubMsgIn;
+    extern ServoPubMsgIn_C servo_msg_i;
 
 
 #pragma pack(2)
@@ -154,7 +154,7 @@ namespace fcnmsg{
     };
 #pragma pack(0)
 
-    extern ServoPubMsgOut_C ServoPubMsgOut;
+    extern ServoPubMsgOut_C servo_msg_o;
 }
 
 

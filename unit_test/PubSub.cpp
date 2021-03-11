@@ -27,44 +27,57 @@ using namespace fcnmsg;
 namespace pubsub_test {
 
     #define SERVO_ADDR 0x02
-    #define DCS_ADDR   0x04
+    #define ECU_ADDR   0x04
     #define HOST_ADDR  0x05
 
 
     FCN_SUBSCRIBE_CALLBACK(servo_speed_cb) {
-        LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoPubMsgOut.speed).data);
+        LOGD("servo_speed_cb: %d", subscriber->readBuffer(servo_msg_o.speed).data);
     }
 
     TEST(PubSub, IntraProc) {
         PubSubManager ps_manager(nullptr);
 
-        auto pub_servo2any = ps_manager.makePublisher (ServoPubMsgOut, SERVO_ADDR, true);
-        auto sub_any2servo = ps_manager.makeSubscriber(ServoPubMsgIn,  SERVO_ADDR, true);
+        /* Servo Side Init */
+        Publisher*  pub_servo_to_any;
+        Subscriber* sub_any_to_servo;
 
-        auto pub_ecu2servo = ps_manager.makePublisher (ServoPubMsgIn,  SERVO_ADDR, false);
-        auto sub_servo2ecu = ps_manager.makeSubscriber(ServoPubMsgOut, SERVO_ADDR, false);
+        std::tie(pub_servo_to_any, sub_any_to_servo) =
+                ps_manager.bindPubChannel(servo_msg_o, servo_msg_i,
+                                  SERVO_ADDR, true);
 
-        sub_servo2ecu->subscribe(ServoPubMsgOut.speed, servo_speed_cb);
+        /* ECU Side Init */
+        Publisher*  pub_ecu_to_servo;
+        Subscriber* sub_servo_to_ecu;
+
+        std::tie(pub_ecu_to_servo, sub_servo_to_ecu) =
+                ps_manager.bindPubChannel(servo_msg_o, servo_msg_i,
+                                  SERVO_ADDR, false);
+
+        sub_servo_to_ecu->subscribe(servo_msg_o.speed, servo_speed_cb);
+
+
 
         uint32_t cnt = 0;
-
         for (int __i = 0; __i < 1;) {
-            auto speed_msg = ServoPubMsgOut.speed;
+            /* Servo Side Run */
+            auto speed_msg = servo_msg_o.speed;
             speed_msg << cnt;
-            pub_servo2any->publish(speed_msg);
+            pub_servo_to_any->publish(speed_msg);
 
-            auto angle_msg = ServoPubMsgOut.angle;
+            auto angle_msg = servo_msg_o.angle;
             angle_msg << cnt;
-            pub_servo2any->publish(angle_msg);
+            pub_servo_to_any->publish(angle_msg);
 
-            auto current_msg = ServoPubMsgOut.current;
+            auto current_msg = servo_msg_o.current;
             current_msg << cnt;
-            pub_servo2any->publish(current_msg);
+            pub_servo_to_any->publish(current_msg);
 
+            /* ECU Side Run */
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                 sub_servo2ecu->readBuffer(ServoPubMsgOut.speed).data,
-                 sub_servo2ecu->readBuffer(ServoPubMsgOut.angle).data,
-                 sub_servo2ecu->readBuffer(ServoPubMsgOut.current).data);
+                 sub_servo_to_ecu->readBuffer(servo_msg_o.speed).data,
+                 sub_servo_to_ecu->readBuffer(servo_msg_o.angle).data,
+                 sub_servo_to_ecu->readBuffer(servo_msg_o.current).data);
 
             perciseSleep(0.1);
 
@@ -77,7 +90,7 @@ namespace pubsub_test {
         Node fcn_node(1);
 
         auto servo_pub = fcn_node.getPubSubManager().
-                makePublisher(ServoPubMsgOut, SERVO_ADDR);
+                makePublisher(servo_msg_o, SERVO_ADDR);
         servo_pub->addPort(0).addPort(1);
 
         fcn_node.spin();
@@ -85,15 +98,15 @@ namespace pubsub_test {
         uint32_t cnt = 0;
 
         for (int __i = 0; __i < 1;) {
-            auto speed_msg = ServoPubMsgOut.speed;
+            auto speed_msg = servo_msg_o.speed;
             speed_msg << cnt;
             servo_pub->publish(speed_msg);
 
-            auto angle_msg = ServoPubMsgOut.angle;
+            auto angle_msg = servo_msg_o.angle;
             angle_msg << cnt;
             servo_pub->publish(angle_msg);
 
-            auto current_msg = ServoPubMsgOut.current;
+            auto current_msg = servo_msg_o.current;
             current_msg << cnt;
             servo_pub->publish(current_msg);
 
@@ -108,7 +121,7 @@ namespace pubsub_test {
         Node fcn_node(0);
 
         auto servo_sub = fcn_node.network_layer->pub_sub_manager
-                .makeSubscriber(ServoPubMsgOut, SERVO_ADDR, HOST_ADDR);
+                .makeSubscriber(servo_msg_o, SERVO_ADDR, HOST_ADDR);
 
 
         fcn_node.spin();
@@ -117,13 +130,14 @@ namespace pubsub_test {
             perciseSleep(0.1);
 
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                 servo_sub->readBuffer(ServoPubMsgOut.speed).data,
-                 servo_sub->readBuffer(ServoPubMsgOut.angle).data,
-                 servo_sub->readBuffer(ServoPubMsgOut.current).data);
+                 servo_sub->readBuffer(servo_msg_o.speed).data,
+                 servo_sub->readBuffer(servo_msg_o.angle).data,
+                 servo_sub->readBuffer(servo_msg_o.current).data);
         }
 
         fcn_node.join();
 
     }
-}
 #endif //0
+}
+
