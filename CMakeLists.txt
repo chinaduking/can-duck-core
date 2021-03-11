@@ -83,7 +83,7 @@ find_package(GTest CONFIG REQUIRED)
 #---------------------------------------------
 set(emlib_DIR  ${PROJECT_SOURCE_DIR}/../../local_deps/lib/emlib/)
 
-find_package(emlib REQUIRED)
+find_package(emlib REQUIRED FATAL)
 message("emlib :"  ${emlib_LIBS}  ", " ${emlib_INCLUDES})
 include_directories(${emlib_INCLUDES})
 

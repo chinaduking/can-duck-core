@@ -74,5 +74,44 @@
 
 **客户端**
 
---------------
+
+```c
+
+/**
+*                      (Host/Monitor)
+*                          |
+*                  [ Serial/Ethernet ]
+*                          |
+*  (subnet A) ----{[CAN1]-[DCS]-[CAN2]}------(subnet B)
+*
+* */
+
+
+//fast msg (11 bit CAN ID)
+//node id  6 bit        [1-63 & 0(anou)]
+//tx/rx    1            [0/1]
+//msg  id  3 bit    tx: [0-7]
+//is seg                [0/1] (data follow uart's protocol)
+//data 0-7
+
+//fast msg (29 bit CAN ID)
+//is msg   1 bit    [=1]
+//node id  6 bit        [1-63 & 0]
+//tx/rx    1            [0/1]
+//msg  id  3 bit        [0-7] + (offset=8)
+//is seg                [0/1]   (data follows uart's protocol)
+//data empty n          [0/1]
+//data[0]
+//data[1]
+
+//sevice (29 bit CAN ID)
+//is msg  1  bit    [=0]
+//op code 5  bit   [ 0-31   ]
+//src id  6  bit   [ 1-63 & 0(anou) ]
+//dest id 6  bit   [1-63]
+//srv_id  11 bit   [ 0-255  ]
+//is seg           [0/1]        (data follows uart's protocol)
+```
+
+
 详细文档见[这里](docs/doxygen/html/index.html) 

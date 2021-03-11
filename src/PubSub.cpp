@@ -100,7 +100,7 @@ void PubSubManager::handleWrtie(FcnFrame* frame, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
 
     for(auto& sub : created_subscribers){
-        if(sub->channel_addr == frame->src_id){
+        if(sub->node_id == frame->src_id){
             subscriber = sub;
         }
     }
@@ -158,25 +158,23 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, int id) {
 }
 
 Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
-                                                 uint16_t channel_addr,
                                                  uint16_t node_id){
-    auto buffer = getSharedBuffer(serdes_dict, channel_addr);
+    auto buffer = getSharedBuffer(serdes_dict, node_id);
 
     for(auto& pub : created_publishers){
         /* 同一通道中，不能有多个相同的发布者（重复创建发布者） */
         USER_IASSERT(
-            !((pub->src_id == node_id) && (pub->channel_id == channel_addr)),
+            !((pub->src_id == node_id) && (pub->node_id == channel_addr)),
             "duplicate publisher!");
     }
 
 
-    auto publisher = new Publisher(serdes_dict, buffer,
-                                   channel_addr, node_id, this);
+    auto publisher = new Publisher(serdes_dict, buffer, node_id, this);
 
     created_publishers.push(publisher);
 
     for(auto& sub : created_subscribers){
-        if(sub->channel_addr == publisher->channel_id){
+        if(sub->node_id == publisher->node_id){
             publisher->regLocalSubscriber(sub);
         }
     }
@@ -186,35 +184,33 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
 
 
 Publisher* PubSubManager::makePublisher(SerDesDict& serdes_dict,
-                                        uint16_t node_id, bool is_owner, bool is_fast_tx){
-    uint16_t channel_addr = node_id;
-    return bindPublisherToChannel(serdes_dict, channel_addr, node_id);
+                                        uint16_t node_id,
+                                        bool is_owner,
+                                        bool is_fast_msg){
+    return bindPublisherToChannel(serdes_dict, node_id);
 }
 
-Publisher* PubSubManager::makeSlavePublisher(SerDesDict& serdes_dict,
-                              uint16_t master_id, uint16_t node_id){
-    uint16_t channel_addr = master_id;
-    return bindPublisherToChannel(serdes_dict, channel_addr, node_id);
-}
 
 Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
-                                           uint16_t channel_addr, uint16_t node_id) {
-    auto buffer = getSharedBuffer(serdes_dict, channel_addr);
+                                           uint16_t node_id,
+                                           bool is_owner,
+                                           bool is_fast_msg) {
+    auto buffer = getSharedBuffer(serdes_dict, node_id);
 
+#if 0  /*skip check under refactor*/
     for(auto& sub : created_subscribers){
         /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
         USER_IASSERT(
-                !((sub->src_id == node_id) && (sub->channel_addr == channel_addr)),
+                !((sub->src_id == node_id) && (sub->node_id == channel_addr)),
                 "duplicate subscriber!");
     }
-
-    auto subscriber = new Subscriber(serdes_dict, buffer,
-                                   channel_addr, node_id, this);
+#endif
+    auto subscriber = new Subscriber(serdes_dict, buffer, node_id, this);
 
     created_subscribers.push(subscriber);
 
     for(auto& pub: created_publishers){
-        if(pub->channel_id == subscriber->channel_addr){
+        if(pub->node_id == subscriber->node_id){
             pub->regLocalSubscriber(subscriber);
         }
     }
@@ -245,8 +241,8 @@ void Publisher::publish(SerDesDictValHandle &msg, bool local_only) {
 
     singleWriteFrameBuilder(
             &trans_frame_tmp,
-            src_id,
-            channel_id,
+            node_id,
+            1,
             static_cast<uint8_t>(OpCode::Publish),
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
@@ -258,11 +254,15 @@ void Publisher::publish(SerDesDictValHandle &msg, bool local_only) {
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {
     /* 同一个NodeID的订阅者只能订阅同一个发布者一次。 */
+
+#if 0  /*skip check under refactor*/
+
     for(auto& sub : local_sub_ptr){
         if(sub->src_id == subscriber->src_id){
             return;
         }
     }
+#endif
 
 
     local_sub_ptr.push(subscriber);

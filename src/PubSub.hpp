@@ -83,14 +83,12 @@ namespace libfcn_v2 {
 
         /* --------- Public Methods --------  */
         Publisher* makePublisher(SerDesDict& serdes_dict,
-                                 uint16_t node_id, bool is_owner= true, bool is_fast_tx= true);
-
-        Publisher* makeSlavePublisher(SerDesDict& serdes_dict,
-                                       uint16_t master_id, uint16_t node_id);
+                                 uint16_t node_id,
+                                 bool is_owner, bool is_fast_msg=true);
 
         Subscriber* makeSubscriber(SerDesDict& serdes_dict,
-                                   uint16_t channel_addr,
-                                   uint16_t node_id);
+                                   uint16_t node_id,
+                                   bool is_owner, bool is_fast_msg=true);
 
         void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
 
@@ -119,9 +117,7 @@ namespace libfcn_v2 {
         emlib::LinkedList<Subscriber*> created_subscribers;
 
 
-        Publisher* bindPublisherToChannel(SerDesDict& serdes_dict,
-                                          uint16_t channel_addr,
-                                          uint16_t node_id);
+        Publisher* bindPublisherToChannel(SerDesDict& serdes_dict, uint16_t node_id);
 
         void* getSharedBuffer(SerDesDict& serdes_dict, int id);
     };
@@ -148,8 +144,8 @@ namespace libfcn_v2 {
          * 点将数据填入自己的状态表，无需分发。如果dstid不等于srcid且dstid也属于组播ID
          * (因此不等于任何一个nodeid），则配置了相应组播id的节点进行处理。
          *
-         * @param channel_id 通道ID，为数据帧中的目标ID。当为单主通道添加主发布者时，
-         *                   channel_id = src_id。当为多主通道添加从发布者时，通道ID为对应
+         * @param node_id 通道ID，为数据帧中的目标ID。当为单主通道添加主发布者时，
+         *                   node_id = src_id。当为多主通道添加从发布者时，通道ID为对应
          *                   主节点ID。当为多主通道添加发布者时，channel_id属于组播ID之一。
          *
          * @param src_id 源ID，为数据帧中的源ID。总是等于用户为节点配置的ID。ID必须是全
@@ -160,12 +156,12 @@ namespace libfcn_v2 {
          */
         Publisher( SerDesDict& serdes_dict,
                    void* buffer,
-                   uint16_t channel_id,
-                   uint16_t src_id,
+                   uint16_t node_id,
+//                   uint16_t src_id,
                    PubSubManager* ps_manager) :
 
-                channel_id(channel_id),
-                src_id(src_id),
+                node_id(node_id),
+//                src_id(src_id),
 
                 serdes_dict(&serdes_dict),
                 buffer(buffer),
@@ -194,8 +190,8 @@ namespace libfcn_v2 {
         Publisher& addPort(int port);
 
         /* ------- Public Variables --------  */
-        const uint16_t channel_id { 0 };
-        const uint16_t src_id     { 0 };
+        const uint16_t node_id {0 };
+//        const uint16_t src_id     { 0 };
 
     private:
         /* ------ Private Declarations ------  */
@@ -262,11 +258,11 @@ namespace libfcn_v2 {
         Subscriber( SerDesDict& serdes_dict,
                     void* buffer,
                     uint16_t channel_id,
-                    uint16_t src_id,
+//                    uint16_t src_id,
                     PubSubManager* ps_manager) :
 
-                channel_addr(channel_id),
-                src_id(src_id),
+                node_id(channel_id),
+//                src_id(src_id),
 
                 serdes_dict(&serdes_dict),
                 buffer(buffer),
@@ -293,14 +289,12 @@ namespace libfcn_v2 {
         }
 
         void notify(uint16_t index){
-            /* TODO: 进行回调 */
-
             callback_table[index].call(this);
         }
 
         /* ------- Public Variables --------  */
-        const uint16_t channel_addr {0 };
-        const uint16_t src_id     { 0 };
+        const uint16_t node_id {0 };
+//        const uint16_t src_id     { 0 };
 
     private:
         /* ------ Private Declarations ------  */

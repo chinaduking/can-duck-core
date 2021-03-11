@@ -5,7 +5,6 @@ add_library(fcn_v2
         ParamServer.cpp
         ParamServerRequestEv.cpp
         MultiFrame.cpp
-        ../../emlib-cpp/src/DataVerify.cpp
         Node.cpp)
 
 target_link_libraries(fcn_v2 ${emlib_LIBS})
