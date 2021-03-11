@@ -95,7 +95,7 @@ namespace can_duck {
 //                                   uint16_t node_id,
 //                                   bool is_owner, bool is_fast_msg=true);
 
-        void handleWrtie(FcnFrame* frame, uint16_t recv_port_id);
+        void handleWrite(FcnFrame* frame, uint16_t recv_port_id);
 
         /* ------- Public Variables --------  */
         NetworkLayer* const network_layer{nullptr};

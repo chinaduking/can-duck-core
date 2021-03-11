@@ -43,7 +43,7 @@ void NetworkLayer::recvProtocolDispatcher(FcnFrame *frame, uint16_t recv_port_id
     if(op_code >= (uint8_t)OpCode::Publish
         && op_code <= (uint8_t)OpCode::PublishReq){
 
-        pub_sub_manager.handleWrtie(frame, recv_port_id);
+        pub_sub_manager.handleWrite(frame, recv_port_id);
     }
 
     /* 服务消息-d */

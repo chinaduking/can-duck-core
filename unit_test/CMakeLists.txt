@@ -25,3 +25,9 @@ target_link_libraries(testDataLinkLayer fcn_v2 ${UT_DEFAULT_LIBS})
 add_executable(testNetworkLayer NetworkLayer.cpp)
 
 target_link_libraries(testNetworkLayer fcn_v2 ${UT_DEFAULT_LIBS})
+
+
+add_executable(testFlatbuffers testFlatbuffers.cpp)
+find_package(Flatbuffers CONFIG REQUIRED)
+target_link_libraries(testFlatbuffers PRIVATE flatbuffers::flatbuffers)
+

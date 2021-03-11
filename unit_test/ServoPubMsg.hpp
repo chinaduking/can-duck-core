@@ -10,7 +10,7 @@ namespace duckmsg{
 
 
 #pragma pack(2)
-    struct ServoSrvMsg_C : public can_duck::SerDesDict{
+    struct ServoService_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         can_duck::DictItem<emlib::Array<uint8_t, 8>> serial_num;
@@ -19,7 +19,7 @@ namespace duckmsg{
         can_duck::DictItem<float> kd;
 
 
-        ServoSrvMsg_C() :
+        ServoService_C() :
                 SerDesDict(4, &serial_num)
                 , serial_num(0)
                 , mode      (1)
@@ -62,18 +62,18 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoSrvMsg_C ServoSrvMsg;
+    extern ServoService_C ServoSrvMsg;
 
 
 
 #pragma pack(2)
-    struct ServoPubMsgIn_C : public can_duck::SerDesDict{
+    struct ServoMsgI_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         can_duck::DictItem<int32_t> target_angle;
         can_duck::DictItem<int16_t> mode;
 
-        ServoPubMsgIn_C() :
+        ServoMsgI_C() :
         SerDesDict(2,&target_angle)
             , target_angle(0)
             , mode        (1)
@@ -105,18 +105,18 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoPubMsgIn_C servo_msg_i;
+    extern ServoMsgI_C servo_msg_i;
 
 
 #pragma pack(2)
-    struct ServoPubMsgOut_C : public can_duck::SerDesDict{
+    struct ServoMsgO_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         can_duck::DictItem<int16_t> speed;
         can_duck::DictItem<int32_t> angle;
         can_duck::DictItem<int8_t>  current;
 
-        ServoPubMsgOut_C() :
+        ServoMsgO_C() :
             SerDesDict(3, &speed)
 
             , speed   (0)
@@ -154,7 +154,7 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoPubMsgOut_C servo_msg_o;
+    extern ServoMsgO_C servo_msg_o;
 }
 
 

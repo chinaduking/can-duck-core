@@ -8,7 +8,7 @@
 using namespace can_duck;
 
 namespace duckmsg{
-    ServoPubMsgIn_C  servo_msg_i;
-    ServoPubMsgOut_C servo_msg_o;
-    ServoSrvMsg_C ServoSrvMsg;
+    ServoMsgI_C  servo_msg_i;
+    ServoMsgO_C servo_msg_o;
+    ServoService_C ServoSrvMsg;
 }
