@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-project(can-duck)
+project(can-duck-core)
 
 #------------Set Compiler-------------------
 # export CC=/usr/bin/clang
