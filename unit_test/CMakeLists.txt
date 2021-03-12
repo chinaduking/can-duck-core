@@ -28,20 +28,6 @@ add_executable(testParamServer
 target_link_libraries(testParamServer ${UT_DEFAULT_LIBS} )
 
 
-#add_executable(testServiceObject ParamServer.cpp  ServoPubMsg.cpp)
-#target_link_libraries(testServiceObject fcn_v2 ${UT_DEFAULT_LIBS})
-#
-#
-#
-#add_executable(testDataLinkLayer DataLinkLayer.cpp)
-#target_link_libraries(testDataLinkLayer fcn_v2 ${UT_DEFAULT_LIBS})
-#
-#
-#
-#add_executable(testNetworkLayer NetworkLayer.cpp)
-#
-#target_link_libraries(testNetworkLayer fcn_v2 ${UT_DEFAULT_LIBS})
-#
 #
 #add_executable(testFlatbuffers testFlatbuffers.cpp)
 #find_package(Flatbuffers CONFIG REQUIRED)

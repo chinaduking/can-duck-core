@@ -5,7 +5,6 @@
 #ifndef LIBFCN_REQUESTERTASK_HPP
 #define LIBFCN_REQUESTERTASK_HPP
 
-#include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "EventLoop.hpp"
 #include "ObjPool.hpp"
@@ -14,8 +13,8 @@ namespace can_duck{
     /* IDs */
     typedef uint64_t framets_t;
 
-    static const int DATALINK_MTU = DATALINK_MAX_TRANS_UNIT;
-    static const int MAX_NODE_NUM = MAX_LOCAL_NODE_NUM;
+    static const int DATALINK_MTU = 64;
+    static const int MAX_NODE_NUM = 64;
     static const int MAX_NODE_ID  = MAX_NODE_NUM - 1;
 
     struct ServiceFrame {

@@ -6,9 +6,9 @@
 #define can_duck_PUBSUB_HPP
 
 #include <cstdint>
+#include "LLComDevice.hpp"
 #include "Vector.hpp"
 #include "LinkedList.hpp"
-#include "DataLinkLayer.hpp"
 #include "SerDesDict.hpp"
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
