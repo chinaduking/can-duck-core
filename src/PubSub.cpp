@@ -6,6 +6,8 @@
 #include "OpCode.hpp"
 #include "CppUtils.hpp"
 #include "Tracer.hpp"
+#include "NetworkLayer.hpp"
+
 
 using namespace can_duck;
 using namespace emlib;
@@ -282,7 +284,7 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-    ps_manager->sendFrame(trans_frame_tmp);
+    ps_manager->nwk->sendFrame(0, &trans_frame_tmp);
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {

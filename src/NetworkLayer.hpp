@@ -7,7 +7,7 @@
 
 //#include "DataLinkLayer.hpp"
 #include "PubSub.hpp"
-#include "ParamServer.hpp"
+//#include "ParamServer.hpp"
 #include "DefaultAllocate.h"
 #include "Vector.hpp"
 #include "Tracer.hpp"
@@ -17,8 +17,8 @@ namespace can_duck{
     public:
         NetworkLayer(LLCanBus* can)
             :
-                pub_sub_manager(can)
-                ,param_server_manager(can),
+                pub_sub_manager(this),
+//                ,param_server_manager(can),
                 can_bus(can)
                 {}
 
@@ -32,7 +32,7 @@ namespace can_duck{
         void sendPolling();
 
         PubSubManager   pub_sub_manager;
-        ParamServerManager param_server_manager;
+//        ParamServerManager param_server_manager;
         //TftpManager tftp_handler;
 
     private:

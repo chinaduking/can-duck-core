@@ -37,7 +37,6 @@ void NetworkLayer::recvPolling() {
     if(can_bus == nullptr){
         return;
     }
-//    perciseSleep(1);
 
     if(!can_bus->read(frame_tmp)){
         return;
@@ -47,9 +46,9 @@ void NetworkLayer::recvPolling() {
         return;
     }
 
-    if(param_server_manager.handleRecv(&frame_tmp, 0)){
-        return;
-    }
+//    if(param_server_manager.handleRecv(&frame_tmp, 0)){
+//        return;
+//    }
 }
 
 void NetworkLayer::sendPolling() {
