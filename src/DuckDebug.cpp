@@ -1,7 +1,5 @@
-#include "ParamServerRequestEv.hpp"
-#include "ParamServer.hpp"
 #include "DuckDebug.hpp"
-
+#include "Tracer.hpp"
 using namespace can_duck;
 
 #ifdef ENABLE_TRACE
@@ -49,7 +47,7 @@ uint32_t can_duck::frame2strbuf(ServiceFrame& frame, char* buffer, uint32_t buff
                             frame.src_id   & 0xff,
                             frame.dest_id  & 0xff,
 
-                            frame.msg_id   & 0xff,
+                            frame.srv_id & 0xff,
                             frame.payload_len);
 
     buffer_remain -= info_len;

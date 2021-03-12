@@ -2,7 +2,7 @@
 // Created by sdong on 2019/11/10.
 //
 
-#include "ParamServerRequestEv.hpp"
+#include "ClientRequestEv.hpp"
 #include "ParamServer.hpp"
 #include "DuckDebug.hpp"
 
@@ -23,50 +23,50 @@ void LinkedListNodeAllocator::deallocate(void *p) {
     unique_ptr_node_objpool.deallocate(p);
 }
 
-ObjPool<ParamServerRequestEv, CLIENT_MAX_REQ_NUM * 2> req_task_obj_pool;
+ObjPool<ClientRequestEv, CLIENT_MAX_REQ_NUM * 2> req_task_obj_pool;
 
-void * ParamServerRequestEv::operator new(size_t size) noexcept {
+void * ClientRequestEv::operator new(size_t size) noexcept {
     //TODO: Request Allocator !
 //    return emlib::DefaultAllocator::allocate(size);
     return req_task_obj_pool.allocate();
 }
 
-void ParamServerRequestEv::operator delete(void *p) noexcept {
+void ClientRequestEv::operator delete(void *p) noexcept {
 //    emlib::DefaultAllocator::deallocate(p);
     req_task_obj_pool.deallocate(p);
 }
 
-void ParamServerRequestEv::evUpdate(){
+void ClientRequestEv::evUpdate(){
     CANMessage can_msg;
     toCanMsg(cached_req, can_msg);
 
-    LOGI("ParamServerRequestEv::evUpdate send a frame:\n %s", can_duck::frame2stdstr(cached_req).c_str());
+    LOGI("ClientRequestEv::evUpdate send a frame:\n %s", can_duck::frame2stdstr(cached_req).c_str());
 
     context_client->manager->sendFrame(can_msg);
     evWaitNotify(timeout_ms);
 }
 
 
-bool ParamServerRequestEv::matchNotifyMsg(ServiceFrame& frame){
+bool ClientRequestEv::matchNotifyMsg(ServiceFrame& frame){
     return frame.src_id == cached_req.dest_id
            && frame.op_code == ack_op_code
-           && frame.msg_id == cached_req.msg_id;
+           && frame.srv_id == cached_req.srv_id;
 }
 
 
-void ParamServerRequestEv::evNotifyCallback(ServiceFrame& frame){
+void ClientRequestEv::evNotifyCallback(ServiceFrame& frame){
     onRecv(frame);
     evExit();
 }
 
 
-void ParamServerRequestEv::evTimeoutCallback() {
+void ClientRequestEv::evTimeoutCallback() {
     if(retry_cnt < retry_max){
         retry_cnt ++;
         evRestart();
 
-        LOGD("request timeout retry:: server = 0x%X, msg_id=0x%X (%d/%d)",
-             cached_req.dest_id, cached_req.msg_id, retry_cnt, retry_max );
+        LOGD("request timeout retry:: server = 0x%X, srv_id=0x%X (%d/%d)",
+             cached_req.dest_id, cached_req.srv_id, retry_cnt, retry_max );
 
         return;
     }
@@ -75,13 +75,13 @@ void ParamServerRequestEv::evTimeoutCallback() {
     evExit();
 }
 
-void ParamServerRequestEv::onTimeout() {
-    LOGW("request timeout: server = 0x%X, msg_id=0x%X",
-         cached_req.dest_id, cached_req.msg_id);
+void ClientRequestEv::onTimeout() {
+    LOGW("request timeout: server = 0x%X, srv_id=0x%X",
+         cached_req.dest_id, cached_req.srv_id);
     callback.call(context_client, 2);
 }
 
-void ParamServerRequestEv::onRecv(ServiceFrame &frame) {
+void ClientRequestEv::onRecv(ServiceFrame &frame) {
 
     if(frame.op_code != ack_op_code){
         LOGE("frame.op_code != ack_op_code, %X  & %X, check evloop!",
@@ -90,15 +90,15 @@ void ParamServerRequestEv::onRecv(ServiceFrame &frame) {
     }
 
     //TODO: define ev code!
-    if(frame.msg_id != cached_req.msg_id){
-        LOGE("frame.msg_id != cached_req.msg_id, %X  & %X, check evloop!",
-             frame.msg_id, cached_req.msg_id);
+    if(frame.srv_id != cached_req.srv_id){
+        LOGE("frame.srv_id != cached_req.srv_id, %X  & %X, check evloop!",
+             frame.srv_id, cached_req.srv_id);
         return;
     }
 
 
     if(frame.op_code == (uint8_t)OpCode::ParamServer_ReadAck){
-        if(context_client->updateData(frame.msg_id, frame.payload)){
+        if(context_client->updateData(frame.srv_id, frame.payload)){
             callback.call(context_client, 1);
         } else{
             callback.call(context_client, 3);

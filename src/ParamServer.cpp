@@ -12,7 +12,7 @@ void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg){
     header.src_id       = srv_frame.src_id   ;
     header.dest_id      = srv_frame.dest_id ;
     header.op_code      = srv_frame.op_code ;
-    header.service_id   = srv_frame.msg_id  ;
+    header.service_id   = srv_frame.srv_id  ;
     header.is_msg       = 0;
     header.is_seg       = 0;
 
@@ -30,7 +30,7 @@ void fromCanMsg(CANMessage& msg, ServiceFrame& srv_frame){
     srv_frame.src_id  = header.src_id       ;
     srv_frame.dest_id = header.dest_id      ;
     srv_frame.op_code = header.op_code      ;
-    srv_frame.msg_id  = header.service_id   ;
+    srv_frame.srv_id  = header.service_id   ;
 
     srv_frame.payload_len = msg.len;
     emlib::memcpy(srv_frame.payload, msg.data, msg.len);
@@ -46,7 +46,7 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
     LOGI("onWriteReq recv a frame: %s",
          can_duck::frame2stdstr(*frame).c_str());
 
-    auto index = frame->msg_id;
+    auto index = frame->srv_id;
 
     uint8_t ack_code = 1;
 
@@ -92,7 +92,7 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
     ack_frame.payload[0] = ack_code;
     ack_frame.payload_len = 1;
 
-    ack_frame.msg_id  = frame->msg_id;
+    ack_frame.srv_id  = frame->srv_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_WriteAck;
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;
@@ -118,7 +118,7 @@ obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
     LOGI("onReadReq recv a frame: %s",
          can_duck::frame2stdstr(*frame).c_str());
 
-    auto index = frame->msg_id;
+    auto index = frame->srv_id;
 
     if(index > serdes_dict->dictSize()){
         /* 仅做写保护，不使程序assert failed崩溃：
@@ -154,7 +154,7 @@ obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
 
     ack_frame.payload_len = size;
 
-    ack_frame.msg_id  = frame->msg_id;
+    ack_frame.srv_id  = frame->srv_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_ReadAck;
     ack_frame.src_id  = frame->dest_id;
     ack_frame.dest_id = frame->src_id;

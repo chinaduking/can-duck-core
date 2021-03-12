@@ -2,51 +2,16 @@
 // Created by sdong on 2019/11/10.
 //
 
-#ifndef LIBFCN_REQUESTERTASK_HPP
-#define LIBFCN_REQUESTERTASK_HPP
+#ifndef CANDUCK_CLIENTREQUESTEV_HPP
+#define CANDUCK_CLIENTREQUESTEV_HPP
 
 #include "SerDesDict.hpp"
 #include "EventLoop.hpp"
 #include "ObjPool.hpp"
+#include "Common.hpp"
+
 
 namespace can_duck{
-    /* IDs */
-    typedef uint64_t framets_t;
-
-    static const int DATALINK_MTU = 64;
-    static const int MAX_NODE_NUM = 64;
-    static const int MAX_NODE_ID  = MAX_NODE_NUM - 1;
-
-    struct ServiceFrame {
-    public:
-        /* 网络层信息自此开始
-         * Network Layer Info */
-        uint8_t src_id{0};    /* [DW1 3] 源节点ID   */
-        uint8_t dest_id{0};   /* [DW1 2] 目标节点ID */
-
-        uint8_t op_code{0};   /* [DW1 1] 操作码     */
-        uint16_t msg_id{0};   /* [DW1 0] 消息ID     */
-
-        uint8_t payload[DATALINK_MTU]{};
-        uint8_t payload_len{0};
-//      framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。进行传输时，最大值为65535 */
-
-        /* 快速数据帧拷贝
-         * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
-        ServiceFrame &operator=(const ServiceFrame &other) {
-            this->src_id = other.src_id;
-            this->dest_id = other.dest_id;
-            this->op_code = other.op_code;
-            this->msg_id = other.msg_id;
-
-            emlib::memcpy(this->payload, (ServiceFrame *) &other.payload,
-                          ((ServiceFrame &) other).payload_len);
-
-            this->payload_len = other.payload_len;
-            return *this;
-        }
-
-    };
 
     struct LinkedListNodeAllocator{
         static void* allocate(size_t size);
@@ -84,11 +49,11 @@ namespace can_duck{
     /*
      * 抽象的数据请求过程。用于用户自定义请求的形式。
      **/
-    class ParamServerRequestEv : public FcnEvLoop::Task{
+    class ClientRequestEv : public FcnEvLoop::Task{
     public:
-        ParamServerRequestEv() : FcnEvLoop::Task(){}
+        ClientRequestEv() : FcnEvLoop::Task(){}
 
-        ParamServerRequestEv(
+        ClientRequestEv(
                 ParamServerClient* context_client,
                 ServiceFrame& frame,
                 uint16_t ack_op_code,
@@ -108,7 +73,7 @@ namespace can_duck{
             this->callback = std::move(callback);
         }
 
-        ~ParamServerRequestEv() override = default;
+        ~ClientRequestEv() override = default;
 
         ServiceFrame cached_req;
 
@@ -141,4 +106,4 @@ namespace can_duck{
 
 }
 
-#endif //LIBFCN_REQUESTERTASK_HPP
+#endif //CANDUCK_CLIENTREQUESTEV_HPP

@@ -3,7 +3,7 @@
 #        NetworkLayer.cpp
 #        PubSub.cpp
 #        ParamServer.cpp
-#        ParamServerRequestEv.cpp
+#        ClientRequestEv.cpp
 #        MultiFrame.cpp
 #        Node.cpp)
 

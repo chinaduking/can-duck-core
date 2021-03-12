@@ -17,7 +17,7 @@ add_executable(testParamServer
         ServoPubMsg.cpp
         ${PROJECT_SOURCE_DIR}/src/PubSub.cpp
         ${PROJECT_SOURCE_DIR}/src/ParamServer.cpp
-        ${PROJECT_SOURCE_DIR}/src/ParamServerRequestEv.cpp
+        ${PROJECT_SOURCE_DIR}/src/ClientRequestEv.cpp
         ${PROJECT_SOURCE_DIR}/src/DuckDebug.cpp
         )
 

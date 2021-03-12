@@ -122,7 +122,7 @@
 //trans id   6 bit                       
 //s/t/e      2 bit      [0/1/2]
 //data[0]    : pack_n/pack_c(down count)
-//data[1-8]  : merged:{msg_id/srv_op+srv_code, data}
+//data[1-8]  : merged:{srv_id/srv_op+srv_code, data}
 
 
 ```

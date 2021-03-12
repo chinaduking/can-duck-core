@@ -12,6 +12,7 @@
 #include "SerDesDict.hpp"
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
+#include "Common.hpp"
 
 namespace can_duck {
     /* ---------------------------------------------------------
@@ -23,49 +24,6 @@ namespace can_duck {
     class PubSubManager;
     class Publisher;
     class Subscriber;
-
-    /* --------------------------------------------------------- */
-    struct HeaderFastMsgExt {
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =1 */
-        uint32_t node_id : 6;
-        uint32_t is_tx   : 1;
-        uint32_t msg_id  : 3;
-        uint32_t is_d1_empty : 1;
-        uint32_t data_0  : 8;
-        uint32_t data_1  : 8;
-    };
-
-    struct HeaderFastMsgStd {
-        uint32_t reserve : 21;  /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =1 */
-        uint32_t node_id : 6;
-        uint32_t is_tx   : 1;
-        uint32_t msg_id  : 3;
-    };
-
-    struct HeaderService{
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =0 */
-        uint32_t src_id  : 6;
-        uint32_t dest_id : 6;
-        uint32_t op_code : 5;
-        uint32_t service_id : 10;
-    };
-
-    struct HeaderSegment{
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =1 */
-        uint32_t src_id  : 6;
-        uint32_t dest_id : 6;
-        uint32_t trans_id: 6;
-        uint32_t status  : 2;
-        uint32_t data_0  : 8;
-    };
-
 
     /* --------------------------------------------------------- */
     /**

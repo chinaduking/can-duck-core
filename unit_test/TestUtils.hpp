@@ -29,7 +29,7 @@ namespace can_duck{
 //            return false;
 //        }
 //
-//        if(frame1.msg_id != frame2.msg_id){
+//        if(frame1.srv_id != frame2.srv_id){
 //            return false;
 //        }
 //

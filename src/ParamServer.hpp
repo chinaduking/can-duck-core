@@ -19,7 +19,7 @@
 #include "DefaultAllocate.h"
 
 #ifdef USE_REQUEST_EVLOOP
-#include "ParamServerRequestEv.hpp"
+#include "ClientRequestEv.hpp"
 #endif
 
 uint64_t globalTimeSourceMS();
@@ -75,7 +75,7 @@ namespace can_duck {
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_ReadReq;
-            frame.msg_id  = msg.index;
+            frame.srv_id  = msg.index;
             frame.payload_len = 1;
             frame.payload[0] =  msg.data_size;
 
@@ -83,7 +83,7 @@ namespace can_duck {
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
             int res = ev_loop.addTask(
-                    std::make_unique<ParamServerRequestEv>(
+                    std::make_unique<ClientRequestEv>(
                         this,
                         frame,
                         (uint8_t)OpCode::ParamServer_ReadAck,
@@ -110,7 +110,7 @@ namespace can_duck {
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_WriteReq;
-            frame.msg_id = msg.index;
+            frame.srv_id = msg.index;
             frame.payload_len = msg.data_size;
             emlib::memcpy(frame.payload, &msg.data, msg.data_size);
 
@@ -118,7 +118,7 @@ namespace can_duck {
             networkSendFrame(port_id, &frame);
 #else //USE_REQUEST_EVLOOP
             int res = ev_loop.addTask(
-                    std::make_unique<ParamServerRequestEv>(
+                    std::make_unique<ClientRequestEv>(
                         this,
                         frame,
                         (uint8_t)OpCode::ParamServer_WriteAck,
@@ -152,7 +152,7 @@ namespace can_duck {
 
     private:
         friend class ParamServerManager;
-        friend class ParamServerRequestEv;
+        friend class ClientRequestEv;
 
         SerDesDict* const serdes_dict{nullptr};
 
