@@ -10,5 +10,5 @@ using namespace can_duck;
 namespace duckmsg{
     ServoMsgI_C  servo_msg_i;
     ServoMsgO_C servo_msg_o;
-    ServoService_C ServoSrvMsg;
+    ServoService_C servo_service;
 }

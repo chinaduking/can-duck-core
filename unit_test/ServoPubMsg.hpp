@@ -62,7 +62,7 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoService_C ServoSrvMsg;
+    extern ServoService_C servo_service;
 
 
 

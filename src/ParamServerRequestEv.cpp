@@ -5,6 +5,7 @@
 #include "ParamServerRequestEv.hpp"
 #include "ParamServer.hpp"
 #include "NetworkLayer.hpp"
+#include "DuckDebug.hpp"
 
 using namespace can_duck;
 using namespace emlib;
@@ -39,6 +40,9 @@ void ParamServerRequestEv::operator delete(void *p) noexcept {
 void ParamServerRequestEv::evUpdate(){
     CANMessage can_msg;
     toCanMsg(cached_req, can_msg);
+
+    LOGI("ParamServerRequestEv::evUpdate send a frame:\n %s", can_duck::frame2stdstr(cached_req).c_str());
+
     context_client->manager->sendFrame(can_msg);
     evWaitNotify(timeout_ms);
 }

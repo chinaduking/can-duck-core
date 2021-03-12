@@ -5,7 +5,7 @@
 #include "ParamServer.hpp"
 #include "OpCode.hpp"
 #include "NetworkLayer.hpp"
-
+#include "DuckDebug.hpp"
 using namespace can_duck;
 
 void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg){
@@ -34,7 +34,7 @@ void fromCanMsg(CANMessage& msg, ServiceFrame& srv_frame){
     srv_frame.msg_id  = header.service_id   ;
 
     srv_frame.payload_len = msg.len;
-    memcpy(srv_frame.payload, msg.data, msg.len);
+    emlib::memcpy(srv_frame.payload, msg.data, msg.len);
 }
 
 
@@ -44,6 +44,8 @@ void fromCanMsg(CANMessage& msg, ServiceFrame& srv_frame){
  * */
 obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
                                    uint16_t port_id){
+    LOGI("onWriteReq recv a frame: %s",
+         can_duck::frame2stdstr(*frame).c_str());
 
     auto index = frame->msg_id;
 
@@ -100,6 +102,8 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
     if(!manager->handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
+        LOGI("onWriteReq send a frame: %s", can_duck::frame2stdstr(ack_frame).c_str());
+
         manager->sendFrame(can_msg);
     }
 
@@ -111,6 +115,9 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
  * */
 obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
                                   uint16_t port_id){
+
+    LOGI("onReadReq recv a frame: %s",
+         can_duck::frame2stdstr(*frame).c_str());
 
     auto index = frame->msg_id;
 
@@ -157,6 +164,8 @@ obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
     if(!manager->handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
+
+        LOGI("onReadReq send a frame:\n %s", can_duck::frame2stdstr(ack_frame).c_str());
         manager->sendFrame(can_msg);
     }
 
@@ -164,10 +173,12 @@ obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
 }
 
 void ParamServerClient::onReadAck(ServiceFrame* frame){
-     ev_loop.notify(*frame);
+    LOGI("onReadAck recv a frame:\n %s", can_duck::frame2stdstr(*frame).c_str());
+    ev_loop.notify(*frame);
 }
 
 void ParamServerClient::onWriteAck(ServiceFrame* frame){
+    LOGI("onWriteAck recv a frame:\n %s", can_duck::frame2stdstr(*frame).c_str());
     ev_loop.notify(*frame);
 }
 
@@ -247,7 +258,6 @@ int ParamServerManager::handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
 }
 
 int ParamServerManager::handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
-
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;

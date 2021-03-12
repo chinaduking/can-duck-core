@@ -21,6 +21,7 @@ add_executable(testParamServer
         ${PROJECT_SOURCE_DIR}/src/PubSub.cpp
         ${PROJECT_SOURCE_DIR}/src/ParamServer.cpp
         ${PROJECT_SOURCE_DIR}/src/ParamServerRequestEv.cpp
+        ${PROJECT_SOURCE_DIR}/src/DuckDebug.cpp
         ${PROJECT_SOURCE_DIR}/src/NetworkLayer.cpp)
 
 target_link_libraries(testParamServer ${UT_DEFAULT_LIBS} )

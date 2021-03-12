@@ -7,8 +7,9 @@
 #include "LLComDevice.hpp"
 #include "PubSub.hpp"
 
-inline void frameLog(CANMessage& msg){
+namespace can_duck{
+    std::string frame2stdstr(ServiceFrame& frame);
+    uint32_t frame2strbuf(ServiceFrame& frame, char* buffer, uint32_t buffer_size);
 
 }
-
 #endif //CAN_DUCK_CORE_DUCKDEBUG_HPP

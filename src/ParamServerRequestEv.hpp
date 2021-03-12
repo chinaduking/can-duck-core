@@ -60,9 +60,13 @@ namespace can_duck{
         /* 快速数据帧拷贝
          * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
         ServiceFrame &operator=(const ServiceFrame &other) {
+            this->src_id = other.src_id;
+            this->dest_id = other.dest_id;
+            this->op_code = other.op_code;
+            this->msg_id = other.msg_id;
 
-            emlib::memcpy(this, (ServiceFrame *) &other,
-                          ((ServiceFrame &) other).payload_len + 4);
+            emlib::memcpy(this->payload, (ServiceFrame *) &other.payload,
+                          ((ServiceFrame &) other).payload_len);
 
             this->payload_len = other.payload_len;
             return *this;

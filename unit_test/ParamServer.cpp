@@ -35,14 +35,14 @@ namespace network_test {
         uint32_t cnt = 0;
 
         auto server = fcn_node.network_layer->param_server_manager
-                .createServer(ServoSrvMsg, local_addr);
+                .createServer(servo_service, local_addr);
 
-        server->setWrAccess(ServoSrvMsg.mode);
+        server->setWrAccess(servo_service.mode);
 
         fcn_node.spin();
 
         for(int __i = 0; __i < 1; ){
-            auto mode_msg = ServoSrvMsg.mode;
+            auto mode_msg = servo_service.mode;
             mode_msg << 0x02;
             server->updateData(mode_msg);
 
@@ -61,19 +61,28 @@ namespace network_test {
         }
 
         if(ev_code == 1){
-            auto angle = client->readBuffer(ServoSrvMsg.mode).data;
+            auto angle = client->readBuffer(servo_service.mode).data;
 
             LOGW("read angle done: 0x%X", angle);
+            return;
         }
+
     }
 
     FCN_REQUEST_CALLBACK(mode_wr_callback){
+        if(ev_code == 2){
+            LOGE("Write angle timeout");
+            return;
+        }
+
         if(ev_code == 1){
             LOGW("Write mode done!");
+            return;
+
         }
-        else{
-            LOGE("Write mode failed!");
-        }
+
+        LOGE("Write angle failed");
+
     }
 
 
@@ -86,17 +95,16 @@ namespace network_test {
         fcn_node.spin();
 
         auto servo_client = fcn_node.network_layer->param_server_manager
-                .bindClientToServer(ServoSrvMsg, servo_addr, local_addr, 0);
+                .bindClientToServer(servo_service, servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
             LOGD("request.. " );
 
+            servo_client->readAsync(servo_service.mode, angle_rd_callback);
 
-            servo_client->readAsync(ServoSrvMsg.mode, angle_rd_callback);
+            servo_client->readAsync(servo_service.mode, angle_rd_callback);
 
-            servo_client->readAsync(ServoSrvMsg.mode, angle_rd_callback);
-
-            auto mode_msg = ServoSrvMsg.mode;
+            auto mode_msg = servo_service.mode;
             mode_msg << 0x22;
 
             servo_client->writeAsync(mode_msg, mode_wr_callback);
