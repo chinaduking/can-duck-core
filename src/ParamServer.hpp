@@ -30,11 +30,11 @@ uint64_t globalTimeSourceMS();
 namespace can_duck {
 
     class ParamServerManager;
-    class NetworkLayer;
+//    class NetworkLayer;
 
     class ParamServerClient{
     public:
-        ParamServerClient(NetworkLayer* ctx_network_layer,
+        ParamServerClient(ParamServerManager* manager,
                           uint16_t server_addr,
                           uint16_t client_addr,
                           uint16_t port_id,
@@ -43,7 +43,7 @@ namespace can_duck {
 
                 server_addr(server_addr),
                 client_addr(client_addr),
-                ctx_network_layer(ctx_network_layer),
+                manager(manager),
                 port_id(port_id)              //TODO: noport, broadcast!
                 ,serdes_dict(serdes_dict)
                 ,buffer(buffer)
@@ -74,12 +74,12 @@ namespace can_duck {
                        uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
-            FcnFrame frame;
+            ServiceFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_ReadReq;
-            frame.msg_id = msg.index;
-            frame.setPayloadLen(1);
+            frame.msg_id  = msg.index;
+            frame.payload_len = 1;
             frame.payload[0] =  msg.data_size;
 
             #ifndef USE_REQUEST_EVLOOP
@@ -109,12 +109,12 @@ namespace can_duck {
                         uint16_t timeout_ms= 300, int retry= 3){
             //TODO: local first
 
-            FcnFrame frame;
+            ServiceFrame frame;
             frame.dest_id = server_addr;
             frame.src_id  = client_addr;
             frame.op_code = (uint8_t)OpCode::ParamServer_WriteReq;
             frame.msg_id = msg.index;
-            frame.setPayloadLen(msg.data_size);
+            frame.payload_len = msg.data_size;
             emlib::memcpy(frame.payload, &msg.data, msg.data_size);
 
 #ifndef USE_REQUEST_EVLOOP
@@ -159,13 +159,15 @@ namespace can_duck {
 
         SerDesDict* const serdes_dict{nullptr};
 
-        int networkSendFrame(uint16_t port_id, FcnFrame* frame);
+        int networkSendFrame(uint16_t port_id, ServiceFrame* frame);
 
-        NetworkLayer* const ctx_network_layer{nullptr};
+//        NetworkLayer* const ctx_network_layer{nullptr};
+        ParamServerManager* const manager;
 
-        void onReadAck(FcnFrame* frame);
 
-        void onWriteAck(FcnFrame* frame);
+        void onReadAck(ServiceFrame* frame);
+
+        void onWriteAck(ServiceFrame* frame);
 
         bool updateData(uint16_t index, uint8_t* data){
             return serdes_dict->deserialize(index, data, buffer);
@@ -188,12 +190,13 @@ namespace can_duck {
      * */
     class ParamServer{
     public:
-        ParamServer(NetworkLayer* ctx_network_layer,
+        ParamServer(ParamServerManager* manager,
                     uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
+                manager(manager),
                 server_addr(address),
                 buffer(buffer),
-                serdes_dict(obj_dict_shm),
-                ctx_network_layer(ctx_network_layer){
+                serdes_dict(obj_dict_shm)
+                {
         }
 
         ~ParamServer() = default;
@@ -248,9 +251,9 @@ namespace can_duck {
         friend class ParamServerManager;
 
         /* ------ Private Methods ------  */
-        obj_size_t onWriteReq(FcnFrame* frame, uint16_t port_id);
+        obj_size_t onWriteReq(ServiceFrame* frame, uint16_t port_id);
 
-        obj_size_t onReadReq(FcnFrame* frame, uint16_t port_id);
+        obj_size_t onReadReq(ServiceFrame* frame, uint16_t port_id);
 
 
         /* ------ Private Data ------  */
@@ -262,7 +265,9 @@ namespace can_duck {
 
         SerDesDict* const serdes_dict{nullptr};
 
-        NetworkLayer* const ctx_network_layer{nullptr};
+//        NetworkLayer* const ctx_network_layer{nullptr};
+
+        ParamServerManager* const manager;
     };
 
 
@@ -273,8 +278,8 @@ namespace can_duck {
     * */
     class ParamServerManager{
     public:
-        ParamServerManager(NetworkLayer* ctx_network_layer):
-                ctx_network_layer(ctx_network_layer),
+        ParamServerManager(LLCanBus* can):
+                can(can),
                 created_servers(MAX_LOCAL_NODE_NUM),
                 created_clients(MAX_LOCAL_NODE_NUM)
         {}
@@ -290,11 +295,21 @@ namespace can_duck {
                   uint16_t client_addr,
                   uint16_t port_id);
 
-        int handleRecv(FcnFrame* frame, uint16_t recv_port_id);
+        int handleRecv(CANMessage* can_msg, uint16_t recv_port_id);
+        int handleRecv(ServiceFrame* srv_frame, uint16_t recv_port_id);
+
+        inline int sendFrame(CANMessage& msg){
+            if(can == nullptr){
+                return 0;
+            }
+            return  can->write(msg);
+        }
 
     private:
 
-        NetworkLayer* const ctx_network_layer{nullptr};
+        LLCanBus* const can{nullptr};
+//        NetworkLayer* const ctx_network_layer{nullptr};
+
 
         struct CreatedServer{
             int         address {-1};

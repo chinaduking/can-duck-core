@@ -8,10 +8,41 @@
 
 using namespace can_duck;
 
+void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg){
+    HeaderService header;
+    header.src_id       = srv_frame.src_id   ;
+    header.dest_id      = srv_frame.dest_id ;
+    header.op_code      = srv_frame.op_code ;
+    header.service_id   = srv_frame.msg_id  ;
+    header.is_msg       = 0;
+    header.is_seg       = 0;
+
+    msg.id = *(uint32_t*)&header;
+    msg.len = srv_frame.payload_len;
+
+    memcpy( msg.data, srv_frame.payload, msg.len);
+}
+
+void fromCanMsg(CANMessage& msg, ServiceFrame& srv_frame){
+    HeaderService header = *(HeaderService*)(&msg.id);
+    USER_ASSERT(header.is_msg == 0);
+    USER_ASSERT(header.is_seg == 0);
+
+    srv_frame.src_id  = header.src_id       ;
+    srv_frame.dest_id = header.dest_id      ;
+    srv_frame.op_code = header.op_code      ;
+    srv_frame.msg_id  = header.service_id   ;
+
+    srv_frame.payload_len = msg.len;
+    memcpy(srv_frame.payload, msg.data, msg.len);
+}
+
+
+
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回1为成功，否则为失败
  * */
-obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
+obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
                                    uint16_t port_id){
 
     auto index = frame->msg_id;
@@ -56,11 +87,9 @@ obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
         }
     }
 
-    //TODO: zero copy frame?
-    // 也许在采用Frame优化过的拷贝方法后，不需要（SVO实时性不强）
-    FcnFrame ack_frame;
+    ServiceFrame ack_frame;
     ack_frame.payload[0] = ack_code;
-    ack_frame.setPayloadLen(1);
+    ack_frame.payload_len = 1;
 
     ack_frame.msg_id  = frame->msg_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_WriteAck;
@@ -68,8 +97,10 @@ obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->param_server_manager.handleRecv(&ack_frame, port_id)){
-        ctx_network_layer->sendFrame(port_id, &ack_frame);
+    if(!manager->handleRecv(&ack_frame, port_id)){
+        CANMessage can_msg;
+        toCanMsg(ack_frame, can_msg);
+        manager->sendFrame(can_msg);
     }
 
     return ack_code;
@@ -78,7 +109,7 @@ obj_size_t ParamServer::onWriteReq(FcnFrame* frame,
 
 /* 响应读取请求
  * */
-obj_size_t ParamServer::onReadReq(FcnFrame* frame,
+obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
                                   uint16_t port_id){
 
     auto index = frame->msg_id;
@@ -110,12 +141,12 @@ obj_size_t ParamServer::onReadReq(FcnFrame* frame,
 
     //TODO: zero copy frame?
     // 也许在采用Frame优化过的拷贝方法后，不需要（SVO实时性不强）
-    FcnFrame ack_frame;
+    ServiceFrame ack_frame;
 
     emlib::memcpy(ack_frame.payload,
                   (uint8_t*)buffer + offset, size);
 
-    ack_frame.setPayloadLen(size);
+    ack_frame.payload_len = size;
 
     ack_frame.msg_id  = frame->msg_id;
     ack_frame.op_code = (uint8_t)OpCode::ParamServer_ReadAck;
@@ -123,33 +154,33 @@ obj_size_t ParamServer::onReadReq(FcnFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->param_server_manager.handleRecv(&ack_frame, port_id)){
-        ctx_network_layer->sendFrame(port_id, &ack_frame);
+    if(!manager->handleRecv(&ack_frame, port_id)){
+        CANMessage can_msg;
+        toCanMsg(ack_frame, can_msg);
+        manager->sendFrame(can_msg);
     }
 
     return 0;
 }
 
-void ParamServerClient::onReadAck(FcnFrame* frame){
+void ParamServerClient::onReadAck(ServiceFrame* frame){
      ev_loop.notify(*frame);
 }
 
-void ParamServerClient::onWriteAck(FcnFrame* frame){
+void ParamServerClient::onWriteAck(ServiceFrame* frame){
     ev_loop.notify(*frame);
 }
 
-int ParamServerClient::networkSendFrame(uint16_t port_id, FcnFrame *frame) {
-    if(ctx_network_layer == nullptr){
-        return -1;
-    }
-
+int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
     /* 先在本地（同进程）已创建的服务器中搜索，如果找到则不再在网络中进行发送 */
-    if(!ctx_network_layer->param_server_manager.handleRecv(frame, port_id)){
-        ctx_network_layer->sendFrame(port_id, frame);
+    if(!manager->handleRecv(frame, port_id)){
+        CANMessage can_msg;
+        toCanMsg(*frame, can_msg);
+        manager->sendFrame(can_msg);
     }
-
     return 0;
 }
+
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
 ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t address){
@@ -162,7 +193,7 @@ ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t ad
     }
 
     if(server == nullptr){
-        server = new ParamServer(ctx_network_layer, address,
+        server = new ParamServer(this, address,
                                  &prototype,
                                  prototype.createBuffer());
 
@@ -192,7 +223,7 @@ ParamServerClient* ParamServerManager::bindClientToServer(
     }
 
     if(client == nullptr){
-        client = new ParamServerClient(ctx_network_layer, server_addr, client_addr,
+        client = new ParamServerClient(this, server_addr, client_addr,
                                        port_id,
                                        &prototype,
                                        prototype.createBuffer());
@@ -208,7 +239,15 @@ ParamServerClient* ParamServerManager::bindClientToServer(
     return client;
 }
 
-int ParamServerManager::handleRecv(FcnFrame *frame, uint16_t recv_port_id) {
+int ParamServerManager::handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
+    ServiceFrame frame;
+    fromCanMsg(*can_msg, frame);
+
+    return handleRecv(&frame, 0);
+}
+
+int ParamServerManager::handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
+
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;

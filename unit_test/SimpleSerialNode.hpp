@@ -10,15 +10,15 @@
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
 
-can_duck::NetworkLayer gNetworkLayer;
+;
 
 class Node {
 public:
-    Node(int sid) : network_layer(&gNetworkLayer) {
+    Node(int sid) {
         serial    = new emlib::HostSerial(sid);
-        frame_dev = new emlib::SimCan    (serial);
+        can = new emlib::SimCan    (serial);
 
-        network_layer->addDataLinkDevice(frame_dev);
+        network_layer = new can_duck::NetworkLayer(can);
     }
 
     void spin() {
@@ -46,8 +46,8 @@ public:
     }
 
     emlib::HostSerial* serial;
-    LLCanBus* frame_dev;
-    can_duck::NetworkLayer *const network_layer;
+    LLCanBus* can;
+    can_duck::NetworkLayer* network_layer;
 
     std::shared_ptr<std::thread> recv_thread  {nullptr};
     std::shared_ptr<std::thread> send_thread  {nullptr};

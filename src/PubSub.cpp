@@ -49,9 +49,9 @@ void can_duck::fastMessageBuilder(
 
     /* 初始化 */
     USER_IASSERT(node_id <= 63, "invalid node id!");
-    USER_IASSERT(dir <= 1, "invalid dir!");
-    USER_IASSERT(msg_id <= 7, "Only support 3bit of msg id now!");
-    USER_IASSERT(len > 0, "empty message!");
+    USER_IASSERT(dir <= 1,      "invalid dir!");
+    USER_IASSERT(msg_id <= 7,   "only support 3 bit of msg id now!");
+    USER_IASSERT(len > 0,       "empty message!");
 
     //TODO: fast-std-msg
 

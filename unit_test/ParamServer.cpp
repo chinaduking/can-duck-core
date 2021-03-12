@@ -7,6 +7,7 @@
 
 #include "ServoPubMsg.hpp"
 #include "SimpleSerialNode.hpp"
+#include "ParamServer.hpp"
 
 using namespace can_duck;
 using namespace emlib;
@@ -30,8 +31,6 @@ namespace network_test {
         int local_addr = SERVO_ADDR;
 
         Node fcn_node(0);
-
-        FcnFrame frame_tmp;
 
         uint32_t cnt = 0;
 

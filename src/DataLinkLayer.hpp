@@ -31,7 +31,7 @@ namespace can_duck{
     static const int FRAME_NWK_INFO_LEN = 4;
 #pragma pack(4)
     /* 为了能快速收发数据和计算CRC，请保证在当前内存对齐配置下，成员的地址连续。*/
-    struct FcnFrame{
+    struct ServiceFrame{
         uint8_t priority    { 0 };     /* [DW0 3] 优先级*/
 
         /* [DW0 2:1] 以字节形式传输的通信设备的帧头。注意为低位对高位
@@ -109,10 +109,10 @@ namespace can_duck{
 
         /* 快速数据帧拷贝
          * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/
-        FcnFrame& operator=(const FcnFrame& other){
+        ServiceFrame& operator=(const ServiceFrame& other){
 
-            emlib::memcpy(this, (FcnFrame*)&other,
-                          ((FcnFrame&)other).getFrameMemSize());
+            emlib::memcpy(this, (ServiceFrame*)&other,
+                          ((ServiceFrame&)other).getFrameMemSize());
 
             this->payload_len = other.payload_len;
             return *this;
@@ -127,11 +127,11 @@ namespace can_duck{
     };
 #pragma pack(0)
 
-    std::string frame2stdstr(FcnFrame& frame);
+    std::string frame2stdstr(ServiceFrame& frame);
 
-    uint32_t frame2strbuf(FcnFrame& frame, char* buffer, uint32_t buffer_size);
+    uint32_t frame2strbuf(ServiceFrame& frame, char* buffer, uint32_t buffer_size);
 
-    typedef FcnFrame* FramePtr;
+    typedef ServiceFrame* FramePtr;
 //    typedef emlib::ESharedPtr<DataLinkFrame> FramePtr;
 }
 
@@ -220,7 +220,7 @@ namespace can_duck{
         virtual bool popTxQueue(FramePtr frame) = 0;
 
     private:
-        emlib::RingBuf<FcnFrame> tx_frame_queue;
+        emlib::RingBuf<ServiceFrame> tx_frame_queue;
 
         FramePtr sending_frame{nullptr};
 

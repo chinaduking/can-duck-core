@@ -9,6 +9,9 @@
 using namespace can_duck;
 using namespace emlib;
 
+
+void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg);
+
 ObjPool<LinkedList<std::unique_ptr<int>>,
         CLIENT_MAX_REQ_NUM*2> unique_ptr_node_objpool;
 
@@ -34,20 +37,21 @@ void ParamServerRequestEv::operator delete(void *p) noexcept {
 }
 
 void ParamServerRequestEv::evUpdate(){
-    context_client->ctx_network_layer->sendFrame(context_client->port_id,
-                                                 &cached_req);
+    CANMessage can_msg;
+    toCanMsg(cached_req, can_msg);
+    context_client->manager->sendFrame(can_msg);
     evWaitNotify(timeout_ms);
 }
 
 
-bool ParamServerRequestEv::matchNotifyMsg(FcnFrame& frame){
+bool ParamServerRequestEv::matchNotifyMsg(ServiceFrame& frame){
     return frame.src_id == cached_req.dest_id
            && frame.op_code == ack_op_code
            && frame.msg_id == cached_req.msg_id;
 }
 
 
-void ParamServerRequestEv::evNotifyCallback(FcnFrame& frame){
+void ParamServerRequestEv::evNotifyCallback(ServiceFrame& frame){
     onRecv(frame);
     evExit();
 }
@@ -74,7 +78,7 @@ void ParamServerRequestEv::onTimeout() {
     callback.call(context_client, 2);
 }
 
-void ParamServerRequestEv::onRecv(FcnFrame &frame) {
+void ParamServerRequestEv::onRecv(ServiceFrame &frame) {
 
     if(frame.op_code != ack_op_code){
         LOGE("frame.op_code != ack_op_code, %X  & %X, check evloop!",

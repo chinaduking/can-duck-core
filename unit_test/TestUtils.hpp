@@ -23,7 +23,7 @@ using namespace std;
 //#include "DataLinkLayer.hpp"
 
 namespace can_duck{
-//    inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
+//    inline bool DataLinkFrameCompare(ServiceFrame& frame1, ServiceFrame&
 //    frame2){
 //        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
 //            return false;
@@ -48,8 +48,8 @@ namespace can_duck{
 //        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
 //    }
 //
-//    inline bool DataLinkFramePayloadCompare(FcnFrame& frame1,
-//                                            FcnFrame& frame2){
+//    inline bool DataLinkFramePayloadCompare(ServiceFrame& frame1,
+//                                            ServiceFrame& frame2){
 //        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
 //            return false;
 //        }
