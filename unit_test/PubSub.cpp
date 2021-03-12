@@ -12,8 +12,6 @@ using namespace can_duck;
 /*
  * 测试实时对象字典使用网络进行传输
  **/
-#include "NetworkLayer.hpp"
-
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
 
@@ -85,15 +83,38 @@ namespace pubsub_test {
         }
     }
 
-#if 1
+    class PubNode {
+    public:
+        PubNode(int sid){
+            can = new emlib::SimCan(new emlib::HostSerial(sid));
+            pubsub = new can_duck::PubSubManager(can);
+        }
+
+        void spin() {
+            recv_thread = std::make_shared<std::thread>([&](){
+                CANMessage rx_msg;
+                for (int __i = 0 ; __i < 1; ){
+                    if(can->read(rx_msg)){
+                        pubsub->handleRecv(&rx_msg, 0);
+                    }
+                }});
+        }
+
+        void join(){ recv_thread->join(); }
+
+        LLCanBus* can;
+        can_duck::PubSubManager* pubsub;
+        std::shared_ptr<std::thread> recv_thread  {nullptr};
+    };
+
     TEST(PubSub, Network){
-        Node fcn_node(1);
+        PubNode fcn_node(1);
 
         Publisher*  servo_pub;
         Subscriber* servo_sub;
 
-        std::tie(servo_pub, servo_sub) = fcn_node.getPubSubManager()
-                .bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
+        std::tie(servo_pub, servo_sub) = fcn_node.pubsub
+                ->bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
 
         fcn_node.spin();
 
@@ -120,13 +141,13 @@ namespace pubsub_test {
 
 
     TEST(PubSub, NetworkHost) {
-        Node fcn_node(0);
+        PubNode fcn_node(0);
 
         Publisher*  servo_pub;
         Subscriber* servo_sub;
 
-        std::tie(servo_pub, servo_sub) = fcn_node.getPubSubManager()
-                .bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
+        std::tie(servo_pub, servo_sub) = fcn_node.pubsub
+                ->bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
 
 
         fcn_node.spin();
@@ -143,6 +164,5 @@ namespace pubsub_test {
         fcn_node.join();
 
     }
-#endif //0
 }
 

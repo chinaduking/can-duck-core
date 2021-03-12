@@ -6,8 +6,6 @@
 #include "OpCode.hpp"
 #include "CppUtils.hpp"
 #include "Tracer.hpp"
-#include "NetworkLayer.hpp"
-
 
 using namespace can_duck;
 using namespace emlib;

@@ -3,11 +3,11 @@
 //
 
 #include "TestUtils.hpp"
-#include "NetworkLayer.hpp"
-
 #include "ServoPubMsg.hpp"
-#include "SimpleSerialNode.hpp"
 #include "ParamServer.hpp"
+#include "SimCan.hpp"
+#include "HostSerial.hpp"
+#include "Tracer.hpp"
 
 using namespace can_duck;
 using namespace emlib;
@@ -26,16 +26,40 @@ namespace network_test {
         cout << sizeof(std::function<int(int)>) << endl;
     }
 
+    class SrvNode {
+    public:
+        SrvNode(int sid){
+            can = new emlib::SimCan(new emlib::HostSerial(sid));
+            srv = new can_duck::ParamServerManager(can);
+        }
+
+        void spin() {
+            recv_thread = std::make_shared<std::thread>([&](){
+                CANMessage rx_msg;
+                for (int __i = 0 ; __i < 1; ){
+                    if(can->read(rx_msg)){
+                        srv->handleRecv(&rx_msg, 0);
+                    }
+                }});
+        }
+
+        void join(){ recv_thread->join(); }
+
+        LLCanBus* can;
+        can_duck::ParamServerManager* srv;
+        std::shared_ptr<std::thread> recv_thread  {nullptr};
+    };
+
 
     TEST(ParamServer, Server) {
         int local_addr = SERVO_ADDR;
 
-        Node fcn_node(0);
+        SrvNode fcn_node(0);
 
         uint32_t cnt = 0;
 
-        auto server = fcn_node.network_layer->param_server_manager
-                .createServer(servo_service, local_addr);
+        auto server = fcn_node.srv
+                ->createServer(servo_service, local_addr);
 
         server->setWrAccess(servo_service.mode);
 
@@ -87,15 +111,15 @@ namespace network_test {
 
 
     TEST(ParamServer, Client) {
-        Node fcn_node(1);
+        SrvNode fcn_node(1);
 
         int servo_addr = SERVO_ADDR;
         int local_addr = HOST_ADDR;
 
         fcn_node.spin();
 
-        auto servo_client = fcn_node.network_layer->param_server_manager
-                .bindClientToServer(servo_service, servo_addr, local_addr, 0);
+        auto servo_client = fcn_node.srv->
+                bindClientToServer(servo_service, servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
             LOGD("request.. " );

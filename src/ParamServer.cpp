@@ -4,7 +4,6 @@
 
 #include "ParamServer.hpp"
 #include "OpCode.hpp"
-#include "NetworkLayer.hpp"
 #include "DuckDebug.hpp"
 using namespace can_duck;
 
