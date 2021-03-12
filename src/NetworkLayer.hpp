@@ -17,7 +17,7 @@ namespace can_duck{
     public:
         NetworkLayer(LLCanBus* can)
             :
-                pub_sub_manager(this)
+                pub_sub_manager(can)
                 ,param_server_manager(can),
                 can_bus(can)
                 {}

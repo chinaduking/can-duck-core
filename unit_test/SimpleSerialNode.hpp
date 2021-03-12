@@ -15,8 +15,8 @@
 class Node {
 public:
     Node(int sid) {
-        serial    = new emlib::HostSerial(sid);
-        can = new emlib::SimCan    (serial);
+        serial = new emlib::HostSerial(sid);
+        can = new emlib::SimCan(serial);
 
         network_layer = new can_duck::NetworkLayer(can);
     }

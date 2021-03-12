@@ -3,9 +3,7 @@
 //
 
 #include "PubSub.hpp"
-#include "NetworkLayer.hpp"
 #include "OpCode.hpp"
-
 #include "CppUtils.hpp"
 #include "Tracer.hpp"
 
@@ -284,11 +282,7 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-    if(ps_manager->network_layer == nullptr){
-        return;
-    }
-
-    ps_manager->network_layer->sendFrame(0, &trans_frame_tmp);
+    ps_manager->sendFrame(trans_frame_tmp);
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {
