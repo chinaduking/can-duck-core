@@ -15,7 +15,7 @@
 using namespace emlib;
 using namespace can_duck;
 
-
+#if 0
 //ObjPool<DataLinkFrame, FCN_ALLOCATE_FRAME_NUM> framObjPool;
 //
 //
@@ -353,3 +353,4 @@ std::string can_duck::frame2stdstr(FcnFrame& frame){
 #endif
 
 }
+#endif

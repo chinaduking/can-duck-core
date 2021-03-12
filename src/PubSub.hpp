@@ -25,17 +25,62 @@ namespace can_duck {
     class Subscriber;
 
     /* --------------------------------------------------------- */
+    struct HeaderFastMsgExt {
+        uint32_t reserve : 3;   /* =0 */
+        uint32_t is_seg  : 1;   /* =0 */
+        uint32_t is_msg  : 1;   /* =1 */
+        uint32_t node_id : 6;
+        uint32_t is_tx   : 1;
+        uint32_t msg_id  : 3;
+        uint32_t is_d1_empty : 1;
+        uint32_t data_0  : 8;
+        uint32_t data_1  : 8;
+    };
+
+    struct HeaderFastMsgStd {
+        uint32_t reserve : 21;  /* =0 */
+        uint32_t is_seg  : 1;   /* =0 */
+        uint32_t is_msg  : 1;   /* =1 */
+        uint32_t node_id : 6;
+        uint32_t is_tx   : 1;
+        uint32_t msg_id  : 3;
+    };
+
+    struct HeaderService{
+        uint32_t reserve : 3;   /* =0 */
+        uint32_t is_seg  : 1;   /* =0 */
+        uint32_t is_msg  : 1;   /* =0 */
+        uint32_t src_id  : 6;
+        uint32_t dest_id : 6;
+        uint32_t op_code : 5;
+        uint32_t service_id : 10;
+    };
+
+    struct HeaderSegment{
+        uint32_t reserve : 3;   /* =0 */
+        uint32_t is_seg  : 1;   /* =1 */
+        uint32_t src_id  : 6;
+        uint32_t dest_id : 6;
+        uint32_t trans_id: 6;
+        uint32_t status  : 2;
+        uint32_t data_0  : 8;
+    };
+
+
+
+
+
+    /* --------------------------------------------------------- */
     /**
      * @brief 构造一个数据帧
      *
      * @author  sdong
      * @date    2020/10/15
      */
-    void singleWriteFrameBuilder(
-            FcnFrame* result_frame,
-            uint16_t src_id,
-            uint16_t dest_id,
-            uint16_t op_code,
+    void fastMessageBuilder(
+            CANMessage* result_frame,
+            uint16_t node_id,
+            uint8_t  dir,
             uint16_t msg_id,
             uint8_t* p_data, uint16_t len);
 
@@ -81,21 +126,18 @@ namespace can_duck {
         ~PubSubManager() = default;
 
 
-        std::pair<Publisher*, Subscriber*> bindMessageChannel(SerDesDict& serdes_dict_tx,
-                                                              SerDesDict& serdes_dict_rx,
-                                                              uint16_t node_id,
-                                                              bool is_owner_node);
+
 
         /* --------- Public Methods --------  */
-//        Publisher* makePublisher(SerDesDict& serdes_dict,
-//                                 uint16_t node_id,
-//                                 bool is_owner, bool is_fast_msg=true);
-//
-//        Subscriber* makeSubscriber(SerDesDict& serdes_dict,
-//                                   uint16_t node_id,
-//                                   bool is_owner, bool is_fast_msg=true);
 
-        void handleWrite(FcnFrame* frame, uint16_t recv_port_id);
+        std::pair<Publisher*, Subscriber*> bindMessageChannel(
+            SerDesDict& serdes_dict_tx,
+            SerDesDict& serdes_dict_rx,
+            uint16_t node_id,
+            bool is_owner_node
+        );
+
+        int handleRecv(CANMessage* frame, uint16_t recv_port_id);
 
         /* ------- Public Variables --------  */
         NetworkLayer* const network_layer{nullptr};
@@ -194,8 +236,6 @@ namespace can_duck {
          */
         void regLocalSubscriber(Subscriber* subscriber);
 
-        Publisher& addPort(int port);
-
         /* ------- Public Variables --------  */
         const uint16_t node_id {0 };
 //        const uint16_t src_id     { 0 };
@@ -210,11 +250,9 @@ namespace can_duck {
         void*          const buffer      { nullptr };
         PubSubManager* const ps_manager  { nullptr };
 
-        FcnFrame trans_frame_tmp;
+        CANMessage trans_frame_tmp;
 
         emlib::LinkedList<Subscriber*> local_sub_ptr;
-        emlib::LinkedList<int> network_pub_ports;
-
     };
 
     /* --------------------------------------------------------- */

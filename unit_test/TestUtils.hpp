@@ -20,42 +20,42 @@
 using namespace std;
 
 
-#include "DataLinkLayer.hpp"
+//#include "DataLinkLayer.hpp"
 
 namespace can_duck{
-    inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
-    frame2){
-        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
-            return false;
-        }
-
-        if(frame1.msg_id != frame2.msg_id){
-            return false;
-        }
-
-        if(frame1.src_id != frame2.src_id){
-            return false;
-        }
-
-        if(frame1.dest_id != frame2.dest_id){
-            return false;
-        }
-
-        if(frame1.op_code != frame2.op_code){
-            return false;
-        }
-
-        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
-    }
-
-    inline bool DataLinkFramePayloadCompare(FcnFrame& frame1,
-                                            FcnFrame& frame2){
-        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
-            return false;
-        }
-
-        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
-    }
+//    inline bool DataLinkFrameCompare(FcnFrame& frame1, FcnFrame&
+//    frame2){
+//        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
+//            return false;
+//        }
+//
+//        if(frame1.msg_id != frame2.msg_id){
+//            return false;
+//        }
+//
+//        if(frame1.src_id != frame2.src_id){
+//            return false;
+//        }
+//
+//        if(frame1.dest_id != frame2.dest_id){
+//            return false;
+//        }
+//
+//        if(frame1.op_code != frame2.op_code){
+//            return false;
+//        }
+//
+//        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
+//    }
+//
+//    inline bool DataLinkFramePayloadCompare(FcnFrame& frame1,
+//                                            FcnFrame& frame2){
+//        if(frame1.getPayloadLen() != frame2.getPayloadLen()){
+//            return false;
+//        }
+//
+//        return memcmp(frame1.payload, frame2.payload, frame1.getPayloadLen()) == 0;
+//    }
 
 }
 

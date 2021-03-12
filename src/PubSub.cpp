@@ -38,53 +38,73 @@ obj_size_t can_duck::MsgDictSingleWrite(SerDesDict* obj_dict,
     return data_sz;
 }
 
-void can_duck::singleWriteFrameBuilder(
-        FcnFrame* result_frame,
-        uint16_t src_id,
-        uint16_t dest_id,
-        uint16_t op_code,
+void can_duck::fastMessageBuilder(
+        CANMessage* result_frame,
+        uint16_t node_id,
+        uint8_t  dir,
         uint16_t msg_id,
         uint8_t* p_data, uint16_t len){
 
     USER_ASSERT(result_frame != nullptr);
 
-
     /* 初始化 */
-//    result_frame->op_code = ;
-    result_frame->src_id  = src_id;
-    result_frame->dest_id = dest_id;
-    result_frame->op_code = op_code;
-    result_frame->msg_id  = msg_id; /* 消息ID为起始ID */
+    USER_IASSERT(node_id <= 63, "invalid node id!");
+    USER_IASSERT(dir <= 1, "invalid dir!");
+    USER_IASSERT(msg_id <= 7, "Only support 3bit of msg id now!");
+    USER_IASSERT(len > 0, "empty message!");
 
-    result_frame->setPayloadLen(len);      /* 开始对数据长度进行累加 */
+    //TODO: fast-std-msg
 
-    uint8_t * payload_ptr = result_frame->payload;
+    result_frame->format = CANExtended;
 
+    HeaderFastMsgExt id;
+    id.is_seg = 0;
+    id.is_msg = 0;
+    id.node_id = node_id;
+    id.is_tx = dir;
+    id.msg_id = msg_id;
+    id.is_d1_empty = (len == 1 ? 1:0);
+    id.data_0 = p_data[0];
+    id.data_1 = (len == 1 ? 0 : p_data[1]);
 
+    result_frame->id = *((uint32_t*)&id);
+
+    if(len <= 2){
+        result_frame->len = 0;
+        return;
+    }
+
+    result_frame->len = len - 2;
     /* 填充数据 */
-    emlib::memcpy(payload_ptr, p_data, len);
+    emlib::memcpy(result_frame->data, p_data+2, len - 2);
 
 }
-
-//void PubSubChannel::networkPublish(FcnFrame *frame) {
-//    if(network_layer != nullptr){
-//        //TODO: by publish ctrl rules!!
-//        network_layer->sendFrame(0, frame);
-//    }
-//}
-
 
 /* ---------------------------------------------------------
  *            Realtime Object Transfer Controller
  * ---------------------------------------------------------
  */
 
-
-void PubSubManager::handleWrite(FcnFrame* frame, uint16_t recv_port_id) {
+int PubSubManager::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
+    uint8_t buf[66];
+
+    /* ! is msg*/
+    if(frame->format == CANExtended &&
+        (frame->id & (((uint32_t) 1) << 27))){
+        return 0;
+    }
+
+    if(frame->format == CANStandard){
+        //TODO: handle fast msg std;
+        return 0;
+    }
+
+    HeaderFastMsgExt header = *(HeaderFastMsgExt*)(&frame->id);
 
     for(auto& sub : created_subscribers){
-        if(sub->node_id == frame->src_id){
+        if(sub->node_id == header.node_id
+            && (sub->is_owner == !header.is_tx)){
             subscriber = sub;
         }
     }
@@ -93,28 +113,32 @@ void PubSubManager::handleWrite(FcnFrame* frame, uint16_t recv_port_id) {
     if(subscriber == nullptr){
         LOGW("PubSubManager::handleWrite, channel == nullptr\n");
 
-        return;
+        return 1;
     }
 
-    auto opcode = static_cast<OpCode>(frame->op_code);
+    if(header.is_d1_empty){
+        buf[0] = header.data_0;
+        MsgDictSingleWrite(
+                subscriber->serdes_dict,
+                subscriber->buffer,
+                header.msg_id,
+                buf, 1);
 
-    switch (opcode) {
-        case OpCode::Publish:
-            MsgDictSingleWrite(
-                    subscriber->serdes_dict,
-                    subscriber->buffer,
-                    frame->msg_id,
-                    frame->payload, frame->getPayloadLen());
+        return 1;
+    }else{
+        buf[0] = header.data_0;
+        buf[1] = header.data_1;
+        emlib::memcpy(buf+2, frame->data, frame->len);
+        MsgDictSingleWrite(
+                subscriber->serdes_dict,
+                subscriber->buffer,
+                header.msg_id,
+                buf, frame->len + 2);
 
-            break;
-
-        case OpCode::PublishReq:
-            break;
-
-        default:
-            break;
+        return 1;
     }
 
+    return 0;
 }
 
 
@@ -237,50 +261,6 @@ Subscriber* PubSubManager::bindSubscriberToChannel(SerDesDict& serdes_dict,
     return subscriber;
 }
 
-
-#if 0
-Publisher* PubSubManager::makePublisher(SerDesDict& serdes_dict,
-                                        uint16_t node_id,
-                                        bool is_owner,
-                                        bool is_fast_msg){
-    return bindPublisherToChannel(serdes_dict, node_id);
-}
-
-
-Subscriber * PubSubManager::makeSubscriber(SerDesDict &serdes_dict,
-                                           uint16_t node_id,
-                                           bool is_owner,
-                                           bool is_fast_msg) {
-    auto buffer = getSharedBuffer(serdes_dict, node_id);
-
-#if 0  /*skip check under refactor*/
-    for(auto& sub : created_subscribers){
-        /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
-        USER_IASSERT(
-                !((sub->src_id == node_id) && (sub->node_id == channel_addr)),
-                "duplicate subscriber!");
-    }
-#endif
-    auto subscriber = new Subscriber(serdes_dict, buffer, node_id, this);
-
-    created_subscribers.push(subscriber);
-
-    /* 将所有已经创建的发布者注册到新创建的订阅者中 */
-    for(auto& pub: created_publishers){
-        if(pub->node_id == subscriber->node_id){
-            pub->regLocalSubscriber(subscriber);
-        }
-    }
-
-    return subscriber;
-}
-#endif
-
-Publisher & Publisher::addPort(int port) {
-    network_pub_ports.push(port);
-    return *this;
-}
-
 void Publisher::publish(hDictItem &msg, bool local_only) {
     USER_ASSERT(ps_manager != nullptr);
 
@@ -292,22 +272,23 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
         sub->notify(msg.index);
     }
 
-    /* 再进行网络发布：*/
-    if(network_pub_ports.size() == 0 || local_only){
+    /* 如果指定只进行本地发布，则发布已经完成、返回。*/
+    if(local_only){
         return;
     }
 
-    singleWriteFrameBuilder(
+    can_duck::fastMessageBuilder(
             &trans_frame_tmp,
             node_id,
-            1,
-            static_cast<uint8_t>(OpCode::Publish),
+            is_owner,  /* 如果是所有者节点的发布者，则是tx类型消息；否则是rx类型的消息*/
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-    for(auto port : network_pub_ports){
-        ps_manager->network_layer->sendFrame(port, &trans_frame_tmp);
+    if(ps_manager->network_layer == nullptr){
+        return;
     }
+
+    ps_manager->network_layer->sendFrame(0, &trans_frame_tmp);
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {

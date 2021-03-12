@@ -6,7 +6,7 @@
 #define can_duck_SIMPLESERIALNODE_HPP
 
 #include "NetworkLayer.hpp"
-
+#include "SimCan.hpp"
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
 
@@ -14,11 +14,10 @@ can_duck::NetworkLayer gNetworkLayer;
 
 class Node {
 public:
-    Node(int sid) :
-            network_layer(&gNetworkLayer) {
+    Node(int sid) : network_layer(&gNetworkLayer) {
+        serial    = new emlib::HostSerial(sid);
+        frame_dev = new emlib::SimCan    (serial);
 
-        serial = new emlib::HostSerial(sid);
-        frame_dev = new can_duck::ByteFrameIODevice(serial);
         network_layer->addDataLinkDevice(frame_dev);
     }
 
@@ -47,7 +46,7 @@ public:
     }
 
     emlib::HostSerial* serial;
-    can_duck::ByteFrameIODevice* frame_dev;
+    LLCanBus* frame_dev;
     can_duck::NetworkLayer *const network_layer;
 
     std::shared_ptr<std::thread> recv_thread  {nullptr};

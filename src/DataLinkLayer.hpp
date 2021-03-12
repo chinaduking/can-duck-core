@@ -15,6 +15,7 @@
 #include "RingBuf.hpp"
 #include "LLComDevice.hpp"
 #include "CppUtils.hpp"
+#if 0
 
 namespace can_duck{
     /* IDs */
@@ -320,24 +321,8 @@ namespace can_duck{
         uint8_t header_buf[MAX_HEADER_LEN+1];/*一字节长度信息*/
         uint8_t crc_buf   [2];               /*2字节CRC*/
     };
-
-#if 0
-    class CanFrameIODevice : public FrameIODevice{
-    public:
-        CanFrameIODevice(LLCanBus* ll_can): ll_can(ll_can){
-        }
-
-        ~CanFrameIODevice() override = default;
-
-        bool read(FcnFrame* frame) override;
-        bool write(FcnFrame* frame) override;
-
-    private:
-        LLCanBus* const ll_can;
-
-    };
-#endif
-
 }
+
+#endif
 
 #endif //can_duck_DATALINKLAYER_HPP

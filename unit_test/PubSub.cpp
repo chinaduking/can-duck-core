@@ -95,8 +95,6 @@ namespace pubsub_test {
         std::tie(servo_pub, servo_sub) = fcn_node.getPubSubManager()
                 .bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
 
-        servo_pub->addPort(0);
-
         fcn_node.spin();
 
         uint32_t cnt = 0;
