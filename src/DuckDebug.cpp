@@ -26,7 +26,7 @@ static char* mOpCodeStr[]={
 
 uint32_t can_duck::frame2strbuf(ServiceFrame& frame, char* buffer, uint32_t buffer_size){
 
-    if(frame.getPayloadLen() > DATALINK_MTU){
+    if(frame.payload_len > DATALINK_MTU){
         LOGW("frame2strbuf: too long frame!");
 //        return 0;
     }
@@ -50,12 +50,12 @@ uint32_t can_duck::frame2strbuf(ServiceFrame& frame, char* buffer, uint32_t buff
                             frame.dest_id  & 0xff,
 
                             frame.msg_id   & 0xff,
-                            frame.getPayloadLen());
+                            frame.payload_len);
 
     buffer_remain -= info_len;
     p_buffer += info_len;
 
-    for(int i = 0; i < frame.getPayloadLen(); i ++){
+    for(int i = 0; i < frame.payload_len; i ++){
         sprintf(p_buffer, "%.2X ", frame.payload[i]);
         p_buffer += 3;
         buffer_remain -= 3;

@@ -284,7 +284,7 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-    ps_manager->nwk->sendFrame(0, &trans_frame_tmp);
+    ps_manager->sendFrame(trans_frame_tmp);
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {

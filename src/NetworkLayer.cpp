@@ -46,9 +46,9 @@ void NetworkLayer::recvPolling() {
         return;
     }
 
-//    if(param_server_manager.handleRecv(&frame_tmp, 0)){
-//        return;
-//    }
+    if(param_server_manager.handleRecv(&frame_tmp, 0)){
+        return;
+    }
 }
 
 void NetworkLayer::sendPolling() {

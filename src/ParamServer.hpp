@@ -19,8 +19,6 @@
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
 
-
-
 #ifdef USE_REQUEST_EVLOOP
 #include "ParamServerRequestEv.hpp"
 #endif

@@ -66,7 +66,7 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
         USER_ASSERT(size != 0);
 
         /* 单数据写入，要求长度要求必须匹配 */
-        if(size != frame->getPayloadLen()){
+        if(size != frame->payload_len){
             ack_code = 2;
         }
 

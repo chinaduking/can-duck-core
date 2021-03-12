@@ -18,12 +18,11 @@ namespace can_duck{
     static const int MAX_NODE_NUM = MAX_LOCAL_NODE_NUM;
     static const int MAX_NODE_ID  = MAX_NODE_NUM - 1;
 
-#pragma pack(4)
     struct ServiceFrame {
     public:
         /* 网络层信息自此开始
          * Network Layer Info */
-        uint8_t src_id{0};   /* [DW1 3] 源节点ID   */
+        uint8_t src_id{0};    /* [DW1 3] 源节点ID   */
         uint8_t dest_id{0};   /* [DW1 2] 目标节点ID */
 
         uint8_t op_code{0};   /* [DW1 1] 操作码     */
@@ -31,31 +30,7 @@ namespace can_duck{
 
         uint8_t payload[DATALINK_MTU]{};
         uint8_t payload_len{0};
-
-    public:
-        inline uint16_t getPayloadLen() {
-            return payload_len;
-        }
-
-        /* 获取指向网路数据包帧信息开头的指针 */
-        inline uint8_t *getNetworkFramePtr() {
-            return (uint8_t *) &src_id;
-        }
-
-        /* 获取指向网路数据包帧大小 */
-        inline uint16_t getNetworkFrameSize() {
-            /* 4个帧信息:
-             *  src_id | dest_id | op_code | msg_id
-             */
-            return payload_len + 4;
-        }
-
-        /* 获取指向CRC起始的指针 */
-        inline uint8_t *getCrcPtr() {
-            return payload + payload_len;
-        }
-
-//        framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。进行传输时，最大值为65535 */
+//      framets_t    ts_100us{ 0 };     /* 时间戳，精度为0.1ms。进行传输时，最大值为65535 */
 
         /* 快速数据帧拷贝
          * 因payload预留空间较大，直接赋值会造成较大CPU开销，因此只拷贝有效数据。*/

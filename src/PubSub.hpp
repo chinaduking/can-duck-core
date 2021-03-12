@@ -19,7 +19,7 @@ namespace can_duck {
      * ---------------------------------------------------------*/
     struct SubscribeCallback;
 
-    class NetworkLayer;
+//    class NetworkLayer;
     class PubSubManager;
     class Publisher;
     class Subscriber;
@@ -114,7 +114,7 @@ namespace can_duck {
     class PubSubManager{
     public:
         /* ---------- Constructors ---------  */
-        explicit PubSubManager(NetworkLayer* nwk)
+        explicit PubSubManager(LLCanBus* nwk)
             : nwk(nwk)
         { }
 
@@ -136,15 +136,15 @@ namespace can_duck {
 
         int handleRecv(CANMessage* frame, uint16_t recv_port_id);
 
-//        inline int sendFrame(CANMessage& msg){
-////            if(can == nullptr){
-////                return 0;
-////            }
-//            return nwk->write(msg);
-//        }
+        inline int sendFrame(CANMessage& msg){
+            if(nwk == nullptr){
+                return 0;
+            }
+            return nwk->write(msg);
+        }
 
         /* ------- Public Variables --------  */
-        NetworkLayer* const nwk {nullptr};
+        LLCanBus* const nwk {nullptr};
 
     protected:
         /* ------ Protected Declarations ------  */
