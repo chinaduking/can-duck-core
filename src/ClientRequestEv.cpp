@@ -15,11 +15,11 @@ void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg);
 ObjPool<LinkedList<std::unique_ptr<int>>,
         CLIENT_MAX_REQ_NUM*2> unique_ptr_node_objpool;
 
-void * LinkedListNodeAllocator::allocate(size_t size) {
+void * UPtrListAllocator::allocate(size_t size) {
     return unique_ptr_node_objpool.allocate();
 }
 
-void LinkedListNodeAllocator::deallocate(void *p) {
+void UPtrListAllocator::deallocate(void *p) {
     unique_ptr_node_objpool.deallocate(p);
 }
 

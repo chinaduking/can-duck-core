@@ -13,12 +13,12 @@
 
 namespace can_duck{
 
-    struct LinkedListNodeAllocator{
+    struct UPtrListAllocator{
         static void* allocate(size_t size);
         static void deallocate(void* p);
     };
 
-    using FcnEvLoop = emlib::EventLoop<ServiceFrame, LinkedListNodeAllocator>;
+    using FcnEvLoop = emlib::EventLoop<ServiceFrame, UPtrListAllocator>;
 
     class ParamServerClient;
 
