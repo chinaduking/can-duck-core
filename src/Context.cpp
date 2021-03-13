@@ -27,7 +27,7 @@ void Context::recvPolling(){
     }
 }
 
-void Context::poll(){
+void Context::__poll(){
     recvPolling();
 }
 

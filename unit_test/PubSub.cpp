@@ -29,7 +29,7 @@ namespace pubsub_test {
 
 
     DUCK_SUBSCRIBE_CALLBACK(servo_speed_cb) {
-        LOGD("servo_speed_cb: %d", subscriber->readBuffer(servo_msg_o.speed).data);
+        LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoMsgTx.speed).data);
     }
 
     TEST(PubSub, IntraProc) {
@@ -40,7 +40,7 @@ namespace pubsub_test {
         Subscriber* sub_any_to_servo;
 
         std::tie(pub_servo_to_any, sub_any_to_servo) =
-                ps_manager.bindChannel(servo_msg_o, servo_msg_i,
+                ps_manager.bindChannel(ServoMsgTx, ServoMsgRx,
                                        SERVO_ADDR, true);
 
         /* ECU Side Init */
@@ -48,33 +48,33 @@ namespace pubsub_test {
         Subscriber* sub_servo_to_ecu;
 
         std::tie(pub_ecu_to_servo, sub_servo_to_ecu) =
-                ps_manager.bindChannel(servo_msg_o, servo_msg_i,
+                ps_manager.bindChannel(ServoMsgTx, ServoMsgRx,
                                        SERVO_ADDR, false);
 
-        sub_servo_to_ecu->subscribe(servo_msg_o.speed, servo_speed_cb);
+        sub_servo_to_ecu->subscribe(ServoMsgTx.speed, servo_speed_cb);
 
 
 
         uint32_t cnt = 0;
         for (int __i = 0; __i < 1;) {
             /* Servo Side Run */
-            auto speed_msg = servo_msg_o.speed;
+            auto speed_msg = ServoMsgTx.speed;
             speed_msg << cnt;
             pub_servo_to_any->publish(speed_msg);
 
-            auto angle_msg = servo_msg_o.angle;
+            auto angle_msg = ServoMsgTx.angle;
             angle_msg << cnt;
             pub_servo_to_any->publish(angle_msg);
 
-            auto current_msg = servo_msg_o.current;
+            auto current_msg = ServoMsgTx.current;
             current_msg << cnt;
             pub_servo_to_any->publish(current_msg);
 
             /* ECU Side Run */
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                 sub_servo_to_ecu->readBuffer(servo_msg_o.speed).data,
-                 sub_servo_to_ecu->readBuffer(servo_msg_o.angle).data,
-                 sub_servo_to_ecu->readBuffer(servo_msg_o.current).data);
+                 sub_servo_to_ecu->readBuffer(ServoMsgTx.speed).data,
+                 sub_servo_to_ecu->readBuffer(ServoMsgTx.angle).data,
+                 sub_servo_to_ecu->readBuffer(ServoMsgTx.current).data);
 
             perciseSleep(0.1);
 
@@ -113,22 +113,22 @@ namespace pubsub_test {
         Subscriber* servo_sub;
 
         std::tie(servo_pub, servo_sub) = fcn_node.pubsub
-                ->bindChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
+                ->bindChannel(ServoMsgTx, ServoMsgRx, SERVO_ADDR, true);
 
         fcn_node.spin();
 
         uint32_t cnt = 0;
 
         for (int __i = 0; __i < 1;) {
-            auto speed_msg = servo_msg_o.speed;
+            auto speed_msg = ServoMsgTx.speed;
             speed_msg << cnt;
             servo_pub->publish(speed_msg);
 
-            auto angle_msg = servo_msg_o.angle;
+            auto angle_msg = ServoMsgTx.angle;
             angle_msg << cnt;
             servo_pub->publish(angle_msg);
 
-            auto current_msg = servo_msg_o.current;
+            auto current_msg = ServoMsgTx.current;
             current_msg << cnt;
             servo_pub->publish(current_msg);
 
@@ -146,7 +146,7 @@ namespace pubsub_test {
         Subscriber* servo_sub;
 
         std::tie(servo_pub, servo_sub) = fcn_node.pubsub
-                ->bindChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
+                ->bindChannel(ServoMsgTx, ServoMsgRx, SERVO_ADDR, false);
 
 
         fcn_node.spin();
@@ -155,9 +155,9 @@ namespace pubsub_test {
             perciseSleep(0.1);
 
             LOGW("servo: speed = %d, angle = %d, current = %d \n",
-                 servo_sub->readBuffer(servo_msg_o.speed).data,
-                 servo_sub->readBuffer(servo_msg_o.angle).data,
-                 servo_sub->readBuffer(servo_msg_o.current).data);
+                 servo_sub->readBuffer(ServoMsgTx.speed).data,
+                 servo_sub->readBuffer(ServoMsgTx.angle).data,
+                 servo_sub->readBuffer(ServoMsgTx.current).data);
         }
 
         fcn_node.join();

@@ -9,6 +9,9 @@
 #include "HostSerial.hpp"
 
 #define SERVO_ADDR 0x02
+#define ECU_ADDR   0x05
+
+using namespace duckmsg;
 
 TEST(Node, msg){
     emlib::SimCan can(
@@ -23,8 +26,13 @@ TEST(Node, msg){
 
     std::tie(servo_pub, servo_sub) =
             ctx.msg().bindChannel(
-                    duckmsg::servo_msg_o, duckmsg::servo_msg_i,
+                    ServoMsgTx, ServoMsgRx,
                     SERVO_ADDR,
                     true
             );
+
+//    servo_pub->publish(ServoMsgTx.angle(200));
+
+    auto server = ctx.srv().makeServer(ServoSrv, SERVO_ADDR);
+    auto client = ctx.srv().bindServer(ServoSrv, SERVO_ADDR, ECU_ADDR);
 }

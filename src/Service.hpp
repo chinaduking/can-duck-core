@@ -292,8 +292,7 @@ namespace can_duck {
         ParamServerClient* bindServer(
                 SerDesDict& prototype,
                 uint16_t server_addr,
-                  uint16_t client_addr,
-                  uint16_t port_id);
+                  uint16_t client_addr);
 
         int __handleRecv(CANMessage* can_msg, uint16_t recv_port_id);
         int __handleRecv(ServiceFrame* srv_frame, uint16_t recv_port_id);

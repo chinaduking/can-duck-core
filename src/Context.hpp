@@ -44,12 +44,8 @@ namespace can_duck{
         inline MessageContext& msg(){ return msg_ctx; }
         inline ServiceContext& srv(){ return srv_ctx; }
 
-        void poll();
+        void __poll();
 
-#ifdef SYSTYPE_FULL_OS
-        void stop();
-        void spin();
-#endif //SYSTYPE_FULL_OS
 
     protected:
         LLCanBus* const can;
@@ -58,13 +54,17 @@ namespace can_duck{
 
 #ifdef SYSTYPE_FULL_OS
         std::thread* thrd_recv{nullptr};
+        bool stop_flag{false};
+
 #endif //SYSTYPE_FULL_OS
 
         void recvPolling();
 
 #ifdef SYSTYPE_FULL_OS
-        bool stop_flag{false};
-#endif
+        void stop();
+        void spin();
+#endif //SYSTYPE_FULL_OS
+
     };
 
 }

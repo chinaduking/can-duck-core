@@ -62,18 +62,18 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoService_C servo_service;
+    extern ServoService_C ServoSrv;
 
 
 
 #pragma pack(2)
-    struct ServoMsgI_C : public can_duck::SerDesDict{
+    struct ServoMsgRx_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         can_duck::DictItem<int32_t> target_angle;
         can_duck::DictItem<int16_t> mode;
 
-        ServoMsgI_C() :
+        ServoMsgRx_C() :
         SerDesDict(2,&target_angle)
             , target_angle(0)
             , mode        (1)
@@ -105,18 +105,18 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoMsgI_C servo_msg_i;
+    extern ServoMsgRx_C ServoMsgRx;
 
 
 #pragma pack(2)
-    struct ServoMsgO_C : public can_duck::SerDesDict{
+    struct ServoMsgTx_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
         can_duck::DictItem<int16_t> speed;
         can_duck::DictItem<int32_t> angle;
         can_duck::DictItem<int8_t>  current;
 
-        ServoMsgO_C() :
+        ServoMsgTx_C() :
             SerDesDict(3, &speed)
 
             , speed   (0)
@@ -154,7 +154,7 @@ namespace duckmsg{
     };
 #pragma pack(0)
 
-    extern ServoMsgO_C servo_msg_o;
+    extern ServoMsgTx_C ServoMsgTx;
 }
 
 

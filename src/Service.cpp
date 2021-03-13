@@ -222,8 +222,7 @@ Service* ServiceContext::makeServer(SerDesDict& prototype, uint16_t address){
 ParamServerClient* ServiceContext::bindServer(
         SerDesDict& prototype,
         uint16_t server_addr,
-          uint16_t client_addr,
-          uint16_t port_id){ //TODO: remove port id.
+          uint16_t client_addr){ //TODO: remove port id.
     ParamServerClient* client = nullptr;
     for(auto & cli : created_clients){
         if(cli.address == client_addr){
@@ -234,7 +233,7 @@ ParamServerClient* ServiceContext::bindServer(
 
     if(client == nullptr){
         client = new ParamServerClient(this, server_addr, client_addr,
-                                       port_id,
+                                       0,
                                        &prototype,
                                        prototype.createBuffer());
 
