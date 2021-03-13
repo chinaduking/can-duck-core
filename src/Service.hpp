@@ -287,9 +287,9 @@ namespace can_duck {
         ~ServiceContext() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        Service* createServer(SerDesDict& prototype, uint16_t address);
+        Service* makeServer(SerDesDict& prototype, uint16_t address);
 
-        ParamServerClient* bindClientToServer(
+        ParamServerClient* bindServer(
                 SerDesDict& prototype,
                 uint16_t server_addr,
                   uint16_t client_addr,

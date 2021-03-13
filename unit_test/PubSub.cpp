@@ -40,16 +40,16 @@ namespace pubsub_test {
         Subscriber* sub_any_to_servo;
 
         std::tie(pub_servo_to_any, sub_any_to_servo) =
-                ps_manager.bindMessageChannel(servo_msg_o, servo_msg_i,
-                                              SERVO_ADDR, true);
+                ps_manager.bindChannel(servo_msg_o, servo_msg_i,
+                                       SERVO_ADDR, true);
 
         /* ECU Side Init */
         Publisher*  pub_ecu_to_servo;
         Subscriber* sub_servo_to_ecu;
 
         std::tie(pub_ecu_to_servo, sub_servo_to_ecu) =
-                ps_manager.bindMessageChannel(servo_msg_o, servo_msg_i,
-                                              SERVO_ADDR, false);
+                ps_manager.bindChannel(servo_msg_o, servo_msg_i,
+                                       SERVO_ADDR, false);
 
         sub_servo_to_ecu->subscribe(servo_msg_o.speed, servo_speed_cb);
 
@@ -113,7 +113,7 @@ namespace pubsub_test {
         Subscriber* servo_sub;
 
         std::tie(servo_pub, servo_sub) = fcn_node.pubsub
-                ->bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
+                ->bindChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, true);
 
         fcn_node.spin();
 
@@ -146,7 +146,7 @@ namespace pubsub_test {
         Subscriber* servo_sub;
 
         std::tie(servo_pub, servo_sub) = fcn_node.pubsub
-                ->bindMessageChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
+                ->bindChannel(servo_msg_o, servo_msg_i, SERVO_ADDR, false);
 
 
         fcn_node.spin();

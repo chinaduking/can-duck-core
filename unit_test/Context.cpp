@@ -22,9 +22,9 @@ TEST(Node, msg){
     can_duck::Subscriber* servo_sub;
 
     std::tie(servo_pub, servo_sub) =
-            ctx.msg().bindMessageChannel(
+            ctx.msg().bindChannel(
                     duckmsg::servo_msg_o, duckmsg::servo_msg_i,
                     SERVO_ADDR,
                     true
-                    );
+            );
 }

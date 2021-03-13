@@ -193,7 +193,7 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
 
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-Service* ServiceContext::createServer(SerDesDict& prototype, uint16_t address){
+Service* ServiceContext::makeServer(SerDesDict& prototype, uint16_t address){
     Service* server = nullptr;
     for(auto & srv : created_servers){
         if(srv.address == address){
@@ -219,7 +219,7 @@ Service* ServiceContext::createServer(SerDesDict& prototype, uint16_t address){
 }
 
 
-ParamServerClient* ServiceContext::bindClientToServer(
+ParamServerClient* ServiceContext::bindServer(
         SerDesDict& prototype,
         uint16_t server_addr,
           uint16_t client_addr,

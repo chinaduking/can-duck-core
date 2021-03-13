@@ -81,7 +81,7 @@ namespace can_duck {
 
         /* --------- Public Methods --------  */
 
-        std::pair<Publisher*, Subscriber*> bindMessageChannel(
+        std::pair<Publisher*, Subscriber*> bindChannel(
             SerDesDict& serdes_dict_tx,
             SerDesDict& serdes_dict_rx,
             uint16_t node_id,

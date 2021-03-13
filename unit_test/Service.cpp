@@ -59,7 +59,7 @@ namespace service_test {
         uint32_t cnt = 0;
 
         auto server = fcn_node.srv
-                ->createServer(servo_service, local_addr);
+                ->makeServer(servo_service, local_addr);
 
         server->setWrAccess(servo_service.mode);
 
@@ -119,7 +119,7 @@ namespace service_test {
         fcn_node.spin();
 
         auto servo_client = fcn_node.srv->
-                bindClientToServer(servo_service, servo_addr, local_addr, 0);
+                bindServer(servo_service, servo_addr, local_addr, 0);
 
         for(int __i = 0; __i < 1; ){
             LOGD("request.. " );

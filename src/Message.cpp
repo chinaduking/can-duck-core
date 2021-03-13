@@ -170,10 +170,10 @@ void * MessageContext::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uin
 
 }
 
-std::pair<Publisher*, Subscriber*> MessageContext::bindMessageChannel(SerDesDict& serdes_dict_tx,
-                                                                      SerDesDict& serdes_dict_rx,
-                                                                      uint16_t node_id,
-                                                                      bool is_owner_node){
+std::pair<Publisher*, Subscriber*> MessageContext::bindChannel(SerDesDict& serdes_dict_tx,
+                                                               SerDesDict& serdes_dict_rx,
+                                                               uint16_t node_id,
+                                                               bool is_owner_node){
     Publisher*  publisher  = nullptr;
     Subscriber* subscriber = nullptr;
 
