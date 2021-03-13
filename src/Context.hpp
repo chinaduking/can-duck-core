@@ -6,8 +6,8 @@
 #define can_duck_NODE_HPP
 
 #include "Common.hpp"
-#include "PubSub.hpp"
-#include "ParamServer.hpp"
+#include "Message.hpp"
+#include "Service.hpp"
 
 #ifdef SYSTYPE_FULL_OS
     #include <vector>

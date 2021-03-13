@@ -188,10 +188,10 @@ namespace can_duck {
      * 读写数据的，称为寄存器模式的SVO。
      * 寄存器模式下，可以有回调，也可以没有。一般写入会有回调，读取没有。
      * */
-    class ParamServer{
+    class Service{
     public:
-        ParamServer(ServiceContext* manager,
-                    uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
+        Service(ServiceContext* manager,
+                uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 manager(manager),
                 server_addr(address),
                 buffer(buffer),
@@ -199,7 +199,7 @@ namespace can_duck {
                 {
         }
 
-        ~ParamServer() = default;
+        ~Service() = default;
 
         //TODO: 任何表项目被从网络写入，均回调
         void onDataChaged(hDictItem* msg,
@@ -287,7 +287,7 @@ namespace can_duck {
         ~ServiceContext() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-        ParamServer* createServer(SerDesDict& prototype, uint16_t address);
+        Service* createServer(SerDesDict& prototype, uint16_t address);
 
         ParamServerClient* bindClientToServer(
                 SerDesDict& prototype,
@@ -315,7 +315,7 @@ namespace can_duck {
 
         struct CreatedServer{
             int         address {-1};
-            ParamServer*  instance {nullptr};
+            Service*  instance {nullptr};
         };
 
         emlib::Vector<CreatedServer> created_servers;

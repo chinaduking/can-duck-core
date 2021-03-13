@@ -2,7 +2,7 @@
 // Created by sdong on 2020/10/15.
 //
 
-#include "ParamServer.hpp"
+#include "Service.hpp"
 #include "OpCode.hpp"
 #include "DuckDebug.hpp"
 using namespace can_duck;
@@ -41,8 +41,8 @@ void fromCanMsg(CANMessage& msg, ServiceFrame& srv_frame){
 /*将缓冲区内容写入参数表（1个项目），写入数据长度必须匹配元信息中的数据长度
  * 返回1为成功，否则为失败
  * */
-obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
-                                   uint16_t port_id){
+obj_size_t Service::onWriteReq(ServiceFrame* frame,
+                               uint16_t port_id){
     LOGI("onWriteReq recv a frame: %s",
          can_duck::frame2stdstr(*frame).c_str());
 
@@ -112,8 +112,8 @@ obj_size_t ParamServer::onWriteReq(ServiceFrame* frame,
 
 /* 响应读取请求
  * */
-obj_size_t ParamServer::onReadReq(ServiceFrame* frame,
-                                  uint16_t port_id){
+obj_size_t Service::onReadReq(ServiceFrame* frame,
+                              uint16_t port_id){
 
     LOGI("onReadReq recv a frame: %s",
          can_duck::frame2stdstr(*frame).c_str());
@@ -193,8 +193,8 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
 
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-ParamServer* ServiceContext::createServer(SerDesDict& prototype, uint16_t address){
-    ParamServer* server = nullptr;
+Service* ServiceContext::createServer(SerDesDict& prototype, uint16_t address){
+    Service* server = nullptr;
     for(auto & srv : created_servers){
         if(srv.address == address){
             server = srv.instance;
@@ -203,9 +203,9 @@ ParamServer* ServiceContext::createServer(SerDesDict& prototype, uint16_t addres
     }
 
     if(server == nullptr){
-        server = new ParamServer(this, address,
-                                 &prototype,
-                                 prototype.createBuffer());
+        server = new Service(this, address,
+                             &prototype,
+                             prototype.createBuffer());
 
         CreatedServer srv = {
                 .address = address,

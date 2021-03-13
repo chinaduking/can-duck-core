@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 #include "ServoDict.hpp"
-#include "ParamServer.hpp"
+#include "Service.hpp"
 #include "SimCan.hpp"
 #include "HostSerial.hpp"
 #include "Tracer.hpp"

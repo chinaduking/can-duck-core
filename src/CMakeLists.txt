@@ -1,7 +1,7 @@
 add_library(can_duck
-        PubSub.cpp
+        Message.cpp
         ClientRequestEv.cpp
-        ParamServer.cpp
+        Service.cpp
         FileTransfer.cpp
         Context.cpp
         DuckDebug.cpp)

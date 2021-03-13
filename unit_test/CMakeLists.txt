@@ -8,7 +8,7 @@ target_link_libraries(testDataObjects ${UT_DEFAULT_LIBS})
 add_executable(testPubSub
         PubSub.cpp
         ServoDict.cpp
-        ${PROJECT_SOURCE_DIR}/src/PubSub.cpp
+        ${PROJECT_SOURCE_DIR}/src/Message.cpp
         ${PROJECT_SOURCE_DIR}/src/DuckDebug.cpp)
 
 target_link_libraries(testPubSub ${UT_DEFAULT_LIBS} )
@@ -16,8 +16,8 @@ target_link_libraries(testPubSub ${UT_DEFAULT_LIBS} )
 add_executable(testParamServer
         ParamServer.cpp
         ServoDict.cpp
-        ${PROJECT_SOURCE_DIR}/src/PubSub.cpp
-        ${PROJECT_SOURCE_DIR}/src/ParamServer.cpp
+        ${PROJECT_SOURCE_DIR}/src/Message.cpp
+        ${PROJECT_SOURCE_DIR}/src/Service.cpp
         ${PROJECT_SOURCE_DIR}/src/ClientRequestEv.cpp
         ${PROJECT_SOURCE_DIR}/src/DuckDebug.cpp
         )

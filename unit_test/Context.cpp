@@ -16,6 +16,7 @@ TEST(Node, msg){
         );
 
     can_duck::Context ctx(&can);
+
     /* Servo Side Init */
     can_duck::Publisher*  pub_servo_to_any;
     can_duck::Subscriber* sub_any_to_servo;
