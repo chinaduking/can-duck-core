@@ -98,12 +98,12 @@ obj_size_t Service::onWriteReq(ServiceFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!manager->handleRecv(&ack_frame, port_id)){
+    if(!context->handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
         LOGI("onWriteReq send a frame: %s", can_duck::frame2stdstr(ack_frame).c_str());
 
-        manager->sendFrame(can_msg);
+        context->sendFrame(can_msg);
     }
 
     return ack_code;
@@ -160,12 +160,12 @@ obj_size_t Service::onReadReq(ServiceFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!manager->handleRecv(&ack_frame, port_id)){
+    if(!context->handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
 
         LOGI("onReadReq send a frame:\n %s", can_duck::frame2stdstr(ack_frame).c_str());
-        manager->sendFrame(can_msg);
+        context->sendFrame(can_msg);
     }
 
     return 0;
@@ -183,10 +183,10 @@ void ParamServerClient::onWriteAck(ServiceFrame* frame){
 
 int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
     /* 先在本地（同进程）已创建的服务器中搜索，如果找到则不再在网络中进行发送 */
-    if(!manager->handleRecv(frame, port_id)){
+    if(!context->handleRecv(frame, port_id)){
         CANMessage can_msg;
         toCanMsg(*frame, can_msg);
-        manager->sendFrame(can_msg);
+        context->sendFrame(can_msg);
     }
     return 0;
 }

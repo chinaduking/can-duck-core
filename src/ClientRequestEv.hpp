@@ -43,7 +43,7 @@ namespace can_duck{
         void* p_this {nullptr};
     };
 
-    #define FCN_REQUEST_CALLBACK(fname) void fname(void* p_this, \
+    #define DUCK_REQUEST_CALLBACK(fname) void fname(void* p_this, \
             int ev_code, ParamServerClient* client)
 
     /*

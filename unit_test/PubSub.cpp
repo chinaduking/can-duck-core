@@ -28,7 +28,7 @@ namespace pubsub_test {
     #define HOST_ADDR  0x05
 
 
-    FCN_SUBSCRIBE_CALLBACK(servo_speed_cb) {
+    DUCK_SUBSCRIBE_CALLBACK(servo_speed_cb) {
         LOGD("servo_speed_cb: %d", subscriber->readBuffer(servo_msg_o.speed).data);
     }
 

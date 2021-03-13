@@ -246,7 +246,7 @@ namespace can_duck {
         void* p_this {nullptr};
     };
 
-    #define FCN_SUBSCRIBE_CALLBACK(fname) void fname(void* p_this, \
+    #define DUCK_SUBSCRIBE_CALLBACK(fname) void fname(void* p_this, \
                     Subscriber* subscriber)
 
     /* --------------------------------------------------------- */
@@ -266,14 +266,14 @@ namespace can_duck {
                    void* buffer,
                    uint16_t channel_id,
 //                    uint16_t src_id,
-                    MessageContext* ps_manager) :
+                    MessageContext* context) :
 
                 node_id(channel_id),
 //                src_id(src_id),
 
                 serdes_dict(&serdes_dict),
                 buffer(buffer),
-                ps_manager(ps_manager),
+                context(context),
                 callback_table(serdes_dict.dictSize()) {
                     callback_table.resize(serdes_dict.dictSize());
                 }
@@ -312,7 +312,7 @@ namespace can_duck {
         /* ------- Private Variables --------  */
         SerDesDict*    const serdes_dict { nullptr };
         void*          const buffer      { nullptr };
-        MessageContext* const ps_manager  {nullptr };
+        MessageContext* const context  {nullptr };
 
         emlib::Vector<SubscribeCallback> callback_table;
 

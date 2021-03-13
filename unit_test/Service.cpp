@@ -78,7 +78,7 @@ namespace service_test {
         fcn_node.join();
     }
 
-    FCN_REQUEST_CALLBACK(angle_rd_callback){
+    DUCK_REQUEST_CALLBACK(angle_rd_callback){
         if(ev_code == 2){
             LOGE("Read angle timeout");
             return;
@@ -93,7 +93,7 @@ namespace service_test {
 
     }
 
-    FCN_REQUEST_CALLBACK(mode_wr_callback){
+    DUCK_REQUEST_CALLBACK(mode_wr_callback){
         if(ev_code == 2){
             LOGE("Write angle timeout");
             return;

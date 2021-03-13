@@ -14,7 +14,7 @@ add_executable(testPubSub
 target_link_libraries(testPubSub ${UT_DEFAULT_LIBS} )
 
 add_executable(testParamServer
-        ParamServer.cpp
+        Service.cpp
         ServoDict.cpp
         ${PROJECT_SOURCE_DIR}/src/Message.cpp
         ${PROJECT_SOURCE_DIR}/src/Service.cpp

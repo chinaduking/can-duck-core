@@ -30,7 +30,7 @@ namespace can_duck {
 
     class ParamServerClient{
     public:
-        ParamServerClient(ServiceContext* manager,
+        ParamServerClient(ServiceContext* context,
                           uint16_t server_addr,
                           uint16_t client_addr,
                           uint16_t port_id,
@@ -39,15 +39,15 @@ namespace can_duck {
 
                 server_addr(server_addr),
                 client_addr(client_addr),
-                manager(manager),
+                context(context),
                 port_id(port_id)              //TODO: noport, broadcast!
-                ,serdes_dict(serdes_dict)
-                ,buffer(buffer)
+                , serdes_dict(serdes_dict)
+                , buffer(buffer)
 
 #ifdef USE_REQUEST_EVLOOP
 
     #ifdef SYSTYPE_FULL_OS
-                    ,ev_loop(emlib::evloopTimeSrouceMS, 0)
+                    , ev_loop(emlib::evloopTimeSrouceMS, 0)
     #else //SYSTYPE_FULL_OS
     				,ev_loop(globalTimeSourceMS, CLIENT_MAX_REQ_NUM)
     #endif //SYSTYPE_FULL_OS
@@ -162,7 +162,7 @@ namespace can_duck {
         int networkSendFrame(uint16_t port_id, ServiceFrame* frame);
 
 //        NetworkLayer* const ctx_network_layer{nullptr};
-        ServiceContext* const manager;
+        ServiceContext* const context;
 
 
         void onReadAck(ServiceFrame* frame);
@@ -190,9 +190,9 @@ namespace can_duck {
      * */
     class Service{
     public:
-        Service(ServiceContext* manager,
+        Service(ServiceContext* context,
                 uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
-                manager(manager),
+                context(context),
                 server_addr(address),
                 buffer(buffer),
                 serdes_dict(obj_dict_shm)
@@ -267,7 +267,7 @@ namespace can_duck {
 
 //        NetworkLayer* const ctx_network_layer{nullptr};
 
-        ServiceContext* const manager;
+        ServiceContext* const context;
     };
 
 
