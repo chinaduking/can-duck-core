@@ -83,7 +83,7 @@ void can_duck::fastMessageBuilder(
  * ---------------------------------------------------------
  */
 
-int MessageContext::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
+int MessageContext::__handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
     uint8_t buf[66];
 
@@ -282,7 +282,7 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
-    ps_manager->sendFrame(trans_frame_tmp);
+    ps_manager->__sendFrame(trans_frame_tmp);
 }
 
 void Publisher::regLocalSubscriber(Subscriber *subscriber) {

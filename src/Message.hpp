@@ -72,15 +72,12 @@ namespace can_duck {
     public:
         /* ---------- Constructors ---------  */
         explicit MessageContext(LLCanBus* nwk)
-            : nwk(nwk)
+            : can(nwk)
         { }
 
 
         /* ----------- Destructor ----------  */
         ~MessageContext() = default;
-
-
-
 
         /* --------- Public Methods --------  */
 
@@ -91,17 +88,17 @@ namespace can_duck {
             bool is_owner_node
         );
 
-        int handleRecv(CANMessage* frame, uint16_t recv_port_id);
+        int __handleRecv(CANMessage* frame, uint16_t recv_port_id);
 
-        inline int sendFrame(CANMessage& msg){
-            if(nwk == nullptr){
+        inline int __sendFrame(CANMessage& msg){
+            if(can == nullptr){
                 return 0;
             }
-            return nwk->write(msg);
+            return can->write(msg);
         }
 
         /* ------- Public Variables --------  */
-        LLCanBus* const nwk {nullptr};
+
 
     protected:
         /* ------ Protected Declarations ------  */
@@ -114,7 +111,7 @@ namespace can_duck {
         /* --------- Protected Methods --------  */
 
         /* ------- Protected Variables --------  */
-
+        LLCanBus* const can {nullptr};
 
         uint16_t poll_freq_hz{1000};
 

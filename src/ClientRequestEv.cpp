@@ -39,7 +39,7 @@ void ClientRequestEv::evUpdate(){
 
     LOGI("ClientRequestEv::evUpdate send a frame:\n %s", can_duck::frame2stdstr(cached_req).c_str());
 
-    context_client->context->sendFrame(can_msg);
+    context_client->context->__sendFrame(can_msg);
     evWaitNotify(timeout_ms);
 }
 

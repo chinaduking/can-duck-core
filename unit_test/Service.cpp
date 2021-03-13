@@ -38,7 +38,7 @@ namespace service_test {
                 CANMessage rx_msg;
                 for (int __i = 0 ; __i < 1; ){
                     if(can->read(rx_msg)){
-                        srv->handleRecv(&rx_msg, 0);
+                        srv->__handleRecv(&rx_msg, 0);
                     }
                 }});
         }

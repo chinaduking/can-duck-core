@@ -295,10 +295,10 @@ namespace can_duck {
                   uint16_t client_addr,
                   uint16_t port_id);
 
-        int handleRecv(CANMessage* can_msg, uint16_t recv_port_id);
-        int handleRecv(ServiceFrame* srv_frame, uint16_t recv_port_id);
+        int __handleRecv(CANMessage* can_msg, uint16_t recv_port_id);
+        int __handleRecv(ServiceFrame* srv_frame, uint16_t recv_port_id);
 
-        inline int sendFrame(CANMessage& msg){
+        inline int __sendFrame(CANMessage& msg){
             /*TODO: 下位机的can->write可能因缓存满/配置不成功而失败，
              * 应进行报错并将错误记录于本地 */
             if(can == nullptr){

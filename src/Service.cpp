@@ -98,12 +98,12 @@ obj_size_t Service::onWriteReq(ServiceFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!context->handleRecv(&ack_frame, port_id)){
+    if(!context->__handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
         LOGI("onWriteReq send a frame: %s", can_duck::frame2stdstr(ack_frame).c_str());
 
-        context->sendFrame(can_msg);
+        context->__sendFrame(can_msg);
     }
 
     return ack_code;
@@ -160,12 +160,12 @@ obj_size_t Service::onReadReq(ServiceFrame* frame,
     ack_frame.dest_id = frame->src_id;
 
     /* 先在本地（同进程）已创建的客户端中搜索，如果找到则不再在网络中进行发送 */
-    if(!context->handleRecv(&ack_frame, port_id)){
+    if(!context->__handleRecv(&ack_frame, port_id)){
         CANMessage can_msg;
         toCanMsg(ack_frame, can_msg);
 
         LOGI("onReadReq send a frame:\n %s", can_duck::frame2stdstr(ack_frame).c_str());
-        context->sendFrame(can_msg);
+        context->__sendFrame(can_msg);
     }
 
     return 0;
@@ -183,10 +183,10 @@ void ParamServerClient::onWriteAck(ServiceFrame* frame){
 
 int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
     /* 先在本地（同进程）已创建的服务器中搜索，如果找到则不再在网络中进行发送 */
-    if(!context->handleRecv(frame, port_id)){
+    if(!context->__handleRecv(frame, port_id)){
         CANMessage can_msg;
         toCanMsg(*frame, can_msg);
-        context->sendFrame(can_msg);
+        context->__sendFrame(can_msg);
     }
     return 0;
 }
@@ -249,14 +249,14 @@ ParamServerClient* ServiceContext::bindClientToServer(
     return client;
 }
 
-int ServiceContext::handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
+int ServiceContext::__handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
     ServiceFrame frame;
     fromCanMsg(*can_msg, frame);
 
-    return handleRecv(&frame, 0);
+    return __handleRecv(&frame, 0);
 }
 
-int ServiceContext::handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
+int ServiceContext::__handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;

@@ -18,10 +18,10 @@ TEST(Node, msg){
     can_duck::Context ctx(&can);
 
     /* Servo Side Init */
-    can_duck::Publisher*  pub_servo_to_any;
-    can_duck::Subscriber* sub_any_to_servo;
+    can_duck::Publisher*  servo_pub;
+    can_duck::Subscriber* servo_sub;
 
-    std::tie(pub_servo_to_any, sub_any_to_servo) =
+    std::tie(servo_pub, servo_sub) =
             ctx.msg().bindMessageChannel(
                     duckmsg::servo_msg_o, duckmsg::servo_msg_i,
                     SERVO_ADDR,

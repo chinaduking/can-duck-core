@@ -94,7 +94,7 @@ namespace pubsub_test {
                 CANMessage rx_msg;
                 for (int __i = 0 ; __i < 1; ){
                     if(can->read(rx_msg)){
-                        pubsub->handleRecv(&rx_msg, 0);
+                        pubsub->__handleRecv(&rx_msg, 0);
                     }
                 }});
         }

@@ -19,10 +19,10 @@ void Context::recvPolling(){
         return;
     }
 
-    if(msg_ctx.handleRecv(&rx_msg, 0)){
+    if(msg_ctx.__handleRecv(&rx_msg, 0)){
         return;
     }
-    if(srv_ctx.handleRecv(&rx_msg, 0)){
+    if(srv_ctx.__handleRecv(&rx_msg, 0)){
         return;
     }
 }
