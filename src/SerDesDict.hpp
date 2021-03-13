@@ -48,18 +48,21 @@ namespace can_duck {
             emlib::memset(&data, 0, sizeof(T));
         }
 
-        inline DictItem operator () (T&& input){
+        /* 对字典中数据进行复制同时赋值（对外具有原子性） */
+        inline DictItem operator () (T&& value){
             DictItem<T> result(this->index);
-            result.data = std::move(input);
+            result.data = std::move(value);
             return result;
         }
 
-        inline void operator<<(T input) { data = input; }
-        inline void operator>>(T &input) { input = data; }
+        inline void operator<<(T value) { data = value; }
+        inline void operator>>(T &value) { value = data; }
 
         T data;
     };
 #pragma pack(0)
+
+#define DICT_T(prototype) decltype(prototype.data)
 
 
     struct SerDesDict{
