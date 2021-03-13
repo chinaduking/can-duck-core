@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 #include "PubSub.hpp"
-#include "ServoPubMsg.hpp"
+#include "ServoDict.hpp"
 using namespace can_duck;
 
 
@@ -14,7 +14,7 @@ using namespace can_duck;
  **/
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
-#include "ServoPubMsg.hpp"
+#include "ServoDict.hpp"
 #include "SimCan.hpp"
 
 using namespace can_duck;
@@ -33,7 +33,7 @@ namespace pubsub_test {
     }
 
     TEST(PubSub, IntraProc) {
-        PubSubManager ps_manager(nullptr);
+        MessageContext ps_manager(nullptr);
 
         /* Servo Side Init */
         Publisher*  pub_servo_to_any;
@@ -86,7 +86,7 @@ namespace pubsub_test {
     public:
         PubNode(int sid){
             can = new emlib::SimCan(new emlib::HostSerial(sid));
-            pubsub = new can_duck::PubSubManager(can);
+            pubsub = new can_duck::MessageContext(can);
         }
 
         void spin() {
@@ -102,7 +102,7 @@ namespace pubsub_test {
         void join(){ recv_thread->join(); }
 
         LLCanBus* can;
-        can_duck::PubSubManager* pubsub;
+        can_duck::MessageContext* pubsub;
         std::shared_ptr<std::thread> recv_thread  {nullptr};
     };
 

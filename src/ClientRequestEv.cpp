@@ -26,13 +26,10 @@ void UPtrListAllocator::deallocate(void *p) {
 ObjPool<ClientRequestEv, CLIENT_MAX_REQ_NUM * 2> req_task_obj_pool;
 
 void * ClientRequestEv::operator new(size_t size) noexcept {
-    //TODO: Request Allocator !
-//    return emlib::DefaultAllocator::allocate(size);
     return req_task_obj_pool.allocate();
 }
 
 void ClientRequestEv::operator delete(void *p) noexcept {
-//    emlib::DefaultAllocator::deallocate(p);
     req_task_obj_pool.deallocate(p);
 }
 

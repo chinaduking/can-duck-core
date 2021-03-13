@@ -4,7 +4,7 @@
 
 #include "TestUtils.hpp"
 
-#include "ServoPubMsg.hpp"
+#include "ServoDict.hpp"
 
 using namespace can_duck;
 

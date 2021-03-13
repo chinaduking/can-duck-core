@@ -2,7 +2,7 @@
 // Created by sdong on 2020/10/29.
 //
 
-#include "ServoPubMsg.hpp"
+#include "ServoDict.hpp"
 
 
 using namespace can_duck;

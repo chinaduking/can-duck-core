@@ -14,9 +14,7 @@
 #include "CppUtils.hpp"
 
 #include "SerDesDict.hpp"
-#include "DefaultAllocate.h"
 #include "OpCode.hpp"
-#include "DefaultAllocate.h"
 #include "Common.hpp"
 
 #ifdef USE_REQUEST_EVLOOP
@@ -27,12 +25,12 @@ uint64_t globalTimeSourceMS();
 
 namespace can_duck {
 
-    class ParamServerManager;
+    class ServiceContext;
 //    class NetworkLayer;
 
     class ParamServerClient{
     public:
-        ParamServerClient(ParamServerManager* manager,
+        ParamServerClient(ServiceContext* manager,
                           uint16_t server_addr,
                           uint16_t client_addr,
                           uint16_t port_id,
@@ -135,24 +133,28 @@ namespace can_duck {
 
 
 #ifdef SYSTYPE_FULL_OS
-//        template<typename Msg>
-//        typename Msg::data readSync(Msg&& item){}
-//
-//
-//
-//        template<typename Msg>
-//        typename Msg::data writeSync(Msg&& item,
-//                             FcnCallbackInterface* callback=nullptr){
-//
-//        }
+        /*TODO: impl this*/
+
+        template<typename Prototype>
+        Prototype readSync(Prototype&& item){
+            Prototype ph;
+            return ph;
+        }
+
+        template<typename Prototype>
+        Prototype writeSync(Prototype&& item){
+            Prototype ph;
+            return ph;
+        }
 #endif
+
         //TODO: const
         uint16_t server_addr { 0 };
         uint16_t client_addr { 0 };
         uint16_t port_id{0};
 
     private:
-        friend class ParamServerManager;
+        friend class ServiceContext;
         friend class ClientRequestEv;
 
         SerDesDict* const serdes_dict{nullptr};
@@ -160,7 +162,7 @@ namespace can_duck {
         int networkSendFrame(uint16_t port_id, ServiceFrame* frame);
 
 //        NetworkLayer* const ctx_network_layer{nullptr};
-        ParamServerManager* const manager;
+        ServiceContext* const manager;
 
 
         void onReadAck(ServiceFrame* frame);
@@ -188,7 +190,7 @@ namespace can_duck {
      * */
     class ParamServer{
     public:
-        ParamServer(ParamServerManager* manager,
+        ParamServer(ServiceContext* manager,
                     uint16_t address, SerDesDict* obj_dict_shm, void* buffer):
                 manager(manager),
                 server_addr(address),
@@ -246,7 +248,7 @@ namespace can_duck {
 
     private:
         /* ------ Private Declaration ------  */
-        friend class ParamServerManager;
+        friend class ServiceContext;
 
         /* ------ Private Methods ------  */
         obj_size_t onWriteReq(ServiceFrame* frame, uint16_t port_id);
@@ -265,7 +267,7 @@ namespace can_duck {
 
 //        NetworkLayer* const ctx_network_layer{nullptr};
 
-        ParamServerManager* const manager;
+        ServiceContext* const manager;
     };
 
 
@@ -274,15 +276,15 @@ namespace can_duck {
     * 不论本地有几个节点，节点均共享一个该实例（单例模式）
     * 但为了降低耦合度，这里不实现单例模式，由上层实现。
     * */
-    class ParamServerManager{
+    class ServiceContext{
     public:
-        ParamServerManager(LLCanBus* can):
+        ServiceContext(LLCanBus* can):
                 can(can),
                 created_servers(MAX_LOCAL_NODE_NUM),
                 created_clients(MAX_LOCAL_NODE_NUM)
         {}
 
-        ~ParamServerManager() = default;
+        ~ServiceContext() = default;
 
         /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
         ParamServer* createServer(SerDesDict& prototype, uint16_t address);
@@ -297,6 +299,8 @@ namespace can_duck {
         int handleRecv(ServiceFrame* srv_frame, uint16_t recv_port_id);
 
         inline int sendFrame(CANMessage& msg){
+            /*TODO: 下位机的can->write可能因缓存满/配置不成功而失败，
+             * 应进行报错并将错误记录于本地 */
             if(can == nullptr){
                 return 0;
             }

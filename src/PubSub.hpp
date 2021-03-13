@@ -11,7 +11,6 @@
 #include "LinkedList.hpp"
 #include "SerDesDict.hpp"
 #include "OpCode.hpp"
-#include "DefaultAllocate.h"
 #include "Common.hpp"
 
 namespace can_duck {
@@ -21,7 +20,7 @@ namespace can_duck {
     struct SubscribeCallback;
 
 //    class NetworkLayer;
-    class PubSubManager;
+    class MessageContext;
     class Publisher;
     class Subscriber;
 
@@ -69,16 +68,16 @@ namespace can_duck {
      * @author  sdong
      * @date    2020/10/15
      */
-    class PubSubManager{
+    class MessageContext{
     public:
         /* ---------- Constructors ---------  */
-        explicit PubSubManager(LLCanBus* nwk)
+        explicit MessageContext(LLCanBus* nwk)
             : nwk(nwk)
         { }
 
 
         /* ----------- Destructor ----------  */
-        ~PubSubManager() = default;
+        ~MessageContext() = default;
 
 
 
@@ -165,11 +164,11 @@ namespace can_duck {
          * @param ps_manager PubSubManager指针。管理所有已创建的发布者、订阅者和共享内存。
          *                  不能为空。
          */
-        Publisher( SerDesDict& serdes_dict,
-                   void* buffer,
-                   uint16_t node_id,
+        Publisher(SerDesDict& serdes_dict,
+                  void* buffer,
+                  uint16_t node_id,
 //                   uint16_t src_id,
-                   PubSubManager* ps_manager) :
+                   MessageContext* ps_manager) :
 
                 node_id(node_id),
 //                src_id(src_id),
@@ -210,7 +209,7 @@ namespace can_duck {
         /* ------- Private Variables --------  */
         SerDesDict*    const serdes_dict { nullptr };
         void*          const buffer      { nullptr };
-        PubSubManager* const ps_manager  { nullptr };
+        MessageContext* const ps_manager  {nullptr };
 
         CANMessage trans_frame_tmp;
 
@@ -263,11 +262,11 @@ namespace can_duck {
      */
     class Subscriber{
     public:
-        Subscriber( SerDesDict& serdes_dict,
-                    void* buffer,
-                    uint16_t channel_id,
+        Subscriber(SerDesDict& serdes_dict,
+                   void* buffer,
+                   uint16_t channel_id,
 //                    uint16_t src_id,
-                    PubSubManager* ps_manager) :
+                    MessageContext* ps_manager) :
 
                 node_id(channel_id),
 //                src_id(src_id),
@@ -307,13 +306,13 @@ namespace can_duck {
 
     private:
         /* ------ Private Declarations ------  */
-        friend class PubSubManager;
+        friend class MessageContext;
         /* --------- Private Methods --------  */
 
         /* ------- Private Variables --------  */
         SerDesDict*    const serdes_dict { nullptr };
         void*          const buffer      { nullptr };
-        PubSubManager* const ps_manager  { nullptr };
+        MessageContext* const ps_manager  {nullptr };
 
         emlib::Vector<SubscribeCallback> callback_table;
 

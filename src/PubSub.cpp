@@ -83,7 +83,7 @@ void can_duck::fastMessageBuilder(
  * ---------------------------------------------------------
  */
 
-int PubSubManager::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
+int MessageContext::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
     uint8_t buf[66];
 
@@ -109,7 +109,7 @@ int PubSubManager::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
 
     /* 未找到对应地址的信道不代表运行错误，一般是因为数据包先到达，但本地字典尚未注册 */
     if(subscriber == nullptr){
-        LOGW("PubSubManager::handleWrite, channel == nullptr\n");
+        LOGW("MessageContext::handleWrite, channel == nullptr\n");
 
         return 1;
     }
@@ -140,7 +140,7 @@ int PubSubManager::handleRecv(CANMessage* frame, uint16_t recv_port_id) {
 }
 
 
-void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint8_t sub_id) {
+void * MessageContext::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint8_t sub_id) {
     void* buffer = nullptr;
 
     uint32_t id_comb = (uint32_t)id<<8 | ((uint32_t)sub_id);
@@ -170,10 +170,10 @@ void * PubSubManager::getSharedBuffer(SerDesDict &serdes_dict, uint16_t id, uint
 
 }
 
-std::pair<Publisher*, Subscriber*> PubSubManager::bindMessageChannel(SerDesDict& serdes_dict_tx,
-                                                                     SerDesDict& serdes_dict_rx,
-                                                                     uint16_t node_id,
-                                                                     bool is_owner_node){
+std::pair<Publisher*, Subscriber*> MessageContext::bindMessageChannel(SerDesDict& serdes_dict_tx,
+                                                                      SerDesDict& serdes_dict_rx,
+                                                                      uint16_t node_id,
+                                                                      bool is_owner_node){
     Publisher*  publisher  = nullptr;
     Subscriber* subscriber = nullptr;
 
@@ -192,9 +192,9 @@ std::pair<Publisher*, Subscriber*> PubSubManager::bindMessageChannel(SerDesDict&
 
 
 
-Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
-                                                 uint16_t node_id,
-                                                 bool is_owner){
+Publisher* MessageContext::bindPublisherToChannel(SerDesDict& serdes_dict,
+                                                  uint16_t node_id,
+                                                  bool is_owner){
     /* 获取共享内存。*/
     auto buffer = getSharedBuffer(serdes_dict, node_id, (uint8_t)is_owner);
 
@@ -228,9 +228,9 @@ Publisher* PubSubManager::bindPublisherToChannel(SerDesDict& serdes_dict,
     return publisher;
 }
 
-Subscriber* PubSubManager::bindSubscriberToChannel(SerDesDict& serdes_dict,
-                                                   uint16_t node_id,
-                                                   bool is_owner){
+Subscriber* MessageContext::bindSubscriberToChannel(SerDesDict& serdes_dict,
+                                                    uint16_t node_id,
+                                                    bool is_owner){
     auto buffer = getSharedBuffer(serdes_dict, node_id, (uint8_t)(!is_owner));
 
 #if 0  /*skip check under refactor*/

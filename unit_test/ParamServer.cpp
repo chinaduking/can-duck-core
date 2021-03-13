@@ -3,7 +3,7 @@
 //
 
 #include "TestUtils.hpp"
-#include "ServoPubMsg.hpp"
+#include "ServoDict.hpp"
 #include "ParamServer.hpp"
 #include "SimCan.hpp"
 #include "HostSerial.hpp"
@@ -13,7 +13,7 @@ using namespace can_duck;
 using namespace emlib;
 using namespace duckmsg;
 
-namespace network_test {
+namespace service_test {
 
     #define SERVO_ADDR 0x02
     #define HOST_ADDR  0x05
@@ -30,7 +30,7 @@ namespace network_test {
     public:
         SrvNode(int sid){
             can = new emlib::SimCan(new emlib::HostSerial(sid));
-            srv = new can_duck::ParamServerManager(can);
+            srv = new can_duck::ServiceContext(can);
         }
 
         void spin() {
@@ -46,7 +46,7 @@ namespace network_test {
         void join(){ recv_thread->join(); }
 
         LLCanBus* can;
-        can_duck::ParamServerManager* srv;
+        can_duck::ServiceContext* srv;
         std::shared_ptr<std::thread> recv_thread  {nullptr};
     };
 

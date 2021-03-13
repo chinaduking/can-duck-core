@@ -193,7 +193,7 @@ int ParamServerClient::networkSendFrame(uint16_t port_id, ServiceFrame *frame) {
 
 
 /* 不同于Pub-Sub，一个地址只允许存在一个服务器实例 */
-ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t address){
+ParamServer* ServiceContext::createServer(SerDesDict& prototype, uint16_t address){
     ParamServer* server = nullptr;
     for(auto & srv : created_servers){
         if(srv.address == address){
@@ -219,7 +219,7 @@ ParamServer* ParamServerManager::createServer(SerDesDict& prototype, uint16_t ad
 }
 
 
-ParamServerClient* ParamServerManager::bindClientToServer(
+ParamServerClient* ServiceContext::bindClientToServer(
         SerDesDict& prototype,
         uint16_t server_addr,
           uint16_t client_addr,
@@ -249,14 +249,14 @@ ParamServerClient* ParamServerManager::bindClientToServer(
     return client;
 }
 
-int ParamServerManager::handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
+int ServiceContext::handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
     ServiceFrame frame;
     fromCanMsg(*can_msg, frame);
 
     return handleRecv(&frame, 0);
 }
 
-int ParamServerManager::handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
+int ServiceContext::handleRecv(ServiceFrame* frame, uint16_t recv_port_id) {
     auto opcode = static_cast<OpCode>(frame->op_code);
 
     int matched = 0;
