@@ -31,7 +31,7 @@ TEST(Node, msg){
                     true
             );
 
-//    servo_pub->publish(ServoMsgTx.angle(200));
+    servo_pub->publish(ServoMsgTx.angle(200));
 
     auto server = ctx.srv().makeServer(ServoSrv, SERVO_ADDR);
     auto client = ctx.srv().bindServer(ServoSrv, SERVO_ADDR, ECU_ADDR);

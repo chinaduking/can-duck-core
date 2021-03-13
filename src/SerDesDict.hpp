@@ -48,10 +48,10 @@ namespace can_duck {
             emlib::memset(&data, 0, sizeof(T));
         }
 
-        inline DictItem operator () (T& input){
-            DictItem i;
-            data = input;
-            return i;
+        inline DictItem operator () (T&& input){
+            DictItem<T> result(this->index);
+            result.data = std::move(input);
+            return result;
         }
 
         inline void operator<<(T input) { data = input; }

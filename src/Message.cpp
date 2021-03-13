@@ -202,7 +202,7 @@ Publisher* MessageContext::bindPublisherToChannel(SerDesDict& serdes_dict,
     for(auto& pub : created_publishers){
         /* 同一通道中，不能有多个相同的发布者（重复创建发布者） */
         USER_IASSERT(
-            !((pub->src_id == node_id) && (pub->node_id == channel_addr)),
+            !((pub->src_id == __node_id) && (pub->__node_id == channel_addr)),
             "duplicate publisher!");
     }
 
@@ -211,7 +211,7 @@ Publisher* MessageContext::bindPublisherToChannel(SerDesDict& serdes_dict,
     auto publisher = new Publisher(serdes_dict, buffer, node_id, this);
 
     /*记录所有者标志，避免同一ID节点自己订阅自己*/
-    publisher->is_owner = is_owner;
+    publisher->__is_owner = is_owner;
 
     /* 将新发布者加入已创建发布者列表中，便于本地订阅者进行订阅 */
     created_publishers.push(publisher);
@@ -219,9 +219,9 @@ Publisher* MessageContext::bindPublisherToChannel(SerDesDict& serdes_dict,
     /* 将所有已经创建的订阅者注册到新创建的发布者中 */
     for(auto& sub : created_subscribers){
         /* 主节点发布者可连接多个从节点订阅者，从节点发布者可连接只可连接一个主节点订阅者 */
-        if(sub->node_id == publisher->node_id
+        if(sub->node_id == publisher->__node_id
             && is_owner != sub->is_owner) {
-            publisher->regLocalSubscriber(sub);
+            publisher->__regLocalSubscriber(sub);
         }
     }
 
@@ -237,7 +237,7 @@ Subscriber* MessageContext::bindSubscriberToChannel(SerDesDict& serdes_dict,
     for(auto& sub : created_subscribers){
         /* 同一通道中，不能有多个相同的发布者（重复创建订阅者） */
         USER_IASSERT(
-                !((sub->src_id == node_id) && (sub->node_id == channel_addr)),
+                !((sub->src_id == __node_id) && (sub->__node_id == channel_addr)),
                 "duplicate subscriber!");
     }
 #endif
@@ -250,16 +250,16 @@ Subscriber* MessageContext::bindSubscriberToChannel(SerDesDict& serdes_dict,
 
     /* 将所有已经创建的发布者注册到新创建的订阅者中 */
     for(auto& pub: created_publishers){
-        if(pub->node_id == subscriber->node_id
-        && is_owner != pub->is_owner){
-            pub->regLocalSubscriber(subscriber);
+        if(pub->__node_id == subscriber->node_id
+        && is_owner != pub->__is_owner){
+            pub->__regLocalSubscriber(subscriber);
         }
     }
 
     return subscriber;
 }
 
-void Publisher::publish(hDictItem &msg, bool local_only) {
+void Publisher::publish(hDictItem &&msg, bool local_only) {
     USER_ASSERT(ps_manager != nullptr);
 
     /* 先进行本地发布，即直接将数据拷贝到共享内存中 */
@@ -277,15 +277,15 @@ void Publisher::publish(hDictItem &msg, bool local_only) {
 
     can_duck::fastMessageBuilder(
             &trans_frame_tmp,
-            node_id,
-            is_owner,  /* 如果是所有者节点的发布者，则是tx类型消息；否则是rx类型的消息*/
+            __node_id,
+            __is_owner,  /* 如果是所有者节点的发布者，则是tx类型消息；否则是rx类型的消息*/
             msg.index,
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
     ps_manager->__sendFrame(trans_frame_tmp);
 }
 
-void Publisher::regLocalSubscriber(Subscriber *subscriber) {
+void Publisher::__regLocalSubscriber(Subscriber *subscriber) {
     /* 同一个NodeID的订阅者只能订阅同一个发布者一次。 */
 
 #if 0  /*skip check under refactor*/

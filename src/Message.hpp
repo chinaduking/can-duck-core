@@ -152,7 +152,7 @@ namespace can_duck {
          * (因此不等于任何一个nodeid），则配置了相应组播id的节点进行处理。
          *
          * @param node_id 通道ID，为数据帧中的目标ID。当为单主通道添加主发布者时，
-         *                   node_id = src_id。当为多主通道添加从发布者时，通道ID为对应
+         *                   __node_id = src_id。当为多主通道添加从发布者时，通道ID为对应
          *                   主节点ID。当为多主通道添加发布者时，channel_id属于组播ID之一。
          *
          * @param src_id 源ID，为数据帧中的源ID。总是等于用户为节点配置的ID。ID必须是全
@@ -167,7 +167,7 @@ namespace can_duck {
 //                   uint16_t src_id,
                    MessageContext* ps_manager) :
 
-                node_id(node_id),
+                __node_id(node_id),
 //                src_id(src_id),
 
                 serdes_dict(&serdes_dict),
@@ -185,19 +185,19 @@ namespace can_duck {
          *
          * @param msg
          */
-        void publish(hDictItem& msg, bool local_only=false);
+        void publish(hDictItem&& msg, bool local_only=false);
 
         /**
          * @brief 注册本地发布者
          *
          * @param subscriber
          */
-        void regLocalSubscriber(Subscriber* subscriber);
+        void __regLocalSubscriber(Subscriber* subscriber);
 
         /* ------- Public Variables --------  */
-        const uint16_t node_id {0 };
+        const uint16_t __node_id {0 };
 //        const uint16_t src_id     { 0 };
-        bool is_owner {false};
+        bool __is_owner {false};
 
     private:
         /* ------ Private Declarations ------  */
