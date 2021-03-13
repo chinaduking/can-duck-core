@@ -14,9 +14,8 @@ using namespace can_duck;
  **/
 #include "HostSerial.hpp"
 #include "Tracer.hpp"
-
 #include "ServoPubMsg.hpp"
-#include "SimpleSerialNode.hpp"
+#include "SimCan.hpp"
 
 using namespace can_duck;
 using namespace emlib;

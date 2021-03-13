@@ -17,6 +17,7 @@
 #include "DefaultAllocate.h"
 #include "OpCode.hpp"
 #include "DefaultAllocate.h"
+#include "Common.hpp"
 
 #ifdef USE_REQUEST_EVLOOP
 #include "ClientRequestEv.hpp"

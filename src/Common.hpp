@@ -17,6 +17,9 @@ namespace can_duck{
 
 
     /* --------------------------------------------------------- */
+    /*
+     * 基于29位扩展ID的快实时消息包头
+     * */
     struct HeaderFastMsgExt {
         uint32_t reserve : 3;   /* =0 */
         uint32_t is_seg  : 1;   /* =0 */
@@ -29,6 +32,9 @@ namespace can_duck{
         uint32_t data_1  : 8;
     };
 
+    /*
+     * 基于11位扩展ID的快实时消息包头
+     * */
     struct HeaderFastMsgStd {
         uint32_t reserve : 21;  /* =0 */
         uint32_t is_seg  : 1;   /* =0 */
@@ -37,6 +43,7 @@ namespace can_duck{
         uint32_t is_tx   : 1;
         uint32_t msg_id  : 3;
     };
+
 
     struct HeaderService{
         uint32_t reserve : 3;   /* =0 */
@@ -89,6 +96,23 @@ namespace can_duck{
         }
 
     };
+
+
+    /*
+     * 最多支持的本地节点数目
+     **/
+    #define MAX_LOCAL_NODE_NUM 6
+
+        /*
+         * 是否使用事件循环管理请求
+         **/
+    #define USE_REQUEST_EVLOOP
+
+
+        /*
+         * 一个客户端可以同时发起的请求
+         **/
+    #define CLIENT_MAX_REQ_NUM 5
 }
 
 #endif //CAN_DUCK_COMMON_HPP
