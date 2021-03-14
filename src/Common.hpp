@@ -38,11 +38,9 @@ namespace can_duck{
      **/
     struct HeaderFastMsgStd {
         uint32_t reserve : 21;  /* 保留位 =0 */
-        uint32_t is_seg  : 1;   /* 是否是分段数据包 =0 */
-        uint32_t is_msg  : 1;   /* 是否是实时消息 =1 */
         uint32_t node_id : 6;   /* 所有者节点ID */
         uint32_t is_tx   : 1;   /* 是否是所有者发送的数据 */
-        uint32_t msg_id  : 3;   /* 消息ID */
+        uint32_t msg_id  : 4;   /* 消息ID */
     };
 
     /*
