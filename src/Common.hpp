@@ -21,50 +21,53 @@ namespace can_duck{
      * 基于29位扩展ID的快实时消息包头
      * */
     struct HeaderFastMsgExt {
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =1 */
-        uint32_t node_id : 6;
-        uint32_t is_tx   : 1;
-        uint32_t msg_id  : 3;
-        uint32_t is_d1_empty : 1;
-        uint32_t data_0  : 8;
-        uint32_t data_1  : 8;
+        uint32_t reserve : 3;   /* 保留位 =0 */
+        uint32_t is_seg  : 1;   /* 是否是分段数据包 =0 */
+        uint32_t is_msg  : 1;   /* 是否是实时消息 =1 */
+        uint32_t node_id : 6;   /* 所有者节点ID */
+        uint32_t is_tx   : 1;   /* 是否是所有者发送的数据 */
+        uint32_t msg_id  : 3;   /* 消息ID */
+        uint32_t is_d1_empty : 1;   /* data_1是否是空的 */
+        uint32_t data_0  : 8;   /* 数据0 */
+        uint32_t data_1  : 8;   /* 数据1 */
     };
+
 
     /*
      * 基于11位扩展ID的快实时消息包头
-     * */
+     **/
     struct HeaderFastMsgStd {
-        uint32_t reserve : 21;  /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =1 */
-        uint32_t node_id : 6;
-        uint32_t is_tx   : 1;
-        uint32_t msg_id  : 3;
+        uint32_t reserve : 21;  /* 保留位 =0 */
+        uint32_t is_seg  : 1;   /* 是否是分段数据包 =0 */
+        uint32_t is_msg  : 1;   /* 是否是实时消息 =1 */
+        uint32_t node_id : 6;   /* 所有者节点ID */
+        uint32_t is_tx   : 1;   /* 是否是所有者发送的数据 */
+        uint32_t msg_id  : 3;   /* 消息ID */
     };
 
-
+    /*
+     * 服务数据包
+     **/
     struct HeaderService{
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =0 */
-        uint32_t is_msg  : 1;   /* =0 */
-        uint32_t src_id  : 6;
-        uint32_t dest_id : 6;
-        uint32_t op_code : 5;
-        uint32_t service_id : 10;
+        uint32_t reserve : 3;   /* 保留位 =0 */
+        uint32_t is_seg  : 1;   /* 是否是分段数据包 =0 */
+        uint32_t is_msg  : 1;   /* 是否是实时消息 =0 */
+        uint32_t src_id  : 6;   /* 源节点ID */
+        uint32_t dest_id : 6;   /* 目标节点ID */
+        uint32_t op_code : 5;   /* 操作码 */
+        uint32_t service_id : 10;   /* 服务ID */
     };
 
+    /*分段数据包*/
     struct HeaderSegment{
-        uint32_t reserve : 3;   /* =0 */
-        uint32_t is_seg  : 1;   /* =1 */
-        uint32_t src_id  : 6;
-        uint32_t dest_id : 6;
-        uint32_t trans_id: 6;
-        uint32_t status  : 2;
-        uint32_t data_0  : 8;
+        uint32_t reserve : 3;   /* 保留位 =0 */
+        uint32_t is_seg  : 1;   /* 是否是分段数据包 =1 */
+        uint32_t src_id  : 6;   /* 源节点ID */
+        uint32_t dest_id : 6;   /* 目标节点ID */
+        uint32_t trans_id: 6;   /* 传输计数，倒数 */
+        uint32_t status  : 2;   /* 0: 启动分段传输, 1: 正在传输, 2: 传输结束 */
+        uint32_t data_0  : 8;   /* 数据0 */
     };
-
 
     /**
      * 服务数据帧
