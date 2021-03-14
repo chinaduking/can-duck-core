@@ -12,10 +12,10 @@
     - [1.1 微控制器通信典型场景](#11-微控制器通信典型场景)
     - [1.2 为什么需要通信协议栈？](#12-为什么需要通信协议栈)
     - [1.3 CAN-Duck vs CAN-Open](#13-can-duck-vs-can-open)
-  - [2. 克隆仓库并运行第一个测试](#2-克隆仓库并运行第一个测试)
+  - [2. 初步接触CAN-Duck](#2-初步接触can-duck)
     - [2.1 前置需求](#21-前置需求)
-    - [2.2 通过命令行编译运行测试用例](#22-通过命令行编译运行测试用例)
-    - [2.2 在CLion IDE中运行测试用例](#22-在clion-ide中运行测试用例)
+    - [2.2 克隆仓库并运行第一个测试](#22-克隆仓库并运行第一个测试)
+    - [2.3 在STM32上测试](#23-在stm32上测试)
   - [3. 使用入门](#3-使用入门)
     - [3.1 启动节点并添加网络设备](#31-启动节点并添加网络设备)
     - [3.2 发布者-订阅者](#32-发布者-订阅者)
@@ -35,7 +35,7 @@
 
 <img src="docs/img/demo-sys-dcu.png" width = "500" align=center />
 
-一般来讲，采用分布式架构还是DCU架构，取决于产品开发的阶段。早期验证时，为了加快迭代速度，一般采用分布式架构，直接集成硬件模块；后期产品功能明确后，为了降低成本，可能会换为DCS架构。
+一般来讲，采用分布式架构还是DCU架构，取决于产品开发的阶段。早期验证时，为了加快迭代速度，一般采用分布式架构，直接集成硬件模块；后期产品功能明确后，为了降低成本，可能会换为DCU架构。
 
 ### 1.2 为什么需要通信协议栈？
 
@@ -67,9 +67,7 @@ CAN总线常采用的协议栈是CANOpen，这一协议栈已在工业领域广�
 
     CAN-Duck虽然基于CAN总线，但也实现了一个基于字节设备的较为完善的**CAN数据包模拟**，因此可以使得串口、UDP网口等无缝转发CAN的数据包。得益于此，CAN-Duck可以很好地在小至Arduino，大至带CAN-Ethernet网关的复杂网络中工作。你甚至不需要CAN转换器即可使用完整的CAN-Duck协议栈。
 
-
-
-- **单MCU虚拟多节点的能力：**
+- **单MCU虚拟多节点的能力：**  
     这是CAN-Duck比CANOpen更灵活的另一创新点：在传统的CAN通信中，如果分布式架构中某一MCU的功能要集成在DCU中，则上位机、DCU中所有涉及该MCU通信相关的代码均需要做出更改，这减慢了研发的进度。在CAN-Duck中，一个MCU可以虚拟多个节点，每个节点均具有CAN-Duck协议栈的**完整功能**，可对同一MCU上的其它虚拟节点或另一MCU上的远程节点进行通信，而API是完全统一的。对于同一MCU上的虚拟节点，实时数据的传输采用了共享内存的方式，效率和直接使用全局变量传递数据是相同的。
 
 - **集成文件传输协议：**  
@@ -79,34 +77,30 @@ CAN总线常采用的协议栈是CANOpen，这一协议栈已在工业领域广�
 - **丰富的调试工具：**   
     CAN-Duck已经集成了多种方便的调试工具。
 	- **DuckProbe：** 总线调试器。硬件+上位机，将高帧率的数据包和串口Log进行汇总、转发、记录、回放。上位机Windows，Linux ，MacOSX全平台兼容。
-	- **DuckPlot:：** 实时数据可视化上位机。Windows，Linux，MacOSX全平台兼容。
+	- **WaveLight：** 实时数据可视化上位机。Windows，Linux，MacOSX全平台兼容。
 	- **Tracer：** MCU/上位机通用的轻量C++调试信息打印库，可自定义过滤等级、输出目标，在终端中彩色显示。内置缓冲区，因此打印API的调用为并发、非阻塞式的，且在MCU中已配置为使用DMA进行串口输出。因此即便在Debug版本输出较多的调试信息，程序行为和Release版本也几乎无差异。
 
 --------------
 
-## 2. 克隆仓库并运行第一个测试
+## 2. 初步接触CAN-Duck
 ### 2.1 前置需求
+**硬件：**  要运行网络数收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以运行虚拟节点通信测试。
+**软件：**  我们采用vcpkg作为三方库的包管理器。依赖的包为gtest。安装命令```vckpg install gtest```。
 
-- Windows
-  - Windows 10
-  - CLion 2020 (可选)
-  - STM32CubeIDE
-  - Visual Studio 2019 Community  
-  - Git / vckpg / CMake / doxygen(1.8.15+) / Python3
-  - GTest (从vckpg安装)
-  - FT232 VCom Driver  
-  <br>
-*提示：您可能需要将Windows的系统编码格式改为UTF-8以消除编译错误*
-  <br>
-- Linux & MacOSX
-  - CLion 2020  (可选)
-  - STM32CubeIDE
-  - Git / vckpg / CMake / doxygen(1.8.15+) / Python3
-  - GTest
+### 2.2 克隆仓库并运行第一个测试
+```bash
+git clone <repo_dir>  --recursive
+cd repo_dir 
+mkdir build && cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
+make ..
 
-### 2.2 通过命令行编译运行测试用例
+#运行第一个测试
+./bin/testNode --gtest_filter="PubSub"
+```
 
-### 2.2 在CLion IDE中运行测试用例
+### 2.3 在STM32上测试
+请移步[CAN-Duck例程页面]()。
 
 
 --------------
