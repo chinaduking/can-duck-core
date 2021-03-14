@@ -1,8 +1,26 @@
 
 
-# CAN-Duck: A Distributed MICROcontroller Communication stacK based on CAN   -- 基于CAN总线的分布式微控制器通信协议栈
+# CAN-Duck: A Distributed MICROcontroller Communication stacK based on CAN 
+
+**基于CAN总线的分布式微控制器通信协议栈**
 
 <img src="docs/img/logo-mid.png" width = "300" align=center />
+
+
+- [CAN-Duck: A Distributed MICROcontroller Communication stacK based on CAN](#can-duck-a-distributed-microcontroller-communication-stack-based-on-can)
+  - [1. 什么是CAN-Duck？](#1-什么是can-duck)
+    - [1.1 微控制器通信典型场景](#11-微控制器通信典型场景)
+    - [1.2 为什么需要通信协议栈？](#12-为什么需要通信协议栈)
+    - [1.3 CAN-Duck vs CAN-Open](#13-can-duck-vs-can-open)
+  - [2. 克隆仓库并运行第一个测试](#2-克隆仓库并运行第一个测试)
+    - [2.1 前置需求](#21-前置需求)
+    - [2.2 通过命令行编译运行测试用例](#22-通过命令行编译运行测试用例)
+    - [2.2 在CLion IDE中运行测试用例](#22-在clion-ide中运行测试用例)
+  - [3. 使用入门](#3-使用入门)
+    - [3.1 启动节点并添加网络设备](#31-启动节点并添加网络设备)
+    - [3.2 发布者-订阅者](#32-发布者-订阅者)
+    - [3.3 参数服务器](#33-参数服务器)
+
 
 ## 1. 什么是CAN-Duck？
 
@@ -15,7 +33,7 @@
     
 另一方面，对于某些对成本约束极严的产品，常会将高度优化后的伺服驱动程序和实时运动控制、甚至传感器采集程序都全部集中在一块MCU中，这一MCU此时被称为**域控制器（DCU）**，此时系统架构如下：
 
-<img src="docs/img/demo-sys-dcs.png" width = "500" align=center />
+<img src="docs/img/demo-sys-dcu.png" width = "500" align=center />
 
 一般来讲，采用分布式架构还是DCU架构，取决于产品开发的阶段。早期验证时，为了加快迭代速度，一般采用分布式架构，直接集成硬件模块；后期产品功能明确后，为了降低成本，可能会换为DCS架构。
 
