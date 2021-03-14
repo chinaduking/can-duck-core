@@ -35,13 +35,12 @@ TEST(Node, ServoMsg){
                     SERVO_ADDR,
                     true
             );
-
+    int16_t target_angle = 0;
     while (1){
-        DICT_T(ServoMsgRx.target_angle) target_angle;
         servo_sub->readBuffer(ServoMsgRx.target_angle) >> target_angle;
-        LOGD("target_angle = %d", target_angle);
+        LOGD("target_angle = %d", servo_sub->readBuffer(ServoMsgRx.target_angle).data);
 
-        servo_pub->publish(ServoMsgTx.angle(target_angle * 1.5f));
+//        servo_pub->publish(ServoMsgTx.angle(target_angle * 1.5f));
         emlib::perciseSleep(0.1);
     }
 //
@@ -67,9 +66,23 @@ TEST(Node, EcuMsg){
                     false
             );
 
-    while (1){
-        servo_pub->publish(ServoMsgRx.target_angle(200));
+    int cmd_state_cnt = 0;
+    int cmd_state = 1;
+    int16_t target_angle = 0;
+
+    for(int i = 0; i < 1; ){
+        target_angle = cmd_state * 0xFFF;
+
+        servo_pub->publish(ServoMsgRx.target_angle(target_angle));
         emlib::perciseSleep(0.1);
+
+        LOGD("target_angle=%d", target_angle);
+
+        cmd_state_cnt ++;
+        if(cmd_state_cnt > 20){
+            cmd_state_cnt = 0;
+            cmd_state *= -1;
+        }
     }
 //
 //    auto server = ctx.srv().makeServer(ServoSrv, SERVO_ADDR);

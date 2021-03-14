@@ -35,8 +35,8 @@
 
 ## 1. 初步接触CAN-Duck
 ### 1.1 前置需求  
-**硬件：**  要运行网络收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以运行虚拟节点通信测试。   
-**软件：**  我们采用vcpkg作为三方库的包管理器。依赖的包为gtest。安装命令```vckpg install gtest```。
+**硬件：**  要运行网络收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以在PC运行虚拟节点通信测试。   
+**软件：**  我们采用 [vcpkg](https://github.com/microsoft/vcpkg) 作为三方库的包管理器。依赖的包为gtest。安装命令  ```vckpg install gtest```，同时依赖库作者的微型C++库 [emlib](https://github.com/dongshiqian/emlib-cpp) 。
 
 ### 1.2 克隆仓库并运行第一个测试
 ```bash
@@ -195,9 +195,10 @@ using namespace duckmsg; /* 数据元信息的命名空间 */
 
 int main(){
     can_duck::Context ctx(&can);    /* 创建上下文管理器 */
-    auto server = ctx.srv().makeServer(  /* 创建服务器 */
-                ServoSrv,         /* 服务数据元信息 */
-                SERVO_ADDR);      /* 自身地址 */
+
+    auto server = ctx.srv().makeServer( /* 创建服务器 */
+                ServoSrv,               /* 服务数据元信息 */
+                SERVO_ADDR);            /* 自身地址 */
 
     server->setWrAccess(ServoSrv.mode); /* 启用写权限（读权限默认开启） */
                        
@@ -222,7 +223,10 @@ DUCK_REQUEST_CALLBACK(mode_wr_callback){
 
 int main(){
     ...
-    auto servo_client = bindServer(ServoSrv, SERVO_ADDR, CLIENT_ADDR);
+    auto servo_client = ctx.srv().bindServer( /* 连接到服务器 */
+            ServoSrv,       /* 服务数据元信息 */
+            SERVO_ADDR,     /* 服务器地址 */
+            CLIENT_ADDR);   /* 客户端地址 */
 
     
     servo_client->writeAsync(

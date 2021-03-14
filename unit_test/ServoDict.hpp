@@ -70,7 +70,7 @@ namespace duckmsg{
     struct ServoMsgRx_C : public can_duck::SerDesDict{
     public:
         /*可以直接访问的元信息*/
-        can_duck::DictItem<int32_t> target_angle;
+        can_duck::DictItem<int16_t> target_angle;
         can_duck::DictItem<int16_t> mode;
 
         ServoMsgRx_C() :

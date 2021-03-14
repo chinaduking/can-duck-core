@@ -57,9 +57,9 @@ void can_duck::fastMessageBuilder(
 
     HeaderFastMsgExt id;
     id.is_seg = 0;
-    id.is_msg = 0;
+    id.is_msg = 1;
     id.node_id = node_id;
-    id.is_tx = dir;
+    id.is_tx  = dir;
     id.msg_id = msg_id;
     id.is_d1_empty = (len == 1 ? 1:0);
     id.data_0 = p_data[0];
@@ -87,16 +87,22 @@ int MessageContext::__handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
     uint8_t buf[66];
 
-    /* ! is msg*/
-    if(frame->format == CANExtended &&
-        (frame->id & (((uint32_t) 1) << 27))){
-        return 0;
-    }
 
     if(frame->format == CANStandard){
-        //TODO: handle fast msg std;
-        return 0;
+        return 0; //TODO: 支持11位快速消息
     }
+
+    /* ! is msg*/
+    if(frame->format == CANExtended){
+        HeaderFastMsgExt header = *(HeaderFastMsgExt*)&(frame->id);
+        if(!header.is_msg){
+            LOGE("not msg");
+            return 0;
+        }
+    }
+
+    LOGD("recv a message!\n");
+
 
     HeaderFastMsgExt header = *(HeaderFastMsgExt*)(&frame->id);
 
@@ -283,6 +289,9 @@ void Publisher::publish(hDictItem &&msg, bool local_only) {
             (uint8_t *)msg.getDataPtr(), msg.data_size);
 
     ps_manager->__sendFrame(trans_frame_tmp);
+
+    LOGD("send a message!\n");
+
 }
 
 void Publisher::__regLocalSubscriber(Subscriber *subscriber) {
