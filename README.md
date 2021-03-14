@@ -2,7 +2,7 @@
 
 # CAN-Duck: A Distributed MICROcontroller Communication stacK Based on CAN 
 
-**基于CAN总线的分布式微控制器通信协议栈**
+**小黄鸭-基于CAN总线的分布式微控制器通信协议栈**
 
 <img src="docs/img/logo-mid.png" width = "300" align=center />
 
@@ -115,7 +115,7 @@ CAN总线常采用的协议栈是CANOpen，这一协议栈已在工业领域广�
 ```cpp
 #include "can_duck/Context.hpp"
 int main(){
-    can_duck::Context ctx(&can);
+    can_duck::Context ctx(&can);    /* 创建上下文管理器 */
     ...
 }
 ```
@@ -127,10 +127,13 @@ can_duck::Context是用来管理本地CAN设备和虚拟节点的对象，发布
 ```cpp
 #include "ServoDict.hpp"
 #include "can_duck/Context.hpp"
+
+using namespace duckmsg; /* 数据元信息的命名空间 */
+
 int main(){
-    can_duck::Context ctx(&can);
-    can_duck::Publisher*  servo_pub;
-    can_duck::Subscriber* servo_sub;
+    can_duck::Context ctx(&can);    /* 创建上下文管理器 */
+    can_duck::Publisher*  servo_pub;/* 声明发布者 */
+    can_duck::Subscriber* servo_sub;/* 声明订阅者 */
 
     std::tie(servo_pub, servo_sub) =
             ctx.msg().bindChannel(  /* 同时创建发布者和订阅者 */
@@ -139,7 +142,10 @@ int main(){
                 SERVO_ADDR,     /* 自身地址 */
                 true);          /* 表明该地址是自身的，而非远程的 */
     while(1){
-        servo_pub->publish(ServoMsgTx.angle(32767));
+        servo_pub->publish(
+            ServoMsgTx.angle(32767) /* 可原子性地创建元信息副本并同时赋值 */
+        );
+
         sleep(1);
     }
 }
@@ -163,7 +169,7 @@ DUCK_SUBSCRIBE_CALLBACK(on_target_angle) {
     uint16_t target_angle; 
     subscriber->readBuffer(ServoMsgRx.target_angle) >> target_angle;
 }
-
+...
 int main(){
     ...
     /* 向订阅者注册回调函数 */
@@ -174,17 +180,70 @@ int main(){
 
 ### 3.3 参数服务器
 **服务器**
-```cpp
+我们假设该伺服，希望暴露一个模式设置接口，可由外界读写
 
+```cpp
+#include "ServoDict.hpp"
+#include "can_duck/Context.hpp"
+
+using namespace duckmsg; /* 数据元信息的命名空间 */
+
+int main(){
+    can_duck::Context ctx(&can);    /* 创建上下文管理器 */
+    auto server = ctx.srv().makeServer(  /* 创建服务器 */
+                ServoSrv,         /* 服务 */
+                SERVO_ADDR);      /* 自身地址 */
+
+    server->setWrAccess(ServoSrv.mode); /* 启用写权限（读权限默认开启） */
+                       
+    while(1){
+        ...
+    }
+}
 ```
+
 **客户端**
 ```cpp
+/* 定义一个回调函数 */
+DUCK_REQUEST_CALLBACK(mode_wr_callback){
+    /* 根据事件码判断成功/拒绝/超时 */
+    switch(ev_code){
+        case 0 : LOGE("Write angle REJECTED!!"); break; /*无权限拒绝写入*/
+        case 1 : LOGW("Write angle SUCCESS!"); break;   /*写入成功*/
+        case 2 : LOGE("Write angle TIMEOUT"); break;    /*通信超时*/
+        default: break;
+    }
+}
 
+int main(){
+    ...
+    auto servo_client = bindServer(ServoSrv, SERVO_ADDR, CLIENT_ADDR);
+
+    
+    servo_client->writeAsync(
+        ServoSrv.mode(1), /* 可原子性地创建元信息副本并同时赋值 */
+        angle_rd_callback /* 异步写需要注册回调函数 */
+        );
+}
 ```
 
 ### 3.4 编写自己的消息定义
-```cpp
 
+编写IDL文件（yaml格式）：
+```yaml
+# ServoDict.yaml
+
+node: Servo
+    msg_tx:
+        angle: uint16_t
+    msg_rx:
+        target_angle: uint16_t 
+    srv:
+        mode: uint8_t
+```
+运行元信息生成脚本
+```bash
+duckgen ServoDict.yaml 
 ```
 
 ## 4. 数据帧结构
