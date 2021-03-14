@@ -45,7 +45,7 @@ git clone git@github.com:dongshiqian/can-duck-core.git  --recursive
 cd can-duck-core
 mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
-make ..
+make .
 
 #运行虚拟节点通信测试
 ./bin/testPubSub --gtest_filter=PubSub.InProc
