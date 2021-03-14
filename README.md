@@ -42,7 +42,7 @@
 ### 1.2 克隆仓库并运行第一个测试
 ```bash
 git clone git@github.com:dongshiqian/can-duck-core.git  --recursive
-cd repo_dir 
+cd can-duck-core
 mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
 make ..
