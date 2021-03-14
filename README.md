@@ -1,6 +1,20 @@
-![](docs/img/logo_mid.png)
 
-# CAN-Duck: Decentralized MICROcontroller Communication stacK based on CAN bus --- 基于CAN总线的分布式微控制器通信协议栈  
+
+# CAN-Duck:- A Distributed MICROcontroller Communication stacK based on CAN
+
+
+
+# 分布式微控制器通信协议栈 CAN-Duck
+
+<img src="docs/img/logo-mid.png" width = "300" align=left />
+
+## 0. 什么是CAN-Duck？
+
+0.1 微控制器通信典型场景
+
+机器人、消费电子、工业控制领域中，经常需要将系统功能分散在多个MCU中实现，以满足电气连接的约束，或提升系统的模块化程度。以下是一个典型的机器人产品MCU连接图：
+
+<img src="docs/img/demo-sys.png" width = "600" align=center />
 
 ## 1. 特性
 
