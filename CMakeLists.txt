@@ -79,13 +79,12 @@ find_package(GTest CONFIG REQUIRED)
 #endif()
 
 #---------------------------------------------
-#------------  Find emlib  -------------------
+#------------ emlib  -------------------
 #---------------------------------------------
-set(emlib_DIR  ${PROJECT_SOURCE_DIR}/../../local_deps/lib/emlib/)
 
-find_package(emlib REQUIRED FATAL)
-message("emlib :"  ${emlib_LIBS}  ", " ${emlib_INCLUDES})
-include_directories(${emlib_INCLUDES})
+add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/emlib-cpp)
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty/emlib-cpp/src)
+set(emlib_LIBS emlib)
 
 #------------Add Submodule---------------
 include_directories(${PROJECT_SOURCE_DIR}/src)
