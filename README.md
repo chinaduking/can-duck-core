@@ -8,23 +8,45 @@
 
 
 - [CAN-Duck: A Distributed MICROcontroller Communication stacK based on CAN](#can-duck-a-distributed-microcontroller-communication-stack-based-on-can)
-  - [1. 什么是CAN-Duck？](#1-什么是can-duck)
-    - [1.1 微控制器通信典型场景](#11-微控制器通信典型场景)
-    - [1.2 为什么需要通信协议栈？](#12-为什么需要通信协议栈)
-    - [1.3 CAN-Duck vs CAN-Open](#13-can-duck-vs-can-open)
-  - [2. 初步接触CAN-Duck](#2-初步接触can-duck)
-    - [2.1 前置需求](#21-前置需求)
-    - [2.2 克隆仓库并运行第一个测试](#22-克隆仓库并运行第一个测试)
-    - [2.3 在STM32上测试](#23-在stm32上测试)
+  - [1. 初步接触CAN-Duck](#1-初步接触can-duck)
+    - [1.1 前置需求](#11-前置需求)
+    - [1.2 克隆仓库并运行第一个测试](#12-克隆仓库并运行第一个测试)
+    - [1.3 在STM32上测试](#13-在stm32上测试)
+  - [2. 什么是CAN-Duck？](#2-什么是can-duck)
+    - [2.1 微控制器通信典型场景](#21-微控制器通信典型场景)
+    - [2.2 为什么需要通信协议栈？](#22-为什么需要通信协议栈)
+    - [2.3 CAN-Duck vs CANOpen](#23-can-duck-vs-canopen)
   - [3. 使用入门](#3-使用入门)
     - [3.1 启动节点并添加网络设备](#31-启动节点并添加网络设备)
     - [3.2 发布者-订阅者](#32-发布者-订阅者)
     - [3.3 参数服务器](#33-参数服务器)
 
 
-## 1. 什么是CAN-Duck？
+## 1. 初步接触CAN-Duck
+### 1.1 前置需求  
+**硬件：**  要运行网络数收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以运行虚拟节点通信测试。   
+**软件：**  我们采用vcpkg作为三方库的包管理器。依赖的包为gtest。安装命令```vckpg install gtest```。
 
-### 1.1 微控制器通信典型场景
+### 1.2 克隆仓库并运行第一个测试
+```bash
+git clone <repo_dir>  --recursive
+cd repo_dir 
+mkdir build && cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
+make ..
+
+#运行第一个测试
+./bin/testNode --gtest_filter="PubSub"
+```
+
+### 1.3 在STM32上测试
+请移步[CAN-Duck例程页面]()。
+
+
+
+## 2. 什么是CAN-Duck？
+
+### 2.1 微控制器通信典型场景
 机器人、消费电子、工业控制领域中，经常需要将系统功能分散在多个MCU中实现，以满足电气连接的约束，或提升系统的模块化程度。以下是一个典型的机器人产品MCU连接图：
 
 <img src="docs/img/demo-sys.png" width = "500" align=center />
@@ -37,12 +59,12 @@
 
 一般来讲，采用分布式架构还是DCU架构，取决于产品开发的阶段。早期验证时，为了加快迭代速度，一般采用分布式架构，直接集成硬件模块；后期产品功能明确后，为了降低成本，可能会换为DCU架构。
 
-### 1.2 为什么需要通信协议栈？
+### 2.2 为什么需要通信协议栈？
 
 CAN、串口的底层原理都非常简单，但面对复杂的业务需求，如：需要在有限的MTU约束下传输多种不同功能的数据包；对远程MCU的内部数据进行可靠的访问；对不同功能、不同总线上的MCU采用统一的API进行控制等，就不能直接利用通信硬件的底层数据直接满足这些需求，而必须对数据传输的链路层、协议层、表示层进行抽象和封装。
 CAN总线常采用的协议栈是CANOpen，这一协议栈已在工业领域广泛应用；串口一般采用ModBus协议或AT指令等。另外还有UAVCAN等业余爱好者开发的协议。
 
-### 1.3 CAN-Duck vs CAN-Open
+### 2.3 CAN-Duck vs CANOpen
 
 既然已经有了CANOpen，我们为什么仍要开发CAN-Duck？CAN-Duck具有以下几方面的优势。
 
@@ -69,33 +91,12 @@ CAN总线常采用的协议栈是CANOpen，这一协议栈已在工业领域广�
     CAN-Duck实现了一个简单的文件传输协议，可用于OTA、记录读取等。该文件传输协议的服务端和客户端也均可在无OS的MCU中直接运行。  
 
 - **丰富的调试工具：**   
-    CAN-Duck已经集成了多种方便的调试工具。
+    CAN-Duck已经集成了多种方便的调试工具：  
 	- **DuckProbe：** 总线调试器。硬件+上位机，将高帧率的数据包和串口Log进行汇总、转发、记录、回放。上位机Windows，Linux ，MacOSX全平台兼容。  
 	- **WaveLight：** 实时数据可视化上位机。Windows，Linux，MacOSX全平台兼容。  
 	- **Tracer：** MCU/上位机通用的轻量C++调试信息打印库，可自定义过滤等级、输出目标，在终端中彩色显示。内置缓冲区，因此打印API的调用为并发、非阻塞式的，且在MCU中已配置为使用DMA进行串口输出。因此即便在Debug版本输出较多的调试信息，程序行为和Release版本也几乎无差异。  
 
 --------------
-
-## 2. 初步接触CAN-Duck
-### 2.1 前置需求  
-**硬件：**  要运行网络数收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以运行虚拟节点通信测试。   
-**软件：**  我们采用vcpkg作为三方库的包管理器。依赖的包为gtest。安装命令```vckpg install gtest```。
-
-### 2.2 克隆仓库并运行第一个测试
-```bash
-git clone <repo_dir>  --recursive
-cd repo_dir 
-mkdir build && cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
-make ..
-
-#运行第一个测试
-./bin/testNode --gtest_filter="PubSub"
-```
-
-### 2.3 在STM32上测试
-请移步[CAN-Duck例程页面]()。
-
 
 --------------
 ## 3. 使用入门
