@@ -16,7 +16,7 @@
 
 另一方面，对于某些对成本约束极严的产品，常会将高度优化后的伺服驱动程序（如FOC、三闭环）和实时运动控制、甚至传感器采集程序都全部集中在一块MCU中，这一MCU此时被称为**域控制器（DCS）**，此时系统架构如下：
 
-<img src="docs/img/demo-sys.png" width = "500" align=center />
+<img src="docs/img/demo-sys-dcs.png" width = "500" align=center />
 
 ## 1. 特性
 
