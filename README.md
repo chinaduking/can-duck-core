@@ -1,6 +1,6 @@
 
 
-# CAN-Duck:- A Distributed MICROcontroller Communication stacK based on CAN -- 基于CAN总线的分布式微控制器通信协议栈
+# CAN-Duck: A Distributed MICROcontroller Communication stacK based on CAN   -- 基于CAN总线的分布式微控制器通信协议栈
 
 <img src="docs/img/logo-mid.png" width = "300" align=center />
 
@@ -10,7 +10,13 @@
 
 机器人、消费电子、工业控制领域中，经常需要将系统功能分散在多个MCU中实现，以满足电气连接的约束，或提升系统的模块化程度。以下是一个典型的机器人产品MCU连接图：
 
-<img src="docs/img/demo-sys.png" width = "600" align=center />
+<img src="docs/img/demo-sys.png" width = "500" align=center />
+
+一般将要求硬实时的运动控制算法运行在一个MCU中，采用bare metal架构（无操作系统），并用CAN总线等和执行器进行通信；执行器的MCU接收运动控制指令，并运行伺服驱动程序（如FOC、三闭环）。而对算力需求更高的人机界面、感知决策算法运行在通用处理器中，采用Linux/Windows等通用操作系统。这样也能节省采购RTOS的成本并对系统进行快速验证。
+
+另一方面，对于某些对成本约束极严的产品，常会将高度优化后的伺服驱动程序（如FOC、三闭环）和实时运动控制、甚至传感器采集程序都全部集中在一块MCU中，这一MCU此时被称为**域控制器（DCS）**，此时系统架构如下：
+
+<img src="docs/img/demo-sys.png" width = "500" align=center />
 
 ## 1. 特性
 
