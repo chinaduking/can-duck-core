@@ -24,11 +24,6 @@ using namespace duckmsg;
 
 namespace pubsub_test {
 
-
-    TEST(Header, Endian){
-        HeaderFastMsgExt header;
-    }
-
     #define SERVO_ADDR 0x02
     #define ECU_ADDR   0x04
     #define HOST_ADDR  0x05
@@ -37,7 +32,7 @@ namespace pubsub_test {
         LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoMsgTx.speed).data);
     }
 
-    TEST(PubSub, IntraProc) {
+    TEST(PubSub, InProc) {
         MessageContext ps_manager(nullptr);
 
         /* Servo Side Init */

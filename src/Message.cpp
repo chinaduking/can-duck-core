@@ -101,7 +101,7 @@ int MessageContext::__handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
         }
     }
 
-    LOGD("recv a message!\n");
+    LOGV("recv a message!\n");
 
 
     HeaderFastMsgExt header = *(HeaderFastMsgExt*)(&can_msg->id);
@@ -294,7 +294,7 @@ void Publisher::publish(hDictItem &&msg, bool local_only) {
 
     ps_manager->__sendFrame(trans_frame_tmp);
 
-    LOGD("send a message!\n");
+    LOGV("send a message!\n");
 
 }
 

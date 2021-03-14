@@ -38,6 +38,7 @@
 **硬件：**  要运行网络收发测试，你需要一对USB转串口线，并将TX、RX交叉连接。如果没有串口线，可以在PC运行虚拟节点通信测试。   
 **软件：**  我们采用 [vcpkg](https://github.com/microsoft/vcpkg) 作为三方库的包管理器。依赖的包为gtest。安装命令  ```vckpg install gtest```，同时依赖库作者的微型C++库 [emlib](https://github.com/dongshiqian/emlib-cpp) 。
 
+ 目前支持的操作系统为Mac和Linux
 ### 1.2 克隆仓库并运行第一个测试
 ```bash
 git clone git@github.com:dongshiqian/can-duck-core.git  --recursive
@@ -46,9 +47,18 @@ mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake ..
 make ..
 
-#运行第一个测试
-./bin/testNode --gtest_filter="PubSub"
+#运行虚拟节点通信测试
+./bin/testPubSub --gtest_filter=PubSub.InProc
 ```
+当连接好两个串口，分别在两个终端运行
+```bash
+./bin/testNode --gtest_filter=Node.EcuMsg
+```
+
+```bash
+./bin/testNode --gtest_filter=Node.ServoMsg
+```
+可观察到模拟Servo反馈给模拟ECU的角度，跟随模拟ECU的指令变化。
 
 ### 1.3 在STM32上测试
 请移步[CAN-Duck例程页面]()。

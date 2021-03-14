@@ -19,6 +19,8 @@
 using namespace duckmsg;
 
 TEST(Node, ServoMsg){
+    getTracer().setFilter(LogLvl::lDebug);
+
     emlib::SimCan can(
         new emlib::HostSerial(SERVO_SIMCAN_PORT, SIMCAN_BAUD)
         );
@@ -36,12 +38,14 @@ TEST(Node, ServoMsg){
                     true
             );
     int16_t target_angle = 0;
+    int16_t motor_angle = 0;
     while (1){
         servo_sub->readBuffer(ServoMsgRx.target_angle) >> target_angle;
         LOGD("target_angle = %d", servo_sub->readBuffer(ServoMsgRx.target_angle).data);
 
-//        servo_pub->publish(ServoMsgTx.angle(target_angle * 1.5f));
-        emlib::perciseSleep(0.1);
+        motor_angle = motor_angle * 0.9 + target_angle * 0.1;
+        servo_pub->publish(ServoMsgTx.angle(motor_angle));
+        emlib::perciseSleep(0.05);
     }
 //
 //    auto server = ctx.srv().makeServer(ServoSrv, SERVO_ADDR);
@@ -49,6 +53,8 @@ TEST(Node, ServoMsg){
 }
 
 TEST(Node, EcuMsg){
+    getTracer().setFilter(LogLvl::lDebug);
+
     emlib::SimCan can(
             new emlib::HostSerial(ECU_SIMCAN_PORT, SIMCAN_BAUD)
     );
@@ -74,9 +80,10 @@ TEST(Node, EcuMsg){
         target_angle = cmd_state * 0x8FF;
 
         servo_pub->publish(ServoMsgRx.target_angle(target_angle));
-        emlib::perciseSleep(0.1);
+        emlib::perciseSleep(0.05);
 
-        LOGD("target_angle=%d", target_angle);
+        LOGD("target_angle=%d, angle=%d", target_angle,
+             servo_sub->readBuffer(ServoMsgTx.angle).data);
 
         cmd_state_cnt ++;
         if(cmd_state_cnt > 20){
