@@ -23,9 +23,6 @@
     - [3.3 参数服务器](#33-参数服务器)
     - [3.4 编写自己的消息定义](#34-编写自己的消息定义)
   - [4. 数据帧结构](#4-数据帧结构)
-    - [4.1 实时消息](#41-实时消息)
-    - [4.2 服务消息](#42-服务消息)
-    - [4.3 分段消息](#43-分段消息)
 
 ---------------
 
@@ -210,7 +207,7 @@ DUCK_REQUEST_CALLBACK(mode_wr_callback){
     switch(ev_code){
         case 0 : LOGE("Write angle REJECTED!!"); break; /*无权限拒绝写入*/
         case 1 : LOGW("Write angle SUCCESS!"); break;   /*写入成功*/
-        case 2 : LOGE("Write angle TIMEOUT"); break;    /*通信超时*/
+        case 2 : LOGE("Write angle TIMEOUT.."); break;    /*通信超时*/
         default: break;
     }
 }
@@ -247,62 +244,55 @@ duckgen ServoDict.yaml
 ```
 
 ## 4. 数据帧结构
-### 4.1 实时消息
-
-### 4.2 服务消息
-
-### 4.3 分段消息
 
 ```c
-
-/**
-*                      (Host/Monitor)
-*                          |
-*                  [ Serial/Ethernet ]
-*                          |
-*  (subnet A) ----{[CAN1]-[DCS]-[CAN2]}------(subnet B)
-*
+/*
+* 基于29位扩展ID的快实时消息包头
 * */
+struct HeaderFastMsgExt {
+    uint32_t reserve : 3;   /* =0 */
+    uint32_t is_seg  : 1;   /* =0 */
+    uint32_t is_msg  : 1;   /* =1 */
+    uint32_t node_id : 6;
+    uint32_t is_tx   : 1;
+    uint32_t msg_id  : 3;
+    uint32_t is_d1_empty : 1;
+    uint32_t data_0  : 8;
+    uint32_t data_1  : 8;
+};
+
+/*
+    * 基于11位扩展ID的快实时消息包头
+    * */
+struct HeaderFastMsgStd {
+    uint32_t reserve : 21;  /* =0 */
+    uint32_t is_seg  : 1;   /* =0 */
+    uint32_t is_msg  : 1;   /* =1 */
+    uint32_t node_id : 6;
+    uint32_t is_tx   : 1;
+    uint32_t msg_id  : 3;
+};
 
 
-//fast msg ext (29 bit CAN ID)
-//is seg   1 bit        [ =0]   
-//is msg   1 bit        [ =1]
-//node id  6 bit        [1-63 & 0]
-//tx/rx    1 bit        [0/1]
-//msg  id  3 bit        [0-7] 
-//empty n  1 bit        [0/1]
-//data[0]                           
-//data[1]
-//data 2-9
+struct HeaderService{
+    uint32_t reserve : 3;   /* =0 */
+    uint32_t is_seg  : 1;   /* =0 */
+    uint32_t is_msg  : 1;   /* =0 */
+    uint32_t src_id  : 6;
+    uint32_t dest_id : 6;
+    uint32_t op_code : 5;
+    uint32_t service_id : 10;
+};
 
-
-//sevice (29 bit CAN ID)
-//is seg  1  bit        [ =0]     
-//is msg  1  bit        [ =0]
-//src id  6  bit        [ 1-63 & 0(anou) ]
-//dest id 6  bit        [ 1-63 & 0(anou) ]
-//op code 5  bit        [ 0-31   ]   
-//srv_id  10 bit        [ 0-1023 ]
-
-
-//fast msg std (11 bit CAN ID)  (TODO..)
-//is seg                [0/1]  (if data follow uart's protocol)
-//node id  6 bit        [1-63 & 0(anou)]
-//tx/rx    1            [0/1]               
-//msg  id  3 bit    tx: [0-7]  + (offset=8)  
-//data 0-7
-
-//segmented msg (29 bit CAN ID)   (TODO..)
-//is seg     1 bit      [ =1]   
-//src id     6 bit      [ 1-63 & 0(anou) ]
-//dest id    6 bit      [ 1-63 & 0(anou) ]
-//trans id   6 bit                       
-//s/t/e      2 bit      [0/1/2]
-//data[0]    : pack_n/pack_c(down count)
-//data[1-8]  : merged:{srv_id/srv_op+srv_code, data}
-
-
+struct HeaderSegment{
+    uint32_t reserve : 3;   /* =0 */
+    uint32_t is_seg  : 1;   /* =1 */
+    uint32_t src_id  : 6;
+    uint32_t dest_id : 6;
+    uint32_t trans_id: 6;
+    uint32_t status  : 2;
+    uint32_t data_0  : 8;
+};
 ```
 
 
