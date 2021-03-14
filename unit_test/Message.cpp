@@ -16,6 +16,7 @@ using namespace can_duck;
 #include "Tracer.hpp"
 #include "ServoDict.hpp"
 #include "SimCan.hpp"
+#include "Common.hpp"
 
 using namespace can_duck;
 using namespace emlib;
@@ -23,10 +24,14 @@ using namespace duckmsg;
 
 namespace pubsub_test {
 
+
+    TEST(Header, Endian){
+        HeaderFastMsgExt header;
+    }
+
     #define SERVO_ADDR 0x02
     #define ECU_ADDR   0x04
     #define HOST_ADDR  0x05
-
 
     DUCK_SUBSCRIBE_CALLBACK(servo_speed_cb) {
         LOGD("servo_speed_cb: %d", subscriber->readBuffer(ServoMsgTx.speed).data);

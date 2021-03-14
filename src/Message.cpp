@@ -46,26 +46,27 @@ void can_duck::fastMessageBuilder(
     USER_ASSERT(result_frame != nullptr);
 
     /* 初始化 */
-    USER_IASSERT(node_id <= 63, "invalid node id!");
+    USER_IASSERT(node_id <= 63, "invalid node header!");
     USER_IASSERT(dir <= 1,      "invalid dir!");
-    USER_IASSERT(msg_id <= 7,   "only support 3 bit of msg id now!");
+    USER_IASSERT(msg_id <= 7,   "only support 3 bit of msg header now!");
     USER_IASSERT(len > 0,       "empty message!");
 
     //TODO: fast-std-msg
 
     result_frame->format = CANExtended;
 
-    HeaderFastMsgExt id;
-    id.is_seg = 0;
-    id.is_msg = 1;
-    id.node_id = node_id;
-    id.is_tx  = dir;
-    id.msg_id = msg_id;
-    id.is_d1_empty = (len == 1 ? 1:0);
-    id.data_0 = p_data[0];
-    id.data_1 = (len == 1 ? 0 : p_data[1]);
+    HeaderFastMsgExt header;
+    header.is_seg = 0;
+    header.is_msg = 1;
+    header.node_id = node_id;
+    header.is_tx  = dir;
+    header.msg_id = msg_id;
+    header.is_d1_empty = (len == 1 ? 1 : 0);
+    header.data_0 = p_data[0];
+    header.data_1 = (len == 1 ? 0 : p_data[1]);
+    header.reserve = 0;
 
-    result_frame->id = *((uint32_t*)&id);
+    result_frame->id = *((uint32_t*)&header);
 
     if(len <= 2){
         result_frame->len = 0;
@@ -83,20 +84,19 @@ void can_duck::fastMessageBuilder(
  * ---------------------------------------------------------
  */
 
-int MessageContext::__handleRecv(CANMessage* frame, uint16_t recv_port_id) {
+int MessageContext::__handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
     Subscriber* subscriber = nullptr;
     uint8_t buf[66];
 
 
-    if(frame->format == CANStandard){
+    if(can_msg->format == CANStandard){
         return 0; //TODO: 支持11位快速消息
     }
 
     /* ! is msg*/
-    if(frame->format == CANExtended){
-        HeaderFastMsgExt header = *(HeaderFastMsgExt*)&(frame->id);
-        if(!header.is_msg){
-            LOGE("not msg");
+    if(can_msg->format == CANExtended){
+        HeaderFastMsgExt header = *(HeaderFastMsgExt*)&(can_msg->id);
+        if(!header.is_msg || header.is_seg){
             return 0;
         }
     }
@@ -104,7 +104,7 @@ int MessageContext::__handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     LOGD("recv a message!\n");
 
 
-    HeaderFastMsgExt header = *(HeaderFastMsgExt*)(&frame->id);
+    HeaderFastMsgExt header = *(HeaderFastMsgExt*)(&can_msg->id);
 
     for(auto& sub : created_subscribers){
         if(sub->node_id == header.node_id
@@ -132,12 +132,12 @@ int MessageContext::__handleRecv(CANMessage* frame, uint16_t recv_port_id) {
     }else{
         buf[0] = header.data_0;
         buf[1] = header.data_1;
-        emlib::memcpy(buf+2, frame->data, frame->len);
+        emlib::memcpy(buf+2, can_msg->data, can_msg->len);
         MsgDictSingleWrite(
                 subscriber->serdes_dict,
                 subscriber->buffer,
                 header.msg_id,
-                buf, frame->len + 2);
+                buf, can_msg->len + 2);
 
         return 1;
     }
@@ -263,6 +263,10 @@ Subscriber* MessageContext::bindSubscriberToChannel(SerDesDict& serdes_dict,
     }
 
     return subscriber;
+}
+
+void Publisher::publish(hDictItem &msg, bool local_only){
+    publish(std::move(msg));
 }
 
 void Publisher::publish(hDictItem &&msg, bool local_only) {

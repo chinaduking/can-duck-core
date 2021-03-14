@@ -88,7 +88,7 @@ namespace can_duck {
             bool is_owner_node
         );
 
-        int __handleRecv(CANMessage* frame, uint16_t recv_port_id);
+        int __handleRecv(CANMessage* can_msg, uint16_t recv_port_id);
 
         inline int __sendFrame(CANMessage& msg){
             if(can == nullptr){
@@ -185,6 +185,9 @@ namespace can_duck {
          *
          * @param msg
          */
+        void publish(hDictItem& msg, bool local_only=false);
+
+
         void publish(hDictItem&& msg, bool local_only=false);
 
         /**

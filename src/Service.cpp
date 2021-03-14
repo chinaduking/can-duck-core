@@ -15,6 +15,7 @@ void toCanMsg(ServiceFrame& srv_frame, CANMessage& msg){
     header.service_id   = srv_frame.srv_id  ;
     header.is_msg       = 0;
     header.is_seg       = 0;
+    header.reserve      = 0;
 
     msg.id = *(uint32_t*)&header;
     msg.len = srv_frame.payload_len;
@@ -249,6 +250,17 @@ ParamServerClient* ServiceContext::bindServer(
 }
 
 int ServiceContext::__handleRecv(CANMessage* can_msg, uint16_t recv_port_id) {
+    /* ! is msg*/
+    if(can_msg->format == CANExtended){
+        HeaderService header = *(HeaderService*)&(can_msg->id);
+        if(header.is_msg || header.is_seg){
+//            LOGI("not msg");
+            return 0;
+        }
+    } else{
+        return 0;
+    }
+
     ServiceFrame frame;
     fromCanMsg(*can_msg, frame);
 

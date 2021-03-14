@@ -6,7 +6,7 @@ add_executable(testDataObjects SerDesDict.cpp ServoDict.cpp
 target_link_libraries(testDataObjects ${UT_DEFAULT_LIBS})
 
 add_executable(testPubSub
-        PubSub.cpp
+        Message.cpp
         ServoDict.cpp
         ${PROJECT_SOURCE_DIR}/src/Message.cpp
         ${PROJECT_SOURCE_DIR}/src/DuckDebug.cpp)

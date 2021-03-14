@@ -57,9 +57,7 @@ namespace can_duck {
 
         /* 对字典中数据进行复制同时赋值（对外具有原子性） */
         inline DictItem operator () (T& value){
-            DictItem<T> result(this->index);
-            result.data = value;
-            return result;
+            return this->operator()(std::move(value));
         }
 
         inline void operator<<(T value) { data = value; }

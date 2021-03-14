@@ -71,7 +71,7 @@ TEST(Node, EcuMsg){
     int16_t target_angle = 0;
 
     for(int i = 0; i < 1; ){
-        target_angle = cmd_state * 0xFFF;
+        target_angle = cmd_state * 0x8FF;
 
         servo_pub->publish(ServoMsgRx.target_angle(target_angle));
         emlib::perciseSleep(0.1);
