@@ -1,0 +1,3 @@
+[submodule "thirdparty/emlib-cpp"]
+	path = thirdparty/emlib-cpp
+	url = git@github.com:dongshiqian/emlib-cpp.git
