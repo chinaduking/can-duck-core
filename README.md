@@ -2,7 +2,7 @@
 
 # CAN-Duck:- A Distributed MICROcontroller Communication stacK based on CAN -- 基于CAN总线的分布式微控制器通信协议栈
 
-<img src="docs/img/logo-mid.png" width = "300" align=left />
+<img src="docs/img/logo-mid.png" width = "300" align=center />
 
 ## 0. 什么是CAN-Duck？
 
